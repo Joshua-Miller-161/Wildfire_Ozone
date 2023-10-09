@@ -6,7 +6,9 @@ from datetime import datetime, timedelta
 from shapely.geometry import Point
 import numpy as np
 import argparse
+import fiona
 
+print(fiona.__version__)
 from preprocessing_funcs import Scale
 from extraction_funcs import ExtractHDF5
 #====================================================================
@@ -46,13 +48,15 @@ fig, ax = plt.subplots(figsize=(8, 6))
 ''' Plot ozone '''
 date = 0
 ozone = dict_['IntegratedVerticalProfile']
-
+print('===== Loaded ozone data')
 # - - - - - - - - - Get points for the ozone plot - - - - - - - - - - -
 lat = np.tile(dict_['LatitudeCenter'], (np.shape(dict_['LongitudeCenter'])[0], 1)).T
+print('===== Tiled latitude')
 lon = np.tile(dict_['LongitudeCenter'], (np.shape(dict_['LatitudeCenter'])[0], 1))
+print('===== Tiled longitude')
 
 points = [Point(x,y) for x,y in zip(lon.ravel(), lat.ravel())]
-points_gdf = gpd.GeoDataFrame(geometry=points)
+print('===== Made points')
 
 print('lat:', np.shape(lat),
       ', lon:', np.shape(lon),

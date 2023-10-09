@@ -106,6 +106,7 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False, chunks='auto', to
                     var_dict[var_name] = var[()]
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     f.close() # close the file
+    print('===== Closed file')
     return var_dict
 
 
