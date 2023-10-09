@@ -39,9 +39,9 @@ fig, ax = plt.subplots(figsize=(8, 6))
 
 # "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"
 
-world = gpd.read_file(map_path)
+#world = gpd.read_file(map_path)
 
-world.plot(ax=ax, color='white', edgecolor='black', linewidth=0.1, alpha=1, legend=True) # GOOD lots the map
+#world.plot(ax=ax, color='white', edgecolor='black', linewidth=0.1, alpha=1, legend=True) # GOOD lots the map
 #====================================================================
 ''' Plot ozone '''
 date = 0
