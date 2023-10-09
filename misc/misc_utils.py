@@ -1,0 +1,29 @@
+import numpy as np
+
+def Funnel(start_size, end_size, r=np.e):
+    assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)
+    if (start_size > end_size):
+        if (round(start_size / r) <= end_size):
+            return [start_size, end_size]
+
+        else:
+            sizes = [start_size]
+            i = 1
+            while ((round(start_size / r**i)) > end_size):
+                sizes.append(round(start_size / r**i))
+                i += 1
+            sizes.append(end_size)
+            return sizes
+    
+    elif (start_size < end_size):
+        if (start_size * r > end_size):
+            return [start_size, end_size]
+        
+        else:
+            sizes = [start_size]
+            i = 1
+            while ((round(start_size * r**i)) < end_size):
+                sizes.append(round(start_size * r**i))
+                i += 1
+            sizes.append(end_size)
+            return sizes
