@@ -11,6 +11,29 @@ import fiona
 print(fiona.__version__)
 from preprocessing_funcs import Scale
 from extraction_funcs import ExtractHDF5
+#from misc.misc_utils import DownSample
+#====================================================================
+def DownSample(data, downsample_rate, axis, delete=False):
+    '''
+    Made by ChatGPT - Extracts data points separated by skip along the given axis
+
+    Returns downsampled data.
+    
+    - data (ndarray) - the data
+    - skip (int) - the number of elements that are skiped when downsampling
+    - axis (int) - the axis on which to downsample
+    - delete (bool, optional) - whether or not to delete the original data in order to save memory
+    '''
+    slices       = [slice(None)] * data.ndim
+    slices[axis] = slice(None, None, downsample_rate)
+    new_data     = data[tuple(slices)]
+    
+    print('Orig. shape :', np.shape(data), "----> new shape :", np.shape(new_data))
+
+    if delete:
+        del(data)
+
+    return new_data
 #====================================================================
 ''' Parse command line for file names '''
 parser = argparse.ArgumentParser(description='Get file locations')
@@ -31,11 +54,10 @@ dict_ = ExtractHDF5(data_path,
                     print_sum=True,
                     to_numpy=True)
 #====================================================================
+downsample_rate = 2
+#====================================================================
 ''' Make subplot '''
 fig, ax = plt.subplots(figsize=(8, 6))
-
-#ax.set_xlim(min(dict_['longitude_ccd']) - .1, max(dict_['longitude_ccd']) + .1)
-#ax.set_ylim(min(dict_['latitude_ccd']) - .1, max(dict_['latitude_ccd']) + .1)
 #====================================================================
 ''' Plot world map '''
 
@@ -47,15 +69,22 @@ fig, ax = plt.subplots(figsize=(8, 6))
 #====================================================================
 ''' Plot ozone '''
 date = 0
-ozone = dict_['IntegratedVerticalProfile']
-print('===== Loaded ozone data')
-# - - - - - - - - - Get points for the ozone plot - - - - - - - - - - -
-lat = np.tile(dict_['LatitudeCenter'], (np.shape(dict_['LongitudeCenter'])[0], 1)).T
-print('===== Tiled latitude, shape:', np.shape(lat))
-lon = np.tile(dict_['LongitudeCenter'], (np.shape(dict_['LatitudeCenter'])[0], 1))
-print('===== Tiled longitude, shape:', np.shape(lon))
+ozone = DownSample(dict_['IntegratedVerticalProfile'], 
+                   downsample_rate=downsample_rate,
+                   axis=0,
+                   delete=True)
 
-points = [Point(x,y) for x,y in zip(lon.ravel(), lat.ravel())]
+print('===== Loaded ozone data, shape:', np.shape(ozone))
+# - - - - - - - - - Get points for the ozone plot - - - - - - - - - - -
+lat = dict_['LatitudeCenter']
+lon = dict_['LongitudeCenter']
+
+lat_tiled = np.tile(lat, (np.shape(lon)[0], 1)).T
+print('===== Tiled latitude, shape:', np.shape(lat_tiled))
+lon_tiled = np.tile(lon, (np.shape(lat)[0], 1))
+print('===== Tiled longitude, shape:', np.shape(lon_tiled))
+
+points = [Point(x,y) for x,y in zip(lon_tiled.ravel(), lat_tiled.ravel())]
 print('===== Made points')
 
 print('lat:', np.shape(lat),

@@ -38,7 +38,7 @@ def DownSample(data, downsample_rate, axis, delete=False):
     - data (ndarray) - the data
     - skip (int) - the number of elements that are skiped when downsampling
     - axis (int) - the axis on which to downsample
-    - delete (bool) - whether or not to delete the original data in order to save memory
+    - delete (bool, optional) - whether or not to delete the original data in order to save memory
     '''
     slices       = [slice(None)] * data.ndim
     slices[axis] = slice(None, None, downsample_rate)
