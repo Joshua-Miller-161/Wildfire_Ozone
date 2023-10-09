@@ -4,9 +4,7 @@ from matplotlib.colors import Normalize
 from matplotlib.colors import LinearSegmentedColormap
 from datetime import datetime, timedelta
 from shapely.geometry import Point
-import netCDF4 as nc
 import numpy as np
-import xarray as xr
 import argparse
 
 from preprocessing_funcs import Scale
@@ -20,9 +18,12 @@ args = parser.parse_args()
 
 data_path = args.data
 map_path = args.map
+
+# "/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5"
+
 #====================================================================
 ''' Get data '''
-dict_ = ExtractHDF5("/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5",
+dict_ = ExtractHDF5(data_path,
                     ['LatitudeCenter', 'LongitudeCenter', 'Time', 'IntegratedVerticalProfile'],
                     groups=['DATA', 'GEOLOCATION'],
                     print_sum=True,
@@ -35,7 +36,10 @@ fig, ax = plt.subplots(figsize=(8, 6))
 #ax.set_ylim(min(dict_['latitude_ccd']) - .1, max(dict_['latitude_ccd']) + .1)
 #====================================================================
 ''' Plot world map '''
-world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
+
+# "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"
+
+world = gpd.read_file(map_path)
 
 world.plot(ax=ax, color='white', edgecolor='black', linewidth=0.1, alpha=1, legend=True) # GOOD lots the map
 #====================================================================
