@@ -90,7 +90,7 @@ print('===== Tiled latitude, shape:', np.shape(lat_tiled))
 lon_tiled = np.tile(lon, (np.shape(lat)[0], 1))
 print('===== Tiled longitude, shape:', np.shape(lon_tiled))
 
-points = [Point(x,y) for x,y in zip(lon_tiled.ravel(), lat_tiled.ravel())]
+points = [Point(x,y) for x,y in zip(lon, lat)]
 print('===== Made points')
 
 print('lat:', np.shape(lat),
