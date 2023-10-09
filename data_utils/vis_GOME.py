@@ -76,8 +76,14 @@ ozone = DownSample(dict_['IntegratedVerticalProfile'],
 
 print('===== Loaded ozone data, shape:', np.shape(ozone))
 # - - - - - - - - - Get points for the ozone plot - - - - - - - - - - -
-lat = dict_['LatitudeCenter']
-lon = dict_['LongitudeCenter']
+lat = DownSample(dict_['LatitudeCenter'], 
+                   downsample_rate=downsample_rate,
+                   axis=0,
+                   delete=True)
+lon = DownSample(dict_['LongitudeCenter'], 
+                   downsample_rate=downsample_rate,
+                   axis=0,
+                   delete=True)
 
 lat_tiled = np.tile(lat, (np.shape(lon)[0], 1)).T
 print('===== Tiled latitude, shape:', np.shape(lat_tiled))

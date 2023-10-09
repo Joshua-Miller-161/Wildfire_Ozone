@@ -4,8 +4,7 @@ import numpy as np
 import xarray as xr
 import dask.array as da
 
-
-#from . misc.misc_utils import DownSample
+#from .misc.misc_utils import DownSample
 
 def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     '''
