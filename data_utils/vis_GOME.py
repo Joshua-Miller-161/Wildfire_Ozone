@@ -107,7 +107,7 @@ ozone_cmap = LinearSegmentedColormap.from_list('custom', ['blue', 'red'], N=200)
 # - - - - - - - - - - - - - Plot ozone data - - - - - - - - - - - - -
 ozone_gdf.plot(ax=ax, column='data', cmap=ozone_cmap, norm=ozone_norm, markersize=5, alpha=1, legend=True)
 #====================================================================
-plt.title(str(dict_['time']))
+plt.title(str(dict_['Time']))
 
 #====================================================================
 plt.show()
