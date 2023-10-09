@@ -44,7 +44,7 @@ def DownSample(data, downsample_rate, axis, delete=False):
     slices[axis] = slice(None, None, downsample_rate)
     new_data     = data[tuple(slices)]
     
-    print('         Orig. shape :', np.shape(data), "----> new shape :", np.shape(new_data))
+    print('Orig. shape :', np.shape(data), "----> new shape :", np.shape(new_data))
 
     if delete:
         del(data)
