@@ -51,7 +51,7 @@ ozone = dict_['IntegratedVerticalProfile']
 print('===== Loaded ozone data')
 # - - - - - - - - - Get points for the ozone plot - - - - - - - - - - -
 lat = np.tile(dict_['LatitudeCenter'], (np.shape(dict_['LongitudeCenter'])[0], 1)).T
-print('===== Tiled latitude, shape:' np.shape(lat))
+print('===== Tiled latitude, shape:', np.shape(lat))
 lon = np.tile(dict_['LongitudeCenter'], (np.shape(dict_['LatitudeCenter'])[0], 1))
 print('===== Tiled longitude, shape:', np.shape(lon))
 
