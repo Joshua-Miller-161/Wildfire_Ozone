@@ -7,9 +7,19 @@ from shapely.geometry import Point
 import netCDF4 as nc
 import numpy as np
 import xarray as xr
+import argparse
 
 from preprocessing_funcs import Scale
 from extraction_funcs import ExtractHDF5
+#====================================================================
+''' Parse command line for file names '''
+parser = argparse.ArgumentParser(description='Get file locations')
+parser.add_argument('data', type=str, help='location of the GOME data file')
+parser.add_argument('map', type=str, help='location of the world map shape file')
+args = parser.parse_args()
+
+data_path = args.data
+map_path = args.map
 #====================================================================
 ''' Get data '''
 dict_ = ExtractHDF5("/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5",
