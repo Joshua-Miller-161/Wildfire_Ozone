@@ -36,6 +36,7 @@ def DownSample(data, downsample_rate, axis, delete=False):
     return new_data
 #====================================================================
 ''' Parse command line for file names '''
+'''
 parser = argparse.ArgumentParser(description='Get file locations')
 parser.add_argument('data', type=str, help='location of the GOME data file')
 parser.add_argument('map', type=str, help='location of the world map shape file')
@@ -43,18 +44,18 @@ args = parser.parse_args()
 
 data_path = args.data
 map_path = args.map
-
+'''
 # "/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5"
 
 #====================================================================
 ''' Get data '''
-dict_ = ExtractHDF5(data_path,
+dict_ = ExtractHDF5("/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5",
                     ['LatitudeCenter', 'LongitudeCenter', 'Time', 'IntegratedVerticalProfile'],
                     groups=['DATA', 'GEOLOCATION'],
                     print_sum=True,
                     to_numpy=True)
 #====================================================================
-downsample_rate = 2
+downsample_rate = 1
 #====================================================================
 ''' Make subplot '''
 fig, ax = plt.subplots(figsize=(8, 6))
@@ -63,9 +64,9 @@ fig, ax = plt.subplots(figsize=(8, 6))
 
 # "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"
 
-#world = gpd.read_file(map_path)
+world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
 
-#world.plot(ax=ax, color='white', edgecolor='black', linewidth=0.1, alpha=1, legend=True) # GOOD lots the map
+world.plot(ax=ax, color='white', edgecolor='black', linewidth=0.1, alpha=1, legend=True) # GOOD lots the map
 #====================================================================
 ''' Plot ozone '''
 date = 0
@@ -105,7 +106,7 @@ ozone_norm = Normalize(vmin=0, vmax=max(dict_['IntegratedVerticalProfile'].ravel
 ozone_cmap = LinearSegmentedColormap.from_list('custom', ['blue', 'red'], N=200) # Higher N=more smooth
 
 # - - - - - - - - - - - - - Plot ozone data - - - - - - - - - - - - -
-ozone_gdf.plot(ax=ax, column='data', cmap=ozone_cmap, norm=ozone_norm, markersize=5, alpha=1, legend=True)
+ozone_gdf.plot(ax=ax, column='data', cmap=ozone_cmap, norm=ozone_norm, markersize=1, alpha=1, legend=True)
 #====================================================================
 plt.title(str(dict_['Time']))
 
