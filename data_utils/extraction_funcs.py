@@ -3,8 +3,7 @@ import h5py
 import numpy as np
 import xarray as xr
 import dask.array as da
-
-#from misc.misc_utils import DownSample
+import csv
 
 def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     '''
@@ -15,7 +14,8 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     Parameters:
     - path (str) - path to the nc file
     - var_names (list) - the names of the variable to be extracted
-    - group (list, optional) - list of the name(s) of the group in the hdf5 file to be accessed
+    - group (list, optional) - list of the name(s) of the group in the hdf5 file to be accessed.
+                               Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
     assert path.endswith('.nc') or path.endswith('.nc4'), "File must be .nc"
@@ -28,6 +28,9 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     var_dict = {}
     #----------------------------------------------------------------
     ds = nc.Dataset(path, "r", format='NETCDF4')
+    #----------------------------------------------------------------
+    if groups == 'all':
+        groups = list(ds.groups)
     #----------------------------------------------------------------
     if groups==None:
         valid_keys = GetKeysNC(ds)
@@ -54,12 +57,13 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
                     var = group_ds.variables[var_name]
                     var_dict[var_name] = var[:]
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
     ds.close() # close the file
     return var_dict
 
 
 
-def ExtractHDF5(path, var_names, groups=None, print_sum=False, chunks='auto', to_numpy=True):
+def ExtractHDF5(path, var_names, groups=None, print_sum=False):
     '''
     This will read the desired variables from an hdf5 file.
     
@@ -69,13 +73,12 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False, chunks='auto', to
     - path (str) - path to the hdf5 file
     - var_names (list) - the names of the variable to be extracted
     - group (list, optional) - list of the name(s) of the group in the hdf5 file to be accessed
+                               Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
-    - chunks (tuple, optional) - the chunk size(s) for from_array(ds["var_name"].values, chunks=)
-    - to_numpy (Bool, optional) - if True, returns variable as a numpy array; if False, leaves it as a dask array
     '''
     assert path.endswith('.hdf5'), "File must be .hdf5"
     #----------------------------------------------------------------
-    if not groups == None:
+    if not ((groups == None) or (groups == 'all')):
         if not type(groups) == list:
             print('AHHHHHHHHHH', type(groups))
             groups = [groups]
@@ -84,14 +87,16 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False, chunks='auto', to
     #----------------------------------------------------------------
     f = h5py.File(path, "r") # open the file in read mode
     #----------------------------------------------------------------
-    if print_sum:
-        PrintSumHDF5(f)
-    #----------------------------------------------------------------
     valid_keys_list, valid_keys_str = GetKeysHDF5(f)
 
     assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names are:\n"+ valid_keys_str
     #----------------------------------------------------------------
-    if groups==None:
+    if (groups == 'all'):
+        groups = list(f.keys())
+    #----------------------------------------------------------------
+    if (groups==None):
+        if print_sum:
+            PrintSumHDF5(f)
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for var_name in var_names:
             var = f[var_name] # access the variable as a dataset object
@@ -99,15 +104,15 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False, chunks='auto', to
     #----------------------------------------------------------------
     else:
         for group in groups:
+            if print_sum:
+                print(' - + - + - + - Examining group \''+group+'\' - + - + - + -')
+                PrintSumHDF5(f[group])
             for var_name in var_names:
                 if var_name in list(f[group].keys()):
                     var = f[group+'/'+var_name]
-                    lol = var[()]
-                    print('TYPE --------- ', type(var), type(lol))
                     var_dict[var_name] = var[()]
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     f.close() # close the file
-    print('===== Closed file')
     return var_dict
 
 
@@ -117,14 +122,17 @@ def PrintSumHDF5(f):
     Prints the variable name, shape
      - f (h5py.Dataset)
     '''
-    print('In PrintSumHDF5')
     def print_name_and_shape(name, obj):
         # check if the object is a dataset
         if isinstance(obj, h5py.Dataset):
-            # print its name and shape
-            print(name, obj.shape)
+            try:
+                units = obj.attrs["units"]
+            except KeyError:
+                units = 'No units specified'
+            
+            print("Name:", name, ", shape:", obj.shape, ", units:", units)
 
-        f.visititems(print_name_and_shape)
+    f.visititems(print_name_and_shape)
 
 
 
@@ -146,7 +154,7 @@ def GetKeysHDF5(f):
     valid_keys_str = ''
 
     for key in f.keys():
-        print("+++++++++++", type(f[key]), "++++++++++++")
+        #print("+++++++++++", type(f[key]), "++++++++++++")
         if isinstance(f[key], h5py._hl.group.Group): # This 'key' is a group name
             for var in f[key].keys():  # Now iterating through variable names
                 valid_keys_list.append(var)

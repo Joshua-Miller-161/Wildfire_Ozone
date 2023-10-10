@@ -25,11 +25,11 @@ parser.add_argument('--map', nargs="?", type=str, help='location of the world ma
 args = parser.parse_args()
 #====================================================================
 ''' Get data '''
+# ['LatitudeCenter', 'LongitudeCenter', 'Time', 'IntegratedVerticalProfile']
 dict_ = ExtractHDF5(args.data,
                     ['LatitudeCenter', 'LongitudeCenter', 'Time', 'IntegratedVerticalProfile'],
-                    groups=['DATA', 'GEOLOCATION'],
-                    print_sum=True,
-                    to_numpy=True)
+                    groups='all',
+                    print_sum=True)
 #====================================================================
 downsample_rate = 1
 #====================================================================
@@ -50,25 +50,12 @@ ozone = DownSample(dict_['IntegratedVerticalProfile'],
 
 print('===== Loaded ozone data, shape:', np.shape(ozone))
 # - - - - - - - - - Get points for the ozone plot - - - - - - - - - - -
-lat = DownSample(dict_['LatitudeCenter'], 
-                   downsample_rate=downsample_rate,
-                   axis=0,
-                   delete=True)
-lon = DownSample(dict_['LongitudeCenter'], 
-                   downsample_rate=downsample_rate,
-                   axis=0,
-                   delete=True)
-
-lat_tiled = np.tile(lat, (np.shape(lon)[0], 1)).T
-print('===== Tiled latitude, shape:', np.shape(lat_tiled))
-lon_tiled = np.tile(lon, (np.shape(lat)[0], 1))
-print('===== Tiled longitude, shape:', np.shape(lon_tiled))
-
-points = [Point(x,y) for x,y in zip(lon, lat)]
+points = [Point(x,y) for x,y in zip(dict_['LongitudeCenter'], dict_['LatitudeCenter'])]
 print('===== Made points')
 
-print('lat:', np.shape(lat),
-      ', lon:', np.shape(lon),
+print('lat:', np.shape(dict_['LatitudeCenter']),
+      ', lon:', np.shape(dict_['LongitudeCenter']),
+      ', time:', np.shape(dict_['Time']),
       ', ozone:', np.shape(ozone),
       ', points:', np.shape(points))
 
