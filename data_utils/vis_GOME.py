@@ -7,49 +7,25 @@ from shapely.geometry import Point
 import numpy as np
 import argparse
 import fiona
-
+import sys
+#====================================================================
+sys.path.append('/Users/joshuamiller/Documents/Python Files/Wildfire_Ozone')
+#====================================================================
 print(fiona.__version__)
 from preprocessing_funcs import Scale
 from extraction_funcs import ExtractHDF5
-#from misc.misc_utils import DownSample
-#====================================================================
-def DownSample(data, downsample_rate, axis, delete=False):
-    '''
-    Made by ChatGPT - Extracts data points separated by skip along the given axis
-
-    Returns downsampled data.
-    
-    - data (ndarray) - the data
-    - skip (int) - the number of elements that are skiped when downsampling
-    - axis (int) - the axis on which to downsample
-    - delete (bool, optional) - whether or not to delete the original data in order to save memory
-    '''
-    slices       = [slice(None)] * data.ndim
-    slices[axis] = slice(None, None, downsample_rate)
-    new_data     = data[tuple(slices)]
-    
-    print('Orig. shape :', np.shape(data), "----> new shape :", np.shape(new_data))
-
-    if delete:
-        del(data)
-
-    return new_data
+from misc.misc_utils import DownSample
 #====================================================================
 ''' Parse command line for file names '''
-'''
 parser = argparse.ArgumentParser(description='Get file locations')
-parser.add_argument('data', type=str, help='location of the GOME data file')
-parser.add_argument('map', type=str, help='location of the world map shape file')
+parser.add_argument('--data', nargs="?", type=str, help='location of the GOME data file',
+                    default="/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5")
+parser.add_argument('--map', nargs="?", type=str, help='location of the world map shape file',
+                    default="/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
 args = parser.parse_args()
-
-data_path = args.data
-map_path = args.map
-'''
-# "/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5"
-
 #====================================================================
 ''' Get data '''
-dict_ = ExtractHDF5("/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5",
+dict_ = ExtractHDF5(args.data,
                     ['LatitudeCenter', 'LongitudeCenter', 'Time', 'IntegratedVerticalProfile'],
                     groups=['DATA', 'GEOLOCATION'],
                     print_sum=True,
@@ -61,10 +37,7 @@ downsample_rate = 1
 fig, ax = plt.subplots(figsize=(8, 6))
 #====================================================================
 ''' Plot world map '''
-
-# "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"
-
-world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
+world = gpd.read_file(args.map)
 
 world.plot(ax=ax, color='white', edgecolor='black', linewidth=0.1, alpha=1, legend=True) # GOOD lots the map
 #====================================================================
