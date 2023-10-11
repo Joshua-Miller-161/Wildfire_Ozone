@@ -11,13 +11,15 @@ from shapely.geometry import Point
 from datetime import datetime
 from dateutil.parser import parse
 import yaml
+import csv
 #====================================================================
-sys.path.append('/Users/joshuamiller/Documents/Python Files/Wildfire_Ozone')
+sys.path.append('data_utils/extraction_funcs.py')
 
 #====================================================================
 from extraction_funcs import ExtractHDF5
 
 #====================================================================
+''' Load variables from config file '''
 with open('data_utils/GOME_filter_config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
 
@@ -42,6 +44,7 @@ for file in file_names:
 
 #====================================================================
 ''' Group together files which cover the same days '''
+print(">> Grouping files")
 file_dict = {}
 
 for i in range(len(file_names)):
@@ -63,70 +66,88 @@ for i in range(len(file_names)):
             KeyError
             file_dict[date] = [file_names[i]] # First time finding a file that contains this date
 
-print(">> Grouped files")
+print(">> Grouped files\n--")
 
 #====================================================================
-''' Create one csv file for each day '''
-for date in file_dict.keys():
-    df = pd.DataFrame(columns=vars_to_extract)
-    df.to_csv(os.path.join(out_folder, date)+'.csv', index=False)
-print(">> Initialized csv files")
+''' Spatially filter lat/lon values for each day and write to the appropriate file '''
+print('>> Filtering data')
+for date in list(file_dict.keys()):
+    print(">>>> Searching for data on", date)
 
-#====================================================================
+    filtered_dict = dict.fromkeys(vars_to_extract, [])
 
+    lon_and = []
+    lat_and = []
+    time_and = []
+    ozone_and = []
 
+    curr_year  = int(date.split('-')[0])
+    curr_month = int(date.split('-')[1])
+    curr_day   = int(date.split('-')[2])
 
+    min_timestamp = datetime(year=curr_year, month=curr_month, day=curr_day, hour=0, minute=0, second=0)
+    max_timestamp = datetime(year=curr_year, month=curr_month, day=curr_day, hour=23, minute=59, second=59)
 
-#====================================================================
-'''
-for i in len(file_names):
-    
-        dict_ = ExtractHDF5(os.path.join(args.in_folder, file_names[i]),
+    for file in file_dict[date]:
+        dict_ = ExtractHDF5(os.path.join(in_folder, file),
                             vars_to_extract,
                             groups='all',
                             print_sum=False)
-
-        filtered_dict = dict.fromkeys(vars_to_extract)
-        for key in filtered_dict.keys():
-            filtered_dict[key] = []
-
-        count = 0
+        #print('++++++++++++++++++++++++++++++++++++')
+        #print("dict_=", dict_)
+        #print('++++++++++++++++++++++++++++++++++++')
         
+        count = 0
+
         for i in range(np.shape(dict_['Time'])[0]): # Shouldn't matter which var you pick
-            
-            if ((args.min_lat <= dict_['LatitudeCenter'][i]) and (dict_['LatitudeCenter'][i] <= args.max_lat)):
-                if ((args.min_lon <= dict_['LongitudeCenter'][i]) and (dict_['LongitudeCenter'][i] <= args.max_lon)):
-                    
-                    filtered_dict['LongitudeCenter'].append(dict_['LongitudeCenter'][i])
-                    filtered_dict['LatitudeCenter'].append(dict_['LatitudeCenter'][i])
-                    filtered_dict['Time'].append(dict_['Time'][i])
-                    filtered_dict['IntegratedVerticalProfile'].append(dict_['IntegratedVerticalProfile'][i])
+            curr_timestamp = parse(dict_['Time'][i])
 
-                    count += 1
+            if ((min_timestamp <= curr_timestamp) and (curr_timestamp <= max_timestamp)):
+                #print("min time:", min_timestamp, ", curr:", curr_timestamp, ", max time:", max_timestamp)
+                if ((min_lat <= dict_['LatitudeCenter'][i]) and (dict_['LatitudeCenter'][i] <= max_lat)):
+                    #print("min lat:", min_lat, ", curr:", dict_['LatitudeCenter'][i], ", max lat:", max_timestamp)
+                    if ((min_lon <= dict_['LongitudeCenter'][i]) and (dict_['LongitudeCenter'][i] <= max_lon)):
+                        #print("min lon:", min_timestamp, ", curr:", dict_['LongitudeCenter'][i], ", max lon:", max_timestamp)
+                        
+                        #print("dict_['LongitudeCenter'][i]=", dict_['LongitudeCenter'][i])
+                        lon_and.append(dict_['LongitudeCenter'][i])
+                        lat_and.append(dict_['LatitudeCenter'][i])
+                        time_and.append(dict_['Time'][i][1:]) # Get rid of 'b' character at the front
+                        ozone_and.append(dict_['IntegratedVerticalProfile'][i])
+                        
+                        count += 1
 
-        if count > 0:
-            print("Found", count, "points in", file)
-            df = pd.DataFrame(filtered_dict)
-            df.to_csv(os.path.join(args.out_folder, file[:-5]+'.csv'), sep=",", header=True, index=False)
+        filtered_dict['LongitudeCenter'] = lon_and
+        filtered_dict['LatitudeCenter'] = lat_and
+        filtered_dict['Time'] = time_and
+        filtered_dict['IntegratedVerticalProfile'] = ozone_and
+        #print("==========================================")
+        #print("filtered_dict=", filtered_dict)
+        #print("==========================================")
+        print(">>>>>> Found", count, "points in", file)
+    
+    with open(os.path.join(out_folder, date+".csv"), "w") as outfile:
+        # pass the csv file to csv.writer function.
+        writer = csv.writer(outfile, dialect='excel')
+    
+        # pass the dictionary keys to writerow
+        # function to frame the columns of the csv file
+        writer.writerow(filtered_dict.keys())
+    
+        # make use of writerows function to append
+        # the remaining values to the corresponding
+        # columns using zip function.
+        writer.writerows(zip(*filtered_dict.values()))
 
-'''
+    print(">>>> Saved", date, '.csv | Contains', len(filtered_dict['Time']), 'points')
 
-
-
-
-
-
-
-
-
-
-
+print(">> Filtered data\n--")
 
 #====================================================================
 
 fig, ax = plt.subplots(figsize=(8, 6))
 #====================================================================
-ozone_file = os.listdir(out_folder)[21]
+ozone_file = '2020-1-2.csv'
 #====================================================================
 df = pd.read_csv(os.path.join(out_folder, ozone_file))
 #====================================================================
@@ -147,7 +168,7 @@ ozone_cmap = LinearSegmentedColormap.from_list('custom', ['blue', 'red'], N=200)
 # - - - - - - - - - - - - - Plot ozone data - - - - - - - - - - - - -
 ozone_gdf.plot(ax=ax, column='data', cmap=ozone_cmap, norm=ozone_norm, markersize=1, alpha=1, legend=True)
 #====================================================================
-plt.title('min. time: '+str(min(df['Time'])) + ', max. time: '+ str(max(df['Time'])))
+plt.title(ozone_file)
 #====================================================================
 plt.show()
 #====================================================================

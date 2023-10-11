@@ -1,4 +1,8 @@
 import numpy as np
+import itertools
+import threading
+import time
+import sys
 
 def Funnel(start_size, end_size, r=np.e):
     assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)
@@ -50,3 +54,19 @@ def DownSample(data, downsample_rate, axis, delete=False):
         del(data)
 
     return new_data
+
+'''
+def ProgressWheel():
+    for c in itertools.cycle(['|', '/', '-', '\\']):
+        if done:
+            break
+        sys.stdout.write("\rloading " + c)
+        sys.stdout.flush()
+        time.sleep(0.05)
+    sys.stdout.write("\r            \r")
+    sys.stdout.flush()
+    sys.stdout.write("\rDone!")
+
+t = threading.Thread(target=ProgressWheel)
+t.start()
+'''

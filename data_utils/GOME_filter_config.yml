@@ -1,6 +1,6 @@
 BOUNDING_BOX:
   min_lat: 30
-  max_lat: 70
+  max_lat: 60
   min_lon: -12
   max_lon: 40
 
