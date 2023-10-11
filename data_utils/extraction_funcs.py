@@ -83,12 +83,15 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False):
             print('AHHHHHHHHHH', type(groups))
             groups = [groups]
     #----------------------------------------------------------------
+    if not (type(var_names) == list):
+        var_names = [var_names]
+    #----------------------------------------------------------------
     var_dict = {}
     #----------------------------------------------------------------
     f = h5py.File(path, "r") # open the file in read mode
     #----------------------------------------------------------------
     valid_keys_list, valid_keys_str = GetKeysHDF5(f)
-
+    
     assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names are:\n"+ valid_keys_str
     #----------------------------------------------------------------
     if (groups == 'all'):

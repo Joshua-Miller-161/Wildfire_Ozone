@@ -1,0 +1,16 @@
+BOUNDING_BOX:
+  min_lat: 30
+  max_lat: 70
+  min_lon: -12
+  max_lon: 40
+
+VARIABLES:
+  - 'Time'
+  - 'LatitudeCenter'
+  - 'LongitudeCenter'
+  - 'IntegratedVerticalProfile'
+
+FOLDERS:
+  in_folder: "/Users/joshuamiller/Documents/Lancaster/Data/Gome"
+  out_folder: "/Users/joshuamiller/Documents/Lancaster/Data/Filtered_GOME"
+  map: "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"
