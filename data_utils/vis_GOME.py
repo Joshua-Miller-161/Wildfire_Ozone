@@ -18,9 +18,9 @@ from misc.misc_utils import DownSample
 #====================================================================
 ''' Parse command line for file names '''
 parser = argparse.ArgumentParser(description='Get file locations')
-parser.add_argument('--data', nargs="?", type=str, help='location of the GOME data file',
+parser.add_argument('--data', nargs=1, type=str, help='location of the GOME data file',
                     default="/Users/joshuamiller/Documents/Lancaster/Data/Gome/S-O3M_GOME_OHP_02_M01_20210601011158Z_20210601020258Z_N_O_20210601082140Z.hdf5")
-parser.add_argument('--map', nargs="?", type=str, help='location of the world map shape file',
+parser.add_argument('--map', nargs=1, type=str, help='location of the world map shape file',
                     default="/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
 args = parser.parse_args()
 #====================================================================

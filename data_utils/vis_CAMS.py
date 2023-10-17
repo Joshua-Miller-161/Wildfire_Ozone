@@ -12,8 +12,8 @@ from extraction_funcs import Extract_netCDF4
 #====================================================================
 ''' Get data '''
 
-dict_ = Extract_netCDF4("/Users/joshuamiller/Documents/Lancaster/Data/L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20200604T113022_20200610T121610_13735_03_020401_20230329T143041.nc",
-                        ['latitude_ccd', 'longitude_ccd', 'time', 'ozone_tropospheric_vertical_column', 'dates_for_tropospheric_column'],
+dict_ = Extract_netCDF4("/Users/joshuamiller/Documents/Lancaster/Data/Copernicus/levtype_ml.nc",
+                        [''],
                         groups='all',
                         print_sum=True)
 #====================================================================

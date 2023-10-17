@@ -13,14 +13,14 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     
     Parameters:
     - path (str) - path to the nc file
-    - var_names (list) - the names of the variable to be extracted
+    - var_names (list) - the names of the variable(s) to be extracted
     - group (list, optional) - list of the name(s) of the group in the hdf5 file to be accessed.
                                Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
     assert path.endswith('.nc') or path.endswith('.nc4'), "File must be .nc"
     #----------------------------------------------------------------
-    if not groups == None:
+    if not ((groups == None)  or (groups == 'all')):
         if not type(groups) == list:
             print('AHHHHHHHHHH', type(groups))
             groups = [groups]
@@ -30,13 +30,13 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     ds = nc.Dataset(path, "r", format='NETCDF4')
     #----------------------------------------------------------------
     if groups == 'all':
-        groups = list(ds.groups)
+        groups = list(ds.groups.keys())
+    #----------------------------------------------------------------
+    valid_keys_list, valid_keys = GetKeysNC(ds)
+
+    assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names in this are:\n"+ valid_keys
     #----------------------------------------------------------------
     if groups==None:
-        valid_keys = GetKeysNC(ds)
-
-        assert all(var_name in ds.variables.keys() for var_name in var_names), "Some variable names are not in the file. Valid variable names are:\n"+ valid_keys
-        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for var_name in var_names:
             var = ds.variables[var_name] # access the variable as a dataset object
             var_dict[var_name] = var[:]  # convert to numpy array using [:]
@@ -46,16 +46,21 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
             group_ds = ds.groups[group]
 
             if print_sum:
+                print(' - + - + - + - Examining group \''+group+'\' - + - + - + -')
                 PrintSumNC(group_ds)
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            valid_keys = GetKeysNC(group_ds)
+            if (len(list(group_ds.variables.keys())) > 0):
+                for var_name in var_names:
+                    if var_name in list(group_ds.variables.keys()):
+                        var = group_ds.variables[var_name]
+                        var_dict[var_name] = var[:]
 
-            assert all(var_name in list(group_ds.variables.keys()) for var_name in var_names), "Some variable names are not in the group, "+group+". Valid variable names in this group are:\n"+ valid_keys
-            # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-            for var_name in var_names:
-                if var_name in list(group_ds.variables.keys()):
-                    var = group_ds.variables[var_name]
-                    var_dict[var_name] = var[:]
+            else:
+                dict_of_group = ds.groups[group].__dict__
+                for var_name in var_names:
+                    if var_name in list(dict_of_group.keys()):
+                        var = dict_of_group[var_name]
+                        var_dict[var_name] = var
             # - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
     ds.close() # close the file
@@ -140,7 +145,6 @@ def PrintSumHDF5(f):
 
 
 def PrintSumNC(ds):
-    print("===================================================")
     print("SUMMARY :", ds)
     print("===================================================")
     for name, var in ds.variables.items(): # loop through the variables
@@ -171,7 +175,24 @@ def GetKeysHDF5(f):
 
 
 def GetKeysNC(ds):
-    valid_keys = ''
-    for key in ds.variables.keys():
-        valid_keys += key + ', '
-    return valid_keys
+    '''
+     - ds (nc.Dataset)
+    '''
+    valid_keys_list = []
+    valid_keys_str = ''
+
+    for group in ds.groups.keys():
+        if isinstance(ds.groups[group], nc._netCDF4.Group): # This 'key' is a group name
+            if (len(list(ds.groups[group].variables.keys())) > 0):
+                for var in list(ds.groups[group].variables.keys()):  # Now iterating through variable names
+                    valid_keys_list.append(var)
+                    valid_keys_str += var + ', '
+            else:
+                for var in list(ds.groups[group].__dict__.keys()):  # Now iterating through keys in the dictionary structure of the group
+                    valid_keys_list.append(var)
+                    valid_keys_str += var + ', '
+        else:
+            valid_keys_list.append(group)
+            valid_keys_str += group + ', '
+
+    return valid_keys_list, valid_keys_str
