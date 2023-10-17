@@ -76,7 +76,7 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False):
                                Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
-    assert path.endswith('.hdf5'), "File must be .hdf5"
+    assert path.endswith('.hdf5'), "File must be .hdf5. Got:\n"+path
     #----------------------------------------------------------------
     if not ((groups == None) or (groups == 'all')):
         if not type(groups) == list:

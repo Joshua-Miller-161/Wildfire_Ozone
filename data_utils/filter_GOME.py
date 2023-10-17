@@ -39,115 +39,115 @@ map = config['FOLDERS']['map']
 file_names = os.listdir(in_folder)
 file_names.sort()
 for file in file_names:
-    if not file.endswith('hdf5'):
+    if not (file[-5:] == '.hdf5'):
         file_names.remove(file)
 
 #====================================================================
 ''' Group together files which cover the same days '''
-print(">> Grouping files")
-file_dict = {}
+# print(">> Grouping files")
+# file_dict = {}
 
-for i in range(len(file_names)):
-    timestamps = ExtractHDF5(os.path.join(in_folder, file_names[i]), 'Time', groups='all', print_sum=False)
+# for i in range(len(file_names)):
+#     timestamps = ExtractHDF5(os.path.join(in_folder, file_names[i]), 'Time', groups='all', print_sum=False)
     
-    unique_dates_in_file = []
-    for timestamp in timestamps['Time']:
-        date_obj = parse(timestamp)
-        y_m_d = str(date_obj.year) + '-' + str(date_obj.month) + '-' + str(date_obj.day)
+#     unique_dates_in_file = []
+#     for timestamp in timestamps['Time']:
+#         date_obj = parse(timestamp)
+#         y_m_d = str(date_obj.year) + '-' + str(date_obj.month) + '-' + str(date_obj.day)
 
-        if not (y_m_d in unique_dates_in_file):
-            unique_dates_in_file.append(y_m_d)
-            #print("Found unique date:", y_m_d, timestamp, unique_dates_in_file)
+#         if not (y_m_d in unique_dates_in_file):
+#             unique_dates_in_file.append(y_m_d)
+#             #print("Found unique date:", y_m_d, timestamp, unique_dates_in_file)
 
-    for date in unique_dates_in_file:
-        try:
-            file_dict[date].append(file_names[i])
-        except:
-            KeyError
-            file_dict[date] = [file_names[i]] # First time finding a file that contains this date
+#     for date in unique_dates_in_file:
+#         try:
+#             file_dict[date].append(file_names[i])
+#         except:
+#             KeyError
+#             file_dict[date] = [file_names[i]] # First time finding a file that contains this date
 
-print(">> Grouped files\n--")
+# print(">> Grouped files\n--")
 
-#====================================================================
-''' Spatially filter lat/lon values for each day and write to the appropriate file '''
-print('>> Filtering data')
-for date in list(file_dict.keys()):
-    print(">>>> Searching for data on", date)
+# #====================================================================
+# ''' Spatially filter lat/lon values for each day and write to the appropriate file '''
+# print('>> Filtering data')
+# for date in list(file_dict.keys()):
+#     print(">>>> Searching for data on", date)
 
-    filtered_dict = dict.fromkeys(vars_to_extract, [])
+#     filtered_dict = dict.fromkeys(vars_to_extract, [])
 
-    lon_and = []
-    lat_and = []
-    time_and = []
-    ozone_and = []
+#     lon_and = []
+#     lat_and = []
+#     time_and = []
+#     ozone_and = []
 
-    curr_year  = int(date.split('-')[0])
-    curr_month = int(date.split('-')[1])
-    curr_day   = int(date.split('-')[2])
+#     curr_year  = int(date.split('-')[0])
+#     curr_month = int(date.split('-')[1])
+#     curr_day   = int(date.split('-')[2])
 
-    min_timestamp = datetime(year=curr_year, month=curr_month, day=curr_day, hour=0, minute=0, second=0)
-    max_timestamp = datetime(year=curr_year, month=curr_month, day=curr_day, hour=23, minute=59, second=59)
+#     min_timestamp = datetime(year=curr_year, month=curr_month, day=curr_day, hour=0, minute=0, second=0)
+#     max_timestamp = datetime(year=curr_year, month=curr_month, day=curr_day, hour=23, minute=59, second=59)
 
-    for file in file_dict[date]:
-        dict_ = ExtractHDF5(os.path.join(in_folder, file),
-                            vars_to_extract,
-                            groups='all',
-                            print_sum=False)
-        #print('++++++++++++++++++++++++++++++++++++')
-        #print("dict_=", dict_)
-        #print('++++++++++++++++++++++++++++++++++++')
+#     for file in file_dict[date]:
+#         dict_ = ExtractHDF5(os.path.join(in_folder, file),
+#                             vars_to_extract,
+#                             groups='all',
+#                             print_sum=False)
+#         #print('++++++++++++++++++++++++++++++++++++')
+#         #print("dict_=", dict_)
+#         #print('++++++++++++++++++++++++++++++++++++')
         
-        count = 0
+#         count = 0
 
-        for i in range(np.shape(dict_['Time'])[0]): # Shouldn't matter which var you pick
-            curr_timestamp = parse(dict_['Time'][i])
+#         for i in range(np.shape(dict_['Time'])[0]): # Shouldn't matter which var you pick
+#             curr_timestamp = parse(dict_['Time'][i])
 
-            if ((min_timestamp <= curr_timestamp) and (curr_timestamp <= max_timestamp)):
-                #print("min time:", min_timestamp, ", curr:", curr_timestamp, ", max time:", max_timestamp)
-                if ((min_lat <= dict_['LatitudeCenter'][i]) and (dict_['LatitudeCenter'][i] <= max_lat)):
-                    #print("min lat:", min_lat, ", curr:", dict_['LatitudeCenter'][i], ", max lat:", max_timestamp)
-                    if ((min_lon <= dict_['LongitudeCenter'][i]) and (dict_['LongitudeCenter'][i] <= max_lon)):
-                        #print("min lon:", min_timestamp, ", curr:", dict_['LongitudeCenter'][i], ", max lon:", max_timestamp)
+#             if ((min_timestamp <= curr_timestamp) and (curr_timestamp <= max_timestamp)):
+#                 #print("min time:", min_timestamp, ", curr:", curr_timestamp, ", max time:", max_timestamp)
+#                 if ((min_lat <= dict_['LatitudeCenter'][i]) and (dict_['LatitudeCenter'][i] <= max_lat)):
+#                     #print("min lat:", min_lat, ", curr:", dict_['LatitudeCenter'][i], ", max lat:", max_timestamp)
+#                     if ((min_lon <= dict_['LongitudeCenter'][i]) and (dict_['LongitudeCenter'][i] <= max_lon)):
+#                         #print("min lon:", min_timestamp, ", curr:", dict_['LongitudeCenter'][i], ", max lon:", max_timestamp)
                         
-                        #print("dict_['LongitudeCenter'][i]=", dict_['LongitudeCenter'][i])
-                        lon_and.append(dict_['LongitudeCenter'][i])
-                        lat_and.append(dict_['LatitudeCenter'][i])
-                        time_and.append(dict_['Time'][i][1:]) # Get rid of 'b' character at the front
-                        ozone_and.append(dict_['IntegratedVerticalProfile'][i])
+#                         #print("dict_['LongitudeCenter'][i]=", dict_['LongitudeCenter'][i])
+#                         lon_and.append(dict_['LongitudeCenter'][i])
+#                         lat_and.append(dict_['LatitudeCenter'][i])
+#                         time_and.append(dict_['Time'][i]) # Get rid of 'b' character at the front
+#                         ozone_and.append(dict_['IntegratedVerticalProfile'][i])
                         
-                        count += 1
+#                         count += 1
 
-        filtered_dict['LongitudeCenter'] = lon_and
-        filtered_dict['LatitudeCenter'] = lat_and
-        filtered_dict['Time'] = time_and
-        filtered_dict['IntegratedVerticalProfile'] = ozone_and
-        #print("==========================================")
-        #print("filtered_dict=", filtered_dict)
-        #print("==========================================")
-        print(">>>>>> Found", count, "points in", file)
+#         filtered_dict['LongitudeCenter'] = lon_and
+#         filtered_dict['LatitudeCenter'] = lat_and
+#         filtered_dict['Time'] = time_and
+#         filtered_dict['IntegratedVerticalProfile'] = ozone_and
+#         #print("==========================================")
+#         #print("filtered_dict=", filtered_dict)
+#         #print("==========================================")
+#         print(">>>>>> Found", count, "points in", file)
     
-    with open(os.path.join(out_folder, date+".csv"), "w") as outfile:
-        # pass the csv file to csv.writer function.
-        writer = csv.writer(outfile, dialect='excel')
+#     with open(os.path.join(out_folder, date+".csv"), "w") as outfile:
+#         # pass the csv file to csv.writer function.
+#         writer = csv.writer(outfile, dialect='excel')
     
-        # pass the dictionary keys to writerow
-        # function to frame the columns of the csv file
-        writer.writerow(filtered_dict.keys())
+#         # pass the dictionary keys to writerow
+#         # function to frame the columns of the csv file
+#         writer.writerow(filtered_dict.keys())
     
-        # make use of writerows function to append
-        # the remaining values to the corresponding
-        # columns using zip function.
-        writer.writerows(zip(*filtered_dict.values()))
+#         # make use of writerows function to append
+#         # the remaining values to the corresponding
+#         # columns using zip function.
+#         writer.writerows(zip(*filtered_dict.values()))
 
-    print(">>>> Saved", date, '.csv | Contains', len(filtered_dict['Time']), 'points')
+#     print(">>>> Saved", date, '.csv | Contains', len(filtered_dict['Time']), 'points')
 
-print(">> Filtered data\n--")
+# print(">> Filtered data\n--")
 
 #====================================================================
 
 fig, ax = plt.subplots(figsize=(8, 6))
 #====================================================================
-ozone_file = '2020-1-2.csv'
+ozone_file = '2020-1-8.csv'
 #====================================================================
 df = pd.read_csv(os.path.join(out_folder, ozone_file))
 #====================================================================
