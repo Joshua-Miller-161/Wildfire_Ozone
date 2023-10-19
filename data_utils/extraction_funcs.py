@@ -4,8 +4,9 @@ import numpy as np
 import xarray as xr
 import dask.array as da
 import pygrib
-import iris
+import iris_grib
 import csv
+from pprint import pprint
 
 def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     '''
@@ -83,7 +84,7 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False):
                                Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
-    assert path.endswith('.hdf5'), "File must be .hdf5. Got:\n"+path
+    assert path.endswith('.hdf5') or path.endswidth('.h5'), "File must be .hdf5 or .h5. Got:\n"+path
     #----------------------------------------------------------------
     if not ((groups == None) or (groups == 'all')):
         if not type(groups) == list:
@@ -138,29 +139,44 @@ def ExtractGRIB(path, var_names, print_sum=False):
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
     assert path.endswith('.grib'), "File must be .grib. Got:\n"+path
-
-    
+    #----------------------------------------------------------------
     grbs = pygrib.open(path)
-    grbs.seek(1)
+    grbs_list = list(grbs)
+    grbs.close()
+    #----------------------------------------------------------------
+    unique_dict = GetUniqueGRIB(grbs_list, ['level', 'dataDate', 'parameterName'])
 
-    for grb in grbs:
-        print(grb)
+    print(" ++++++++ unique_dict", unique_dict)
+    #----------------------------------------------------------------
+    if print_sum:
+        PrintSumGRIB(grbs_list, ['level', 'dataDate', 'parameterName'])
+    #----------------------------------------------------------------
+    
+    grb = grbs_list[0]
+    print(grb)
+    print("---")
+    print(grb['dataDate'], grb.parameterName, grb.level)
+    #----------------------------------------------------------------
+    
+    #----------------------------------------------------------------
 
-    u = grbs.select(name='U component of wind')[0]
-    u_lat, u_lon = u.latlons()
-    print("||||| u=", u)
-    print("||||| u-lat=", u_lat)
-    print("||||| u-lon=", u_lon)
-    print("||||| u.values=", u.values)
+    # u = grbs.select(name='U component of wind')[0]
+    # u_lat, u_lon = u.latlons()
+    # print("||||| len", len(grbs.select(name='U component of wind')))
+    # print("||||| u-lat=", np.shape(u_lat))
+    # print("||||| u-lon=", np.shape(u_lon))
+    # print("||||| u.values=", np.shape(u.values))
     #----------------------------------------------------------------
     var_dict = {}
     #----------------------------------------------------------------
-    #valid_keys_list, valid_keys_str = GetKeysHDF5(grbs)
+
+
+    #----------------------------------------------------------------
+    #valid_keys_list, valid_keys_str = GetKeysGRIB(grbs)
     
     #assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names are:\n"+ valid_keys_str
     
     #----------------------------------------------------------------
-    grbs.close()
     return var_dict
 
 
@@ -188,6 +204,22 @@ def PrintSumNC(ds):
     print("===================================================")
     for name, var in ds.variables.items(): # loop through the variables
         print(name, var.shape)
+
+
+def PrintSumGRIB(grbs, num_to_display=1, 
+                 vars_to_examine=['levels', 'dataDate', 'parameterName']):
+    unique_dict = GetUniqueGRIB(grbs)
+
+    print("Number of levels:", len(list(grbs)))
+    print("")
+    print(" - + - + - Examples - + - + -")
+    for i in range(num_to_display):
+        print(grbs[i])
+        print("min lat:", min(grbs[i].distinctLatitudes), ",max lat:", min(grbs[i].distinctLatitudes),
+              ", min lon:", min(grbs[i].distinctLongitudes), ", max lon:", max(grbs[i].distinctLongitudes), ', level:', grbs[i].level)
+        
+    print("===================================================")
+
 
 
 def GetKeysHDF5(f):
@@ -234,3 +266,28 @@ def GetKeysNC(ds):
             valid_keys_str += group + ', '
 
     return valid_keys_list, valid_keys_str
+
+
+def GetUniqueGRIB(grbs_list, var_names):
+    '''
+     - Grib open object
+    '''
+    grb = grbs_list[0]
+    valid_keys_str = ''
+    for key in list(grb.keys()):
+        valid_keys_str += key + ','
+
+    assert all(var_name in list(grb.keys()) for var_name in var_names), "Some variable names are not attributes. Valid attributes are:\n"+ valid_keys_str
+
+    unique_dict = {var_name:[] for var_name in var_names}
+    for grb in grbs_list:
+        for var_name in var_names:
+            lol = unique_dict[var_name]
+            
+            if not (grb[var_name] in lol):
+                lol.append(grb[var_name])
+            
+            unique_dict[var_name] = lol
+
+    return unique_dict
+    

@@ -6,13 +6,15 @@ from datetime import datetime, timedelta
 from shapely.geometry import Point
 import netCDF4 as nc
 import numpy as np
+import pygrib
 
 from preprocessing_funcs import Scale
 from extraction_funcs import ExtractGRIB
 #====================================================================
 ''' Get data '''
-
-ExtractGRIB("/Users/joshuamiller/Documents/Lancaster/Data/Copernicus/adaptor.mars_constrained.external-1697707401.7930443-25417-7-468c83e5-7003-4cc1-b631-9d7c806b74c3.grib")
+dict_ = ExtractGRIB("/Users/joshuamiller/Documents/Lancaster/Data/Copernicus/adaptor.mars_constrained.external-1697707401.7930443-25417-7-468c83e5-7003-4cc1-b631-9d7c806b74c3.grib",
+                    ['U component of wind', 'V component of wind'],
+                    print_sum=False)
 #====================================================================
 ''' Make subplot '''
 fig, ax = plt.subplots(figsize=(8, 6))
