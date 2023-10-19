@@ -8,14 +8,11 @@ import netCDF4 as nc
 import numpy as np
 
 from preprocessing_funcs import Scale
-from extraction_funcs import Extract_netCDF4
+from extraction_funcs import ExtractGRIB
 #====================================================================
 ''' Get data '''
 
-dict_ = Extract_netCDF4("/Users/joshuamiller/Documents/Lancaster/Data/Copernicus/levtype_ml.nc",
-                        [''],
-                        groups='all',
-                        print_sum=True)
+ExtractGRIB("/Users/joshuamiller/Documents/Lancaster/Data/Copernicus/adaptor.mars_constrained.external-1697707401.7930443-25417-7-468c83e5-7003-4cc1-b631-9d7c806b74c3.grib")
 #====================================================================
 ''' Make subplot '''
 fig, ax = plt.subplots(figsize=(8, 6))
@@ -41,8 +38,8 @@ points_gdf = gpd.GeoDataFrame(geometry=points)
 
 print('lat:', np.shape(lat),
       ', lon:', np.shape(lon),
-      ', ozone:', np.shape(ozone),
-      ', points:', np.shape(points))
+      ', u:', np.shape(u_wind),
+      ', v:', np.shape(v_wind))
 
 del(lat)
 del(lon)

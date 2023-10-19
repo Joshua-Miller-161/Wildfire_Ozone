@@ -3,6 +3,8 @@ import h5py
 import numpy as np
 import xarray as xr
 import dask.array as da
+import pygrib
+import iris
 import csv
 
 def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
@@ -18,7 +20,7 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
                                Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
-    assert path.endswith('.nc') or path.endswith('.nc4'), "File must be .nc"
+    assert path.endswith('.nc') or path.endswith('.nc4') or path.endswith('.nc4'), "File must be .nc"
     #----------------------------------------------------------------
     if not ((groups == None)  or (groups == 'all')):
         if not type(groups) == list:
@@ -124,6 +126,44 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False):
     return var_dict
 
 
+def ExtractGRIB(path, var_names, print_sum=False):
+    '''
+    This will read the desired variables from an hdf5 file.
+    
+    Returns: A dict of dask arrays or numpy arrays of the variables desired
+    
+    Parameters:
+    - path (str) - path to the grib file
+    - var_names (list) - the names of the variable to be extracted
+    - print_sum (Bool, optional) - print out a summary of the dataset
+    '''
+    assert path.endswith('.grib'), "File must be .grib. Got:\n"+path
+
+    
+    grbs = pygrib.open(path)
+    grbs.seek(1)
+
+    for grb in grbs:
+        print(grb)
+
+    u = grbs.select(name='U component of wind')[0]
+    u_lat, u_lon = u.latlons()
+    print("||||| u=", u)
+    print("||||| u-lat=", u_lat)
+    print("||||| u-lon=", u_lon)
+    print("||||| u.values=", u.values)
+    #----------------------------------------------------------------
+    var_dict = {}
+    #----------------------------------------------------------------
+    #valid_keys_list, valid_keys_str = GetKeysHDF5(grbs)
+    
+    #assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names are:\n"+ valid_keys_str
+    
+    #----------------------------------------------------------------
+    grbs.close()
+    return var_dict
+
+
 
 def PrintSumHDF5(f):
     '''
@@ -143,13 +183,11 @@ def PrintSumHDF5(f):
     f.visititems(print_name_and_shape)
 
 
-
 def PrintSumNC(ds):
     print("SUMMARY :", ds)
     print("===================================================")
     for name, var in ds.variables.items(): # loop through the variables
         print(name, var.shape)
-
 
 
 def GetKeysHDF5(f):
