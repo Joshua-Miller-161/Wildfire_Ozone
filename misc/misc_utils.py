@@ -3,6 +3,7 @@ import itertools
 import threading
 import time
 import sys
+import re
 
 def Funnel(start_size, end_size, r=np.e):
     assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)
@@ -55,6 +56,21 @@ def DownSample(data, downsample_rate, axis, delete=False):
 
     return new_data
 
+
+def FindDate(my_str, start_keyword):
+
+    start_idx = my_str.find(start_keyword)
+
+    my_str = my_str[start_idx+(len(start_keyword)+1):]
+    # Search for the pattern in the string
+    match = re.search(r'\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}', my_str)
+    # If the pattern is found, return the matched substring
+    if match:
+        return match.group()
+    # Otherwise, return None
+    else:
+        return None
+    
 '''
 def ProgressWheel():
     for c in itertools.cycle(['|', '/', '-', '\\']):
