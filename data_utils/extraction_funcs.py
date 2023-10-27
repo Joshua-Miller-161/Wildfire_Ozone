@@ -22,7 +22,7 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     Parameters:
     - path (str) - path to the nc file
     - var_names (list) - the names of the variable(s) to be extracted
-    - group (list, optional) - list of the name(s) of the group in the hdf5 file to be accessed.
+    - group (list, optional) - list of the name(s) of the group in the nc file to be accessed.
                                Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
@@ -35,10 +35,16 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     #----------------------------------------------------------------
     var_dict = {}
     #----------------------------------------------------------------
-    ds = nc.Dataset(path, "r", format='NETCDF4')
+    ds = nc.Dataset(path, "r")
+    if print_sum:
+        print("SUMMARY :", ds)
     #----------------------------------------------------------------
     if groups == 'all':
         groups = list(ds.groups.keys())
+
+    if print_sum:
+        print("GROUPS:", groups)
+        print("VARIABLES:", list(ds.variables.keys()))
     #----------------------------------------------------------------
     valid_keys_list, valid_keys = GetKeysNC(ds)
 
@@ -81,24 +87,29 @@ def GetKeysNC(ds):
     valid_keys_list = []
     valid_keys_str = ''
 
-    for group in ds.groups.keys():
-        if isinstance(ds.groups[group], nc._netCDF4.Group): # This 'key' is a group name
-            if (len(list(ds.groups[group].variables.keys())) > 0):
-                for var in list(ds.groups[group].variables.keys()):  # Now iterating through variable names
-                    valid_keys_list.append(var)
-                    valid_keys_str += var + ', '
+    if (len(list(ds.groups.keys())) > 0): # Iterate through the froups
+        for group in ds.groups.keys():
+            if isinstance(ds.groups[group], nc._netCDF4.Group): # This 'key' is a group name
+                if (len(list(ds.groups[group].variables.keys())) > 0):
+                    for var in list(ds.groups[group].variables.keys()):  # Now iterating through variable names
+                        valid_keys_list.append(var)
+                        valid_keys_str += var + ', '
+                else:
+                    for var in list(ds.groups[group].__dict__.keys()):  # Now iterating through keys in the dictionary structure of the group
+                        valid_keys_list.append(var)
+                        valid_keys_str += var + ', '
             else:
-                for var in list(ds.groups[group].__dict__.keys()):  # Now iterating through keys in the dictionary structure of the group
-                    valid_keys_list.append(var)
-                    valid_keys_str += var + ', '
-        else:
-            valid_keys_list.append(group)
-            valid_keys_str += group + ', '
+                valid_keys_list.append(group)
+                valid_keys_str += group + ', '
 
+    else: # No groups
+        for var in list(ds.variables.keys()):
+            valid_keys_list.append(var)
+            valid_keys_str += var + ', '
+    
     return valid_keys_list, valid_keys_str
 
 def PrintSumNC(ds):
-    print("SUMMARY :", ds)
     print("===================================================")
     for name, var in ds.variables.items(): # loop through the variables
         print(name, var.shape)
@@ -211,7 +222,7 @@ def ExtractGRIBIris(path, var_names='all',
                     use_dask_array=False, 
                     essential_var_names=['forecast_reference_time', 'model_level_number', 'latitude', 'longitude']):
     '''
-    This will read the desired variables from an hdf5 file.
+    This will read the desired variables from an grib file.
     
     Returns: A dict of dask arrays or numpy arrays of the variables desired
     
@@ -243,6 +254,9 @@ def ExtractGRIBIris(path, var_names='all',
             print(f"Cube {i + 1}: {cubes[i + 1]}")
             return # Exit function
     #----------------------------------------------------------------
+    if print_keys:
+        print(vars(cubes[0]))
+    #----------------------------------------------------------------
     unique_vars, unique_vars_idx, unique_dates, unique_levels = GetUniqueGRIBIris(cubes)
     #----------------------------------------------------------------
     if not ((var_names == 'all') or (type(var_names) == list)):
@@ -260,9 +274,6 @@ def ExtractGRIBIris(path, var_names='all',
     #----------------------------------------------------------------
     data_dim = cubes[0].data.shape # Shouldn't matter which cube is used
     big_data_shape = (len(unique_dates),) + (len(unique_levels),) + data_dim
-    #----------------------------------------------------------------
-    if print_keys:
-        print(vars(cubes[0]))
     #----------------------------------------------------------------
     if print_sum:
         PrintSumGRIBIris(path, cubes, unique_vars, unique_vars_idx, unique_dates, unique_levels, num_examples)
