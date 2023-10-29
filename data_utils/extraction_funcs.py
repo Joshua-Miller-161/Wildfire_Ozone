@@ -3,12 +3,13 @@ import h5py
 import numpy as np
 import xarray as xr
 import dask.array as da
-import pygrib
 import iris_grib
 from osgeo import gdal
+import rasterio
 import csv
 import sys
 import os
+
 
 sys.path.append(os.getcwd())
 from misc.misc_utils import FindDate
@@ -45,6 +46,20 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     if print_sum:
         print("GROUPS:", groups)
         print("VARIABLES:", list(ds.variables.keys()))
+        
+        ds_gdal = gdal.Open(path)
+        if not ds_gdal.GetProjectionRef() == '':
+            print("CRS (gdal):", ds_gdal.GetProjectionRef())
+            del(ds_gdal)
+        else:
+            ds_rasterio = rasterio.open(path)
+            if not (ds_rasterio.crs == ''):
+                print("CRS (rasterio):", ds_rasterio.crs)
+            else:
+                print("Couldn't get crs")
+
+        
+
     #----------------------------------------------------------------
     valid_keys_list, valid_keys = GetKeysNC(ds)
 
@@ -110,9 +125,9 @@ def GetKeysNC(ds):
     return valid_keys_list, valid_keys_str
 
 def PrintSumNC(ds):
-    print("===================================================")
     for name, var in ds.variables.items(): # loop through the variables
         print(name, var.shape)
+    
 
 #====================================================================
 #====================================================================
