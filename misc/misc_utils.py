@@ -4,6 +4,7 @@ import threading
 import time
 import sys
 import re
+import pandas as pd
 
 def Funnel(start_size, end_size, r=np.e):
     assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)
@@ -86,3 +87,22 @@ def ProgressWheel():
 t = threading.Thread(target=ProgressWheel)
 t.start()
 '''
+
+
+
+df = pd.DataFrame({'date': ['06/01/2020', '06/01/2020', '06/03/2020'], 'data': [25, 26, 27]})
+
+def CreateDateDfs(df):
+    # Create an empty dictionary to store the new dataframes
+    date_dfs = {}
+    # Loop through the unique values of the date column
+    for date in df['date'].unique():
+        # Filter the dataframe by the date value
+        date_df = df[df['date'] == date]
+        # Add the filtered dataframe to the dictionary with the date as the key
+        date_dfs[date] = date_df
+    # Return the dictionary of new dataframes
+    return date_dfs
+
+lol = CreateDateDfs(df)
+print(lol)

@@ -1,91 +1,77 @@
 import matplotlib.pyplot as plt
 import geopandas as gpd
-from matplotlib.colors import Normalize
+from matplotlib.colors import Normalize, LogNorm
 from matplotlib.colors import LinearSegmentedColormap
-from datetime import datetime, timedelta
 from shapely.geometry import Point
-import netCDF4 as nc
-import numpy as np
 import pandas as pd
-import re
-import sys
 import os
+import random
+import sys
 
 sys.path.append(os.getcwd())
-from preprocessing_funcs import Scale
-from extraction_funcs import ExtractHDF5
-from misc.misc_utils import FindDate
+from data_utils.extraction_funcs import SplitDataFrame
 #====================================================================
 ''' Get data '''
-path1 = "/Users/joshuamiller/Documents/Lancaster/Data/Fire/DL_FIRE_M-C61_396339/fire_archive_M-C61_396339.csv"
-df = pd.read_csv(path1)
-print(df)
-#====================================================================
-fig, ax = plt.subplots(1,1,figsize=(9,7))
+# path1 = "/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61/fire_archive_M-C61_396750.csv"
+# df = pd.read_csv(path1)
+# print("df=", df)
 
+# new_dfs = SplitDataFrame(df, column="acq_date", 
+#                         save_new_files=True,
+#                         new_files_folder="/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61")
+#====================================================================
+num_rows = 3
+num_cols = 3
+fig, ax = plt.subplots(num_rows, num_cols, figsize=(9,7))
 #====================================================================
 ''' World map '''
 world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
 #====================================================================
-''' Plot fire '''
+path = "/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61"
 
-world.plot(ax=ax, facecolor='none', edgecolor='black', linewidth=.5, alpha=1, legend=True) # GOOD lots the map
+files = os.listdir(path)
+files_to_plot = random.sample(files, num_rows * num_cols)
+#====================================================================
+''' Make points '''
+dfs_dict = {}
+min_frp = 999
+max_frp = -999
+for i in range(num_rows):
+    for j in range(num_cols):
+        df = pd.read_csv(os.path.join(path, files_to_plot[num_cols * i + j]))
+        #------------------------------------------------------------
+        points = [Point(x,y) for x,y in zip(df['longitude'].values, df['latitude'].values)]
+        points_gdf = gpd.GeoDataFrame(geometry=points)
+
+        #------------------------------------------------------------
+        ''' Fire dataframe'''
+        fire_gdf = gpd.GeoDataFrame(geometry=points).assign(data=df['frp'].values)
+
+        #------------------------------------------------------------
+        if (max(df['frp'].values.ravel()) > max_frp):
+            max_frp = max(df['frp'].values)
+
+        if (min(df['frp'].values.ravel()) < min_frp):
+            min_frp = min(df['frp'].values)
+
+        #------------------------------------------------------------
+        dfs_dict[files_to_plot[num_cols * i + j]] = fire_gdf
+
+#====================================================================
+fire_norm = LogNorm(vmin=min_frp, vmax=max_frp)
+fire_cmap = LinearSegmentedColormap.from_list('custom', ['yellow', 'orange', 'red'], N=200) # Higher N=more smooth
+
+#====================================================================
+for i in range(num_rows):
+    for j in range(num_cols):
+        #------------------------------------------------------------
+        ''' Plot fire '''
+        dfs_dict[files_to_plot[num_cols * i + j]].plot(ax=ax[i][j], column='data', cmap=fire_cmap, norm=fire_norm, markersize=1, alpha=1, legend=True)
+        world.plot(ax=ax[i][j], facecolor='none', edgecolor='black', linewidth=.5, alpha=1, legend=True) # GOOD lots the map
+
+        #------------------------------------------------------------
+        ax[i][j].set_xlim(-20, 60)
+        ax[i][j].set_ylim(-20, 20)
+        ax[i][j].set_title(files_to_plot[num_cols * i + j])
 
 plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# # print("IRIS:", len(cubes), type(cubes[0])) 
-# # print("===========================================================")
-# # print("===========================================================")
-# # print("vars(cubes[0]):", vars(cubes[0]))
-# # print("===========================================================")
-# # print("===========================================================")
-# # print("cubes[0].__dir__:", cubes[0].__dir__())
-# # print("===========================================================")
-# # print("===========================================================")
-# # print("cubes[0].__dict__:", cubes[0].__dict__)
-# # print("===========================================================")
-# # print("===========================================================")
-# # print("cubes[0].data.__dir__():", cubes[0].units, cubes[0].data.__dir__())
-# # print("===========================================================")
-# # print("===========================================================")
-# # print("cubes[0].coord.__dir__():", cubes[0].coord.__dir__())
-# # print("===========================================================")
-# # print("===========================================================")
-# # cube_num = 4
-# # print("Data:", cubes[cube_num].standard_name, cubes[cube_num].data.shape, cubes[cube_num].data.shape, type(cubes[cube_num].data), cubes[cube_num].data)
-# # print("===========================================================")
-# # print(cubes[cube_num]._dim_coords_and_dims[0][0], type(cubes[cube_num]._dim_coords_and_dims[0][0]))
-# # print("-")
-# # print(cubes[cube_num]._dim_coords_and_dims[1][0], type(cubes[cube_num]._dim_coords_and_dims[1][0]))
-# # print("-")
-# # print(cubes[cube_num]._dim_coords_and_dims[0][1], type(cubes[cube_num]._dim_coords_and_dims[0][1]))
-# # print("-")
-# # print(cubes[cube_num]._dim_coords_and_dims[1][1], type(cubes[cube_num]._dim_coords_and_dims[1][1]))
-# # print("===========================================================")
-# # print(cubes[cube_num].coord('latitude').points, type(cubes[cube_num].coord('latitude').points))
-# # print(cubes[cube_num].coord('longitude').points - 360, type(cubes[cube_num].coord('longitude').points))
-# # print(cubes[cube_num].coord('model_level_number').points, type(cubes[cube_num].coord('model_level_number').points))
-# # print(cubes[cube_num].coord('time').points, type(cubes[cube_num].coord('time').points))
-# # print(cubes[cube_num].coord('forecast_reference_time'), cubes[cube_num].coord('forecast_reference_time').points)
-# # print("===========================================================")
-# # print("===========================================================")

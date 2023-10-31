@@ -427,39 +427,33 @@ def GetUniqueGRIBIris(cubes):
 #====================================================================
 #====================================================================
 
-def FilterCSV(df, values, columns_to_check='all', save_new_file=False, new_file_name=None):
+def SplitDataFrame(df, column, save_new_files=False, new_files_folder=None):
     '''
-    Creates a new dataframe which is a subset from an existing one, 'df', which
-    saves all of the rows which contain the 'value'
+    Creates subsets of df where all of the entries in 'column' are the same
 
-    Returns a subset of the original dataframe
+    Returns a dictionary of subsets of the original dataframe
 
-    - df (Pandas dataframe)
-    - values (str, int, float (list of)): The value(s) which will be searched for. Each row in the
-                               new dataframe will contain at least one instance of this
-    - columns_to_check (str (list of), optional): Which columns to look in when searching for 'values'
-    - save_new_file (Bool, optional): Whether to save the new dataframe as a csv
-    - new_file_name (str, optional): The name of the csv file of the corresponding new csv
+    - df (Pandas dataframe): The dataframe to split
+    - column (str): The column in which the unique values will be searched
+    - save_new_file (Bool, optional): Whether to save the new dataframes as csv files
+    - new_files_folder (str, optional): Path to folder to save the subsets
     '''
     #----------------------------------------------------------------
-    if not (type(values) == list):
-        values = [values]
+    cols_str = ''
+    for col in df.columns:
+        cols_str += col +', '
+    assert column in df.columns, column+" is not a valid column name. Valid columns:\n"+cols_str
     #----------------------------------------------------------------
-    for col_name in col_names:
-        for value in values:
-            df = df[df[col_name] == value]
+    sub_dfs_dict = {}
 
-    if save_new_file:
-        df.to_excel(new_file_name, index=False)
+    for val in df[column].unique():
+        print(">> Searching for", val)
+        sub_dfs_dict[val] = df[df[column] == val]
+        print(">> Finished with", val, "\n  - - - -")
     #----------------------------------------------------------------
-    if (columns_to_check == 'all'):
-        for value in values:
-            col_names = df.columns[df.isin([value]).any()].values
-            for col_name in col_names:
-                # Filter the rows with the column equal to "01/06/2023"
-                df = df[df[col_name] == value]
-
-        if save_new_file:
-            df.to_excel(new_file_name, index=False)
+    if save_new_files:
+        for key in sub_dfs_dict.keys():
+            sub_dfs_dict[key].to_csv(os.path.join(new_files_folder, key+'.csv'), index=False)
+            print(">> Saved", key+'.csv')
     #----------------------------------------------------------------
-    return df
+    return sub_dfs_dict
