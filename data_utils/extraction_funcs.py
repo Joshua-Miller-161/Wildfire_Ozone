@@ -67,7 +67,7 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
 
     assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names in this are:\n"+ valid_keys
     #----------------------------------------------------------------
-    if groups==None:
+    if ((groups==None) or (list(ds.groups.keys())==[])):
         for var_name in var_names:
             var = ds.variables[var_name] # access the variable as a dataset object
             var_dict[var_name] = var[:]  # convert to numpy array using [:]

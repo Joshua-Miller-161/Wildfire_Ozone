@@ -28,7 +28,7 @@ path1 = "/Users/joshuamiller/Documents/Lancaster/Data/Copernicus/adaptor.mars_co
 path3 = "/Users/joshuamiller/Documents/Lancaster/Data/ERA5/ERA5-ml-temperature-subarea.nc"
 path4 = "/Users/joshuamiller/Documents/Lancaster/Data/ERA5/ERA5-ml-uwind-vwind-subarea_025025.nc"
 path5 = "/Users/joshuamiller/Documents/Lancaster/Data/ERA5/ERA5-ml-temperature-subarea_025025.grib"
-path6 = "/Users/joshuamiller/Documents/Lancaster/Data/ERA5/uwind_vwind_20200101_025025.grib"
+path6 = "/Users/joshuamiller/Documents/Lancaster/Data/ERA5/uwind_20200101_025025_levelsTest.grib"
 
 dict_ = ExtractGRIBIris(path6,
                         var_names='all',

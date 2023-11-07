@@ -30,10 +30,10 @@ c = cdsapi.Client()
 c.retrieve('reanalysis-era5-complete', { # Requests follow MARS syntax
                                         # Keywords 'expver' and 'class' can be dropped. They are obsolete
                                         # since their values are imposed by 'reanalysis-era5-complete'
-    'date'    : '2020-01-01',            # The hyphens can be omitted
-    'levelist': '1/25/50/100/115/137',          # 1 is top level, 137 the lowest model level in ERA5. Use '/' to separate values.
+    'date'    : '2020-01-01',           # The hyphens can be omitted
+    'levelist': '1/10/20/30/40/50/60/70/80/90/100/110/120/130/135/136/137',  # 1 is top level, 137 the lowest model level in ERA5. Use '/' to separate values.
     'levtype' : 'ml',
-    'param'   : '131/132',              # Full information at https://apps.ecmwf.int/codes/grib/param-db/
+    'param'   : '131',              # Full information at https://apps.ecmwf.int/codes/grib/param-db/
                                         # The native representation for temperature is spherical harmonics
     'stream'  : 'oper',                 # Denotes ERA5. Ensemble members are selected by 'enda'
     'time'    : '00/to/23/by/6',        # You can drop :00:00 and use MARS short-hand notation, instead of '00/06/12/18'
@@ -41,4 +41,4 @@ c.retrieve('reanalysis-era5-complete', { # Requests follow MARS syntax
     'area'    : '20/-20/-20/60',        # North, West, South, East. Default: global
     'grid'    : '.25/.25',              # Latitude/longitude. Default: spherical harmonics or reduced Gaussian grid
     'format'  : 'grib',                 # Output needs to be regular lat-lon, so only works in combination with 'grid'!
-}, '/Users/joshuamiller/Documents/Lancaster/Data/ERA5/uwind_vwind_20200101_025025.grib')     # Output file. Adapt as you wish.
+}, '/Users/joshuamiller/Documents/Lancaster/Data/ERA5/uwind_20200101_025025_levelsTest.grib')     # Output file. Adapt as you wish.

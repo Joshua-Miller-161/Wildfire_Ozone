@@ -12,7 +12,7 @@ from extraction_funcs import Extract_netCDF4
 #====================================================================
 ''' Get data '''
 
-dict_ = Extract_netCDF4("/Users/joshuamiller/Documents/Lancaster/Data/L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20200604T113022_20200610T121610_13735_03_020401_20230329T143041.nc",
+dict_ = Extract_netCDF4("/Users/joshuamiller/Documents/Lancaster/Data/L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20200128T111827_20200203T120440_11919_03_020401_20230329T134602/S5P_RPRO_L2__O3_TCL_20200128T111827_20200203T120440_11919_03_020401_20230329T134602.nc",
                         ['latitude_ccd', 'longitude_ccd', 'time', 'ozone_tropospheric_vertical_column', 'dates_for_tropospheric_column'],
                         groups='all',
                         print_sum=True)
