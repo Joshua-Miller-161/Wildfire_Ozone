@@ -65,6 +65,11 @@ def Extract_netCDF4(path, var_names, groups=None, print_sum=False):
     #----------------------------------------------------------------
     valid_keys_list, valid_keys = GetKeysNC(ds)
 
+    if print_sum:
+        print("____________________________")
+        print("Valid keys:", valid_keys_list)
+        print("____________________________")
+
     assert all(var_name in valid_keys_list for var_name in var_names), "Some variable names are not in the file. Valid variable names in this are:\n"+ valid_keys
     #----------------------------------------------------------------
     if ((groups==None) or (list(ds.groups.keys())==[])):
