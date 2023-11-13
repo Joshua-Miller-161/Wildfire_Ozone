@@ -12,7 +12,7 @@ sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import SplitDataFrame
 #====================================================================
 ''' Get data '''
-# path1 = "/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61/fire_archive_M-C61_396750.csv"
+# path1 = "/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61/fire_archive_M-C61_401077.csv"
 # df = pd.read_csv(path1)
 # print("df=", df)
 
@@ -30,6 +30,10 @@ world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land
 path = "/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61"
 
 files = os.listdir(path)
+for file in files:
+    if not file.endswith('.csv'):
+        files.remove(file)
+
 files_to_plot = random.sample(files, num_rows * num_cols)
 #====================================================================
 ''' Make points '''
@@ -58,6 +62,7 @@ for i in range(num_rows):
         dfs_dict[files_to_plot[num_cols * i + j]] = fire_gdf
 
 #====================================================================
+print("min:", min_frp, ", max:", max_frp)
 fire_norm = LogNorm(vmin=min_frp, vmax=max_frp)
 fire_cmap = LinearSegmentedColormap.from_list('custom', ['yellow', 'orange', 'red'], N=200) # Higher N=more smooth
 
