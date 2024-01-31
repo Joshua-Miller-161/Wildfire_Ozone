@@ -369,7 +369,12 @@ def ExtractGRIBIris(path, var_names='all',
                     #print(cube.standard_name, subcube.coord('model_level_number').points[0], level_idx, date_str, date_idx, ", subcube:", s, ", subname:", subcube.standard_name)
 
                     var_dict[subcube.standard_name][date_idx, level_idx, ...] = subcube.data
-        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    for key in var_dict.keys():
+        try:
+            var_dict[key] = np.squeeze(var_dict[key])
+        except ValueError:
+            print('lol')
     return var_dict
 
 def PrintSumGRIBIris(path, cubes, unique_vars, unique_vars_idx, unique_dates, unique_levels, unique_pressures, num_cubes_to_print):

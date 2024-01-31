@@ -5,7 +5,7 @@ import sys
 import datetime
 
 sys.path.append(os.getcwd())
-from misc.check_date_completeness import CheckDateCompleteness
+#====================================================================
 
 def DownloadERA5(dest_folder, dates, min_lat, max_lat, min_lon, max_lon, levels, params):
     #================================================================
@@ -61,19 +61,44 @@ def DownloadERA5(dest_folder, dates, min_lat, max_lat, min_lon, max_lon, levels,
                    download_dict, 
                    os.path.join(dest_folder, 'ERA5_p='+params_str_f+'_l='+levels_str_f+'_'+date+'.grib'))
         print("\n>> Saved", 'ERA5_p='+params_str_f+'_l='+levels_str_f+'_'+date+'.grib')
-    #================================================================
 
 #====================================================================
-dates = CheckDateCompleteness("/Users/joshuamiller/Documents/Lancaster/Data/L2_O3_TCL")
-print(dates)
-
+def DownloadSST(dest_folder, dates):
+    
+    download_dict = {
+        'version': '2_1',
+        'variable': 'all',
+        'format': 'zip',
+        'processinglevel': 'level_4',
+        'sensor_on_satellite': 'combined_product',
+        'year': '',
+        'month': '',
+        'day': ''
+    }
+    #================================================================
+    for date in dates:
+        assert datetime.datetime.strptime(date, "%Y-%m-%d"), date+" has invalid date format. Need YYYY-MM-DD."
+        year, month, day = date.split('-')
+        download_dict['year'] = year
+        download_dict['month'] = month
+        download_dict['day'] = day
+      
+        #================================================================
+        c = cdsapi.Client()
+        print("________________________________________________________________________________")
+        print(">> Downloading", 'sst_'+date+'.zip', '\n')
+        c.retrieve('satellite-sea-surface-temperature',
+                download_dict,
+                os.path.join(dest_folder, 'sst_'+date+'.zip'))
+#====================================================================
 # DownloadERA5(dest_folder="/Users/joshuamiller/Documents/Lancaster/Data/ERA5",
 #              dates=dates,
 #              min_lat=20, min_lon=-20, max_lat=-20, max_lon=60,
 #              levels=[1,137],
 #              params=[131, 132])
 
-
+DownloadSST(dest_folder="/Users/joshuamiller/Documents/Lancaster/Data",
+            dates=['2018-04-30', '2018-05-01', '2018-05-02'])
 
 
 

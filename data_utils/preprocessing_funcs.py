@@ -1,6 +1,8 @@
 import numpy as np
 from sklearn import preprocessing
-
+import pykrige.kriging_tools as kt
+from pykrige.ok import OrdinaryKriging
+#====================================================================
 def Scale(data, reference, method='standard'):
     '''
     This function scales the data, either using the StandardScaler or MaxAbsScaler
@@ -25,3 +27,15 @@ def Scale(data, reference, method='standard'):
     scaled_data = scaler.transform(data.ravel().reshape(-1, 1))
 
     return scaled_data.reshape(orig_shape)
+#====================================================================
+def DoKrig(x, y, val, x_target, y_target):
+    OK = OrdinaryKriging(
+                x,
+                y,
+                val,
+                variogram_model='spherical',
+                verbose=False,
+                enable_plotting=False,
+                nlags=10,
+                )
+    return OK.execute("points", x_target, y_target)
