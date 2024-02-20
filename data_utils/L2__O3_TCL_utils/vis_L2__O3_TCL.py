@@ -188,6 +188,8 @@ ax[2].set_title('Dates: '+ dates_3, fontsize=6)
 #====================================================================
 plt.show()
 
+
+fig.savefig(os.path.join('/Users/joshuamiller/Documents/Lancaster/Figs', "L2__O3_TCL_interp.pdf"), bbox_inches = 'tight', pad_inches = 0)
 # mask = np.ma.getmaskarray(dict_['ozone_tropospheric_vertical_column'])
 # for i in range(np.shape(mask)[0]):
 #     for j in range(np.shape(mask)[1]):

@@ -1,13 +1,14 @@
+import os
+os.environ['USE_PYGEOS'] = '0'
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import geopandas as gpd
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
 from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
-import os
 import sys
 import numpy as np
-
+    
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
 #====================================================================
@@ -16,17 +17,44 @@ world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land
 crs = world.crs
 print(" + + +", crs, crs.datum)
 #====================================================================
-f_fire = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2018-07-01_kriged.csv',
-          '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2018-07-02_kriged.csv',
-          '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2020-12-01_kriged.csv',
-          '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2020-12-02_kriged.csv']
-f_O3 = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180701-20180705_kriged_555.nc',
-        '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180702-20180705_kriged_527.nc',
-        '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20201201-20201205_kriged_690.nc',
-        '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20201202-20201205_kriged_808.nc']
+# f_fire = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2018-07-01_kriged.csv',
+#           '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2018-07-02_kriged.csv',
+#           '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2020-11-17_kriged.csv',
+#           '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2020-11-18_kriged.csv']
+# f_O3 = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180701-20180705_kriged_555.nc',
+#         '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180702-20180705_kriged_527.nc',
+#         '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20201117-20201120_kriged_497.nc',
+#         '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20201118-20201121_kriged_445.nc']
+
+
+
+f_fire = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2020-05-17_kriged.csv',
+          '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_MODIS_C61/MODIS_C61_2020-11-17_kriged.csv']
+f_O3 = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20200517-20200521_kriged_382.nc',
+        '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20201117-20201120_kriged_497.nc']
+
+
+
+
+
+
+f_O3_ = ['/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180527-20180530_kriged_243.nc',
+         '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180526-20180529_kriged_199.nc',
+         '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL/S5P_RPRO_L2__O3_TCL_20180524-20180528_kriged_322.nc']
+
+for file in f_O3_:
+    dict_ = Extract_netCDF4(file,
+                        ['lat', 'lon', 'ozone_tropospheric_vertical_column', 'dates_for_tropospheric_column'],
+                        groups='all',
+                        print_sum=True)
+    print(dict_['dates_for_tropospheric_column'])
+    print("+++++++++++++++++++++++++++++++++++")
+    print("+++++++++++++++++++++++++++++++++++")
+    print("+++++++++++++++++++++++++++++++++++")
+    print("+++++++++++++++++++++++++++++++++++")
 #====================================================================
-fig, ax = plt.subplots(len(f_fire), 2, figsize=(9,7))
-fig.subplots_adjust(wspace=.5, hspace=.5)
+fig, ax = plt.subplots(len(f_fire), 2, figsize=(9,6)) # figsize (height (in), width (in))
+fig.subplots_adjust(wspace=1, hspace=-.1)
 #====================================================================
 fire_norm = Normalize(vmin=0.1, vmax=10**3)
 fire_cmap = LinearSegmentedColormap.from_list('custom', ['yellow', 'orange', 'red'], N=200) # Higher N=more smooth
@@ -58,7 +86,7 @@ for i in range(len(f_fire)):
 
     divider = make_axes_locatable(ax[i][0])
     cax = divider.append_axes("right", size="5%", pad=0.05)
-    cbar = plt.colorbar(new_fire, cax=cax, label='Megatwatts')
+    cbar = plt.colorbar(new_fire, cax=cax, label='MaxFRP (Megawatts)')
     cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
 
     ax[i][0].scatter(x=lon_0, y=lat_0, s=0.5, marker='.', color='black')
@@ -68,7 +96,7 @@ for i in range(len(f_fire)):
     dict_ = Extract_netCDF4(f_O3[i],
                             ['lat', 'lon', 'ozone_tropospheric_vertical_column', 'dates_for_tropospheric_column'],
                             groups='all',
-                            print_sum=True)
+                            print_sum=False)
 
     lat_3 = dict_['lat']
     lon_3 = dict_['lon']
@@ -82,7 +110,7 @@ for i in range(len(f_fire)):
 
     divider = make_axes_locatable(ax[i][1])
     cax = divider.append_axes("right", size="5%", pad=0.05)
-    cbar = plt.colorbar(O3_3, cax=cax, label=r'$\frac{mol}{m^2}$')
+    cbar = plt.colorbar(O3_3, cax=cax, label=r'$O_3$'+' concentration '+r'$\left(\frac{mol}{m^2}\right)$')
     cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=90)
     ax[i][1].set_title("Ozone: " + dates_3[0][:4] + '-' + dates_3[0][4:6] + '-' + dates_3[0][6:8] + " - " + dates_3[-1][:4] + '-' + dates_3[-1][4:6] + '-' + dates_3[-1][6:8])
 
@@ -94,4 +122,4 @@ for i in range(len(f_fire)):
         
 plt.show()
 
-#fig.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Fire_Ozone_Camparison.pdf', bbox_inches = 'tight', pad_inches = 0)
+fig.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Fire_Ozone_Camparison.pdf', bbox_inches = 'tight', pad_inches = 0)

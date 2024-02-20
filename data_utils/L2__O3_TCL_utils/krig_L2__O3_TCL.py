@@ -1,21 +1,15 @@
 import numpy as np
 import netCDF4 as nc
 from scipy.spatial import KDTree
-import os
-import sys
-import math
-from datetime import date
-
-sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import Scale, DoKrig
 from data_utils.extraction_funcs import Extract_netCDF4
 #====================================================================
+''' Number of neighbors '''
+num_neighbors = 100
+#====================================================================
 ''' Folders '''
 search_folder = '/Users/joshuamiller/Documents/Lancaster/Data/Filtered_L2_O3_TCL'
-save_folder   = '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL'
-#====================================================================
-''' Number of neighbors '''
-num_neighbors = 25
+save_folder   = '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL_'+str(num_neighbors)
 #====================================================================
 ''' Search through files and krig where necessary '''
 for file in os.listdir(search_folder):

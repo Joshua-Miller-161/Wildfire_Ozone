@@ -152,7 +152,7 @@ def ExtractHDF5(path, var_names, groups=None, print_sum=False):
                                Can also use 'all' to search all the groups
     - print_sum (Bool, optional) - print out a summary of the dataset
     '''
-    assert path.endswith('.hdf5') or path.endswith('.h5'), "File must be .hdf5 or .h5. Got:\n"+path
+    #assert path.endswith('.hdf5') or path.endswith('.h5') or path.endswith('.hdf'), "File must be .hdf5 or .h5. Got:\n"+path
     #----------------------------------------------------------------
     if print_sum:
         PrintSumHDF5(path)
