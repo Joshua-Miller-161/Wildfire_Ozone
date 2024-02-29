@@ -84,6 +84,16 @@ def Scale(data, reference, method='standard'):
 
     return scaled_data.reshape(orig_shape)
 
+def MinMaxScale(x, lower, upper):
+    x = np.asarray(x)
+    orig_shape = np.shape(x)
+    x_min = min(x.ravel())
+    x_max = max(x.ravel())
+
+    y = (x - x_min) / (x_max - x_min) * (upper - lower) + lower
+
+    return y.reshape(orig_shape)
+
 def FindDate(my_str, start_keyword):
 
     start_idx = my_str.find(start_keyword)
@@ -98,6 +108,22 @@ def FindDate(my_str, start_keyword):
     else:
         return None
     
+def FFT(t, y, mult_2pi=False):
+    # If you believe data is of the form: y = sin(2π * f1 * x) + ...
+    #    - set mult_2pi=False to show peak at f1
+    # Otherwise if you have: y = sin(f1 * x) + ...
+    #    - set mult_2pi=True to show peak at f1
+    # Credit: john-hen on Stack Exchange
+    n = len(t)
+    delta = (max(t) - min(t)) / (n-1)
+    k = int(n/2)
+    f = np.arange(k) / (n*delta)
+    Y = abs(np.fft.rfft(y))[:k]
+    if not mult_2pi:
+        return (f, Y)
+    else:
+        return (f*(2*np.pi), Y)
+
 def Longitude360to180(lon):
     lon = np.asarray(lon)
     return (lon + 180) % 360 - 180

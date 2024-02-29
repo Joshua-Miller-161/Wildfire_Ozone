@@ -15,12 +15,13 @@ import yaml
     
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
-from misc.misc_utils import GetBoxCoords, PlotBoxes, GetDateInStr, CompareDates, Scale
+from misc.misc_utils import GetBoxCoords, PlotBoxes, GetDateInStr, CompareDates, Scale, MinMaxScale, FFT
 #====================================================================
 base_path    = "/Users/joshuamiller/Documents/Lancaster/Data"
 O3_folders   = ['Kriged_L2_O3_TCL', 'East_Ocean/L2__O3_TCL', 'West_Ocean/L2__O3_TCL', 'South_Land/L2__O3_TCL', 'North_Land/L2__O3_TCL']
 fire_folders = ['Kriged_MODIS_C61', 'East_Ocean/MODIS_C61', 'West_Ocean/MODIS_C61', 'South_Land/MODIS_C61', 'North_Land/MODIS_C61']
 labels       = ['Whole_area', 'East_ocean', 'West_ocean', 'South_land', 'North_land']
+region = 0
 #====================================================================
 ''' Get data '''
 num_O3_files = 0
@@ -196,9 +197,9 @@ for i in range(5):
     #PlotWindow(ax[i], datetime(2018, 3, 1, 0, 0, 0), datetime(2018, 6, 1, 0, 0, 0), 0, 100, 'cyan', .5, 'O3')
 #====================================================================
 windowsizes = [15, 30, 60, 120]
-overlaps    = [0, .33, .5]
-colors      = ['springgreen', 'royalblue', 'violet']
-region = 4
+overlaps    = [0, .5]
+colors      = ['springgreen', 'violet', 'royalblue']
+
 
 fig2, ax2 = plt.subplots(1+len(windowsizes),1,figsize=(12, 7), sharex=True)
 fig2.subplots_adjust(hspace=0, wspace=0)
@@ -217,6 +218,9 @@ for i in range(len(windowsizes)):
         offset = int(windowsizes[i] * (1 - overlaps[j]))
         num_corrs = np.shape(new_dates)[0] - offset - windowsizes[i]
         corrs = np.ones(num_corrs, float) * -9999
+
+        ax2[i+1].axvspan(new_dates[j * 365], new_dates[j * 365]+timedelta(days=windowsizes[i]), 0, 1, color=colors[j], alpha=.1)
+        ax2[i+1].axvspan(new_dates[j * 365]+timedelta(days=offset), new_dates[j * 365]+timedelta(days=windowsizes[i])+timedelta(days=offset), 0, 1, color=colors[j], alpha=.1)
 
         for k in range(num_corrs):
             corrs[k] = np.corrcoef(new_fire[k:(k+windowsizes[i])], new_O3[(k+offset):(k+windowsizes[i]+offset)])[0][1]
@@ -247,6 +251,7 @@ for label in labels:
         intersect_dict[label+'_dates'] = new_dates
 #====================================================================
 fig3, ax3 = plt.subplots(3, 1, figsize=(12, 7))
+fig3.subplots_adjust(hspace=1, wspace=0)
 
 def interpolate_data(dates, values):
     # Convert the list of datetime objects to a pandas Series
@@ -263,49 +268,71 @@ def interpolate_data(dates, values):
     y_interp = series_interp.values
 
     return t_interp, y_interp
+
+def find_largest_values(y, x, num):
+    indices = sorted(range(len(y)), key=lambda i: y[i], reverse=True)[:num]
+    values = [(x[i], y[i]) for i in indices]
+    values = list(sorted(values, key=lambda t: t[0]))
+    return values
 #--------------------------------------------------------------------
 start_date = min(intersect_dict[labels[region]+'_dates'])
 T = np.asarray([(date - start_date).days for date in intersect_dict[labels[region]+'_dates']])
 O3 = np.asarray(intersect_dict[labels[region]+'_O3_means'])
 fire = np.asarray(intersect_dict[labels[region]+'_fire_means'])
-N = np.shape(T)[0]
-print("========================")
 
 T_interp, O3_interp = interpolate_data(intersect_dict[labels[region]+'_dates'], O3)
 T_interp, fire_interp = interpolate_data(intersect_dict[labels[region]+'_dates'], fire)
+start_date = min(T_interp)
+T = np.asarray([(date - start_date).days for date in T_interp])
 print(np.shape(T_interp), np.shape(O3_interp), np.shape(fire_interp))
-N = np.shape(T_interp)[0]
 #--------------------------------------------------------------------
-N = 1000
-x = np.arange(N)
-barf = np.sin(0.01*2*np.pi*x)+np.sin(0.001*2*np.pi*x)+np.random.random(1000)
-
-fhat = np.fft.fft(Scale(O3_interp, O3_interp))
-N = np.shape(O3_interp)[0]
-PSD = 2 / N * np.abs(fhat)
+(freq_O3, Y_O3) = FFT(T, Scale(O3_interp, O3_interp), True)
+Y_scaled_O3 = MinMaxScale(Y_O3, 0, 1)
 #print(PSD)
-freq = np.fft.fftfreq(N, 11.57407*10**-6)
-
-ax3[1].scatter(freq, PSD, s=1, facecolors=None, edgecolors='blue')
+ax3[1].scatter(freq_O3, Y_scaled_O3, s=16, facecolors='blue')
 ax3[1].set_xlabel('Frequency')
-ax3[1].set_yscale('log')
+#ax3[1].set_yscale('log')
+ax3[1].set_xlim(0, max(freq_O3))
+ax3[1].grid(True)
 
-#ax3[0].plot(x, barf)
+vals = find_largest_values(Y_scaled_O3, freq_O3, 5)
+text = ''
+for lol in vals:
+    text += '(' + str(round(lol[0], 3)) +', ' + str(round(lol[1], 3)) + ') '
+    ax3[1].scatter(lol[0], lol[1], s=48, facecolors='blue', edgecolors='black')
+ax3[1].set_title(text)
 #--------------------------------------------------------------------
-fhat = np.fft.fft(Scale(fire_interp, fire_interp))
-N = np.shape(fire_interp)[0]
-PSD = 2 / N * np.abs(fhat)
-#print(PSD)
-freq = np.fft.fftfreq(N, 11.57407*10**-6)
+(freq_fire, Y_fire) = FFT(T, Scale(fire_interp, fire_interp), True)
+Y_scaled_fire = MinMaxScale(Y_fire, 0, 1)
 
-ax3[2].scatter(freq, PSD, s=1, facecolors=None, edgecolors='red')
+ax3[2].scatter(freq_fire, Y_scaled_fire, s=16, facecolors='red')
 ax3[2].set_xlabel('Frequency')
-ax3[2].set_yscale('log')
+#ax3[2].set_yscale('log')
+ax3[2].set_xlim(0, max(freq_fire))
+ax3[2].grid(True)
+
+vals = find_largest_values(Y_scaled_fire, freq_fire, 5)
+text = ''
+for lol in vals:
+    text += '(' + str(round(lol[0], 3)) +', ' + str(round(lol[1], 3)) + ') '
+    ax3[2].scatter(lol[0], lol[1], s=48, facecolors='red', edgecolors='black')
+ax3[2].set_title(text)
 #--------------------------------------------------------------------
 Plot_O3_Fire(ax3[0],
              intersect_dict[labels[region]+'_dates'], fire, 
              intersect_dict[labels[region]+'_dates'], O3)
 ax3[0].set_title(labels[region])
 #--------------------------------------------------------------------
+
+
+# from statsmodels.tsa.seasonal import seasonal_decompose
+# series = O3_interp
+# result = seasonal_decompose(series, model='additive', period=365)
+# result.plot()
+
+
+# series = fire_interp
+# result = seasonal_decompose(series, model='additive', period=365)
+# result.plot()
 
 plt.show()
