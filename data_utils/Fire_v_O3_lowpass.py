@@ -1,27 +1,28 @@
 import os
 os.environ['USE_PYGEOS'] = '0'
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from matplotlib.ticker import FuncFormatter
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import geopandas as gpd
+from matplotlib.colors import Normalize, LogNorm, FuncNorm
+from matplotlib.colors import LinearSegmentedColormap
 import pandas as pd
 import sys
 import numpy as np
-from datetime import datetime
+import re
+from datetime import datetime, timedelta
     
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
-from misc.misc_utils import GetDateInStr, Plot_O3_Fire, FindIntersection, ButterLowpassFilter
-from misc.plotting_utils import ShowYearMonth
+from misc.misc_utils import GetDateInStr, FindIntersection, NumericalDerivative, ButterLowpassFilter
+from misc.plotting_utils import ShowYearMonth, Plot_O3_Fire
 #====================================================================
 base_path    = "/Users/joshuamiller/Documents/Lancaster/Data"
 O3_folders   = ['Kriged_L2_O3_TCL', 'East_Ocean/L2__O3_TCL', 'West_Ocean/L2__O3_TCL', 'South_Land/L2__O3_TCL', 'North_Land/L2__O3_TCL']
 fire_folders = ['Kriged_MODIS_C61', 'East_Ocean/MODIS_C61', 'West_Ocean/MODIS_C61', 'South_Land/MODIS_C61', 'North_Land/MODIS_C61']
 labels       = ['Whole_area', 'East_ocean', 'West_ocean', 'South_land', 'North_land']
 region = 0
-num_fft = 50
 cutoff = 0.016
 order = 4
-subtract_region = 3
 #====================================================================
 ''' Get data '''
 num_O3_files = 0
@@ -105,7 +106,7 @@ for label in labels:
     sorted_dates = [x[1] for x in sorted_dt_list]
 
     O3_dict[label+'_dates'] = sorted_dates
-    O3_dict[label+'_means'] = O3_means[sorted_idx]
+    O3_dict[label+'_means'] = ButterLowpassFilter(O3_means[sorted_idx], cutoff, 1, order)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     fire_dates = fire_dict[label+'_dates']
     fire_means = fire_dict[label+'_means']
@@ -116,31 +117,59 @@ for label in labels:
     sorted_dates = [x[1] for x in sorted_dt_list]
 
     fire_dict[label+'_dates'] = sorted_dates
-    fire_dict[label+'_means'] = fire_means[sorted_idx]
-#====================================================================
+    fire_dict[label+'_means'] = ButterLowpassFilter(fire_means[sorted_idx], cutoff, 1, order)
+
+    print(label, "dates:", np.shape(fire_dict[label+'_dates']), ", fire:", np.shape(fire_dict[label+'_means']))
+    print(label, "dates:", np.shape(O3_dict[label+'_dates']), ", O3:", np.shape(O3_dict[label+'_means']))
+#--------------------------------------------------------------------
+''' Compute derivative of fire and ozone '''
+print(" - - - - derivative - - - -")
+deriv_dict = {}
+for label in labels:
+    deriv_dates, dfire_dt = NumericalDerivative(fire_dict[label+'_dates'], fire_dict[label+'_means'])
+    #print(label, ", dates:",np.shape(deriv_dates), ", fire:", np.shape(dfire_dt))
+    deriv_dict[label+'_fire_dt_dates'] = deriv_dates
+    deriv_dict[label+'_fire_dt_means'] = dfire_dt
+
+    deriv_dates, dO3_dt = NumericalDerivative(O3_dict[label+'_dates'], O3_dict[label+'_means'])
+    #print(label, ", dates:",np.shape(deriv_dates), ", O3:", np.shape(dO3_dt))
+    deriv_dict[label+'_O3_dt_dates'] = deriv_dates
+    deriv_dict[label+'_O3_dt_means'] = dO3_dt
+#--------------------------------------------------------------------
+''' Find intersecting dates and values at those dates '''
+print("============================================================")
+print("============================================================")
+print("============================================================")
 intersect_dict = {}
 for label in labels:
-    new_dates, new_fire, new_O3 = FindIntersection(fire_dict[label+'_dates'],
-                                                   fire_dict[label+'_means'],
-                                                   O3_dict[label+'_dates'],
-                                                   O3_dict[label+'_means'])
-    intersect_dict[label+'_fire_means']  = new_fire
-    intersect_dict[label+'_O3_means']    = new_O3
-    intersect_dict[label+'_dates'] = new_dates
+    #print(np.shape(fire_dict[label+'_dates']), np.shape(fire_dict[label+'_means']))
+    print(" - - -", label, "- - -")
+    new_dates, data = FindIntersection(x_arrays=[fire_dict[label+'_dates'], deriv_dict[label+'_fire_dt_dates'], O3_dict[label+'_dates'], deriv_dict[label+'_O3_dt_dates']],
+                                       y_arrays=[fire_dict[label+'_means'], deriv_dict[label+'_fire_dt_means'], O3_dict[label+'_means'], deriv_dict[label+'_O3_dt_means']])
+    
+    intersect_dict[label+'_fire_means']    = data[0]
+    intersect_dict[label+'_fire_dt_means'] = data[1]
+    intersect_dict[label+'_O3_means']      = data[2]
+    intersect_dict[label+'_O3_dt_means']   = data[3]
+    intersect_dict[label+'_dates']         = new_dates
+
+del(fire_dict)
+del(O3_dict)
+del(deriv_dict)
 #====================================================================
-fig, ax = plt.subplots(len(labels),1,figsize=(12, 7), sharex=True)
+fig, ax = plt.subplots(len(labels), 1, figsize=(12, 7), sharex=True)
 fig.subplots_adjust(hspace=0, wspace=0)
 
 for i in range(len(labels)):
     dates = intersect_dict[labels[i]+'_dates']
-    O3    = intersect_dict[labels[i]+'_O3_means']
     fire  = intersect_dict[labels[i]+'_fire_means']
+    O3    = intersect_dict[labels[i]+'_O3_means']
 
     Plot_O3_Fire(ax[i], dates, fire, dates, O3)
     
     ax[i].set_xlim(datetime(2018, 1, 1, 0, 0, 0), datetime(2023, 1, 1, 0, 0, 0))
-    
-    ShowYearMonth(ax=ax[i], dates=dates)
+
+    ShowYearMonth(ax[i], dates)
 
     corr_string = r'$\rho=$'+str(round(np.corrcoef(fire, O3)[0][1], 3))
 
@@ -148,70 +177,249 @@ for i in range(len(labels)):
         ax[i].set_ylim(-0.1, 10)
         ax[i].text(datetime(2018, 2, 1, 0, 0, 0), 7, labels[i]+'\n'+corr_string)
     else:
-        ax[i].text(datetime(2018, 2, 1, 0, 0, 0),
-                  .7 * max(fire_dict[labels[i]+'_means']),
-                  labels[i]+'\n'+corr_string)   
-#====================================================================
-fig1, ax1 = plt.subplots(len(labels),1,figsize=(12, 7), sharex=True)
-fig1.subplots_adjust(hspace=0, wspace=1)
+        ax[i].text(datetime(2018, 2, 1, 0, 0, 0), 
+                  .7 * max(fire), 
+                  labels[i]+'\n'+corr_string)
 
-for i in range(len(labels)):
-    dates = intersect_dict[labels[i]+'_dates']
-    O3    = intersect_dict[labels[i]+'_O3_means']
-    fire  = intersect_dict[labels[i]+'_fire_means']
-
-    new_fire = ButterLowpassFilter(fire, .016, 1, 2)
-    new_O3   = ButterLowpassFilter(O3, .016, 1, 2)
-
-    Plot_O3_Fire(ax1[i], dates, new_fire, dates, new_O3,
-                 fire_ymin=min(fire), fire_ymax=max(fire), O3_ymin=min(O3), O3_ymax=max(O3))
-
-    ax1[i].set_xlim(datetime(2018, 1, 1, 0, 0, 0), datetime(2023, 1, 1, 0, 0, 0))
-    
-    ShowYearMonth(ax1[i], dates)
-
-    corr_string = r'$\rho=$'+str(round(np.corrcoef(new_fire, new_O3)[0][1], 3))
-
-    if ('ocean' in labels[i]):
-        ax1[i].set_ylim(-0.1, 10)
-        ax1[i].text(datetime(2018, 2, 1, 0, 0, 0), 8.5, labels[i]+', '+corr_string+', cutoff='+str(cutoff)+', order='+str(order))
-    else:
-        ax1[i].text(datetime(2018, 2, 1, 0, 0, 0),
-                    .85 * max(fire_dict[labels[i]+'_means']),
-                    labels[i]+', '+corr_string+', cutoff='+str(cutoff)+', order='+str(order))
+    #PlotWindow(ax[i], datetime(2018, 1, 1, 0, 0, 0), datetime(2018, 4, 1, 0, 0, 0), 0, 100, 'lightcoral', .5, 'fire')
+    #PlotWindow(ax[i], datetime(2018, 3, 1, 0, 0, 0), datetime(2018, 6, 1, 0, 0, 0), 0, 100, 'cyan', .5, 'O3')
         
-fig1.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Lowpass_Filtered_Fire_O3.pdf"), bbox_inches=None, pad_inches=0)
+fig.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Fire_O3_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
 #====================================================================
-fig2, ax2 = plt.subplots(len(labels),1,figsize=(12, 7), sharex=True)
+fig2, ax2 = plt.subplots(len(labels), 1, figsize=(12, 7), sharex=True)
 fig2.subplots_adjust(hspace=0, wspace=0)
 
-ref_fire = ButterLowpassFilter(intersect_dict[labels[subtract_region]+'_fire_means'], cutoff, 1, order)
-ref_O3   = ButterLowpassFilter(intersect_dict[labels[subtract_region]+'_O3_means'], cutoff, 1, order)
-
 for i in range(len(labels)):
-    dates = intersect_dict[labels[i]+'_dates']
-    O3    = intersect_dict[labels[i]+'_O3_means']
-    fire  = intersect_dict[labels[i]+'_fire_means']
+    dates  = intersect_dict[labels[i]+'_dates']
+    fire   = intersect_dict[labels[i]+'_fire_means']
+    dO3_dt = intersect_dict[labels[i]+'_O3_dt_means']
 
-    new_fire = ButterLowpassFilter(fire, cutoff, 1, order)
-    new_O3   = ButterLowpassFilter(O3, cutoff, 1, order)
-
-    Plot_O3_Fire(ax2[i], dates, new_fire-ref_fire, dates, new_O3-ref_O3)
-
+    Plot_O3_Fire(ax2[i], dates, fire, dates, dO3_dt, O3_ylabel=r'$\frac{dO_3}{dt}$', draw_line_O3=0)
+    
     ax2[i].set_xlim(datetime(2018, 1, 1, 0, 0, 0), datetime(2023, 1, 1, 0, 0, 0))
 
     ShowYearMonth(ax2[i], dates)
+
+    corr_string = r'$\rho=$'+str(round(np.corrcoef(fire, dO3_dt)[0][1], 3))
+
+    if ('ocean' in labels[i]):
+        ax2[i].set_ylim(-0.1, 10)
+        ax2[i].text(datetime(2018, 2, 1, 0, 0, 0), 7, labels[i]+'\n'+corr_string)
+    else:
+        ax2[i].text(datetime(2018, 2, 1, 0, 0, 0), 
+                  .7 * max(fire), 
+                  labels[i]+'\n'+corr_string)
+
+    #PlotWindow(ax2[i], datetime(2018, 1, 1, 0, 0, 0), datetime(2018, 4, 1, 0, 0, 0), 0, 100, 'lightcoral', .5, 'fire')
+    #PlotWindow(ax2[i], datetime(2018, 3, 1, 0, 0, 0), datetime(2018, 6, 1, 0, 0, 0), 0, 100, 'cyan', .5, 'O3')
+        
+fig2.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Fire_dO3dt_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+fig3, ax3 = plt.subplots(len(labels), 1, figsize=(12, 7), sharex=True)
+fig3.subplots_adjust(hspace=0, wspace=0)
+
+for i in range(len(labels)):
+    dates  = intersect_dict[labels[i]+'_dates']
+    fire_dt   = intersect_dict[labels[i]+'_fire_dt_means']
+    O3 = intersect_dict[labels[i]+'_O3_means']
+
+    Plot_O3_Fire(ax3[i], dates, fire_dt, dates, O3, fire_ylabel=r'$\frac{dFire}{dt}$', draw_line_fire=0)
     
-    corr_string = r'$\rho=$'+str(round(np.corrcoef(new_fire, new_O3)[0][1], 3))
+    ax3[i].set_xlim(datetime(2018, 1, 1, 0, 0, 0), datetime(2023, 1, 1, 0, 0, 0))
 
-    # if ('ocean' in labels[i]):
-    #     #ax2[i].set_ylim(-0.1, 10)
-    #     ax2[i].text(datetime(2018, 2, 1, 0, 0, 0), 4, labels[i]+'\n'+corr_string+'\n'+'cutoff='+str(cutoff)+' units????'+'\n'+'order='+str(order))
-    # else:
-    #     ax2[i].text(datetime(2018, 2, 1, 0, 0, 0),
-    #                 .4 * max(fire_dict[labels[i]+'_means']),
-    #                 labels[i]+'\n'+corr_string+'\n'+'cutoff='+str(cutoff)+' units????'+'\n'+'order='+str(order))
+    ShowYearMonth(ax3[i], dates)
 
-fig2.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Subtract_"+labels[subtract_region]+".pdf"), bbox_inches=None, pad_inches=0)
+    corr_string = r'$\rho=$'+str(round(np.corrcoef(fire_dt, O3)[0][1], 3))
+
+    if ('ocean' in labels[i]):
+        ax3[i].set_ylim(-0.1, 10)
+        ax3[i].text(datetime(2018, 2, 1, 0, 0, 0), 7, labels[i]+'\n'+corr_string)
+    else:
+        ax3[i].text(datetime(2018, 2, 1, 0, 0, 0), 
+                  .5 * max(fire_dt), 
+                  labels[i]+'\n'+corr_string)
+
+    #PlotWindow(ax3[i], datetime(2018, 1, 1, 0, 0, 0), datetime(2018, 4, 1, 0, 0, 0), 0, 100, 'lightcoral', .5, 'fire')
+    #PlotWindow(ax3[i], datetime(2018, 3, 1, 0, 0, 0), datetime(2018, 6, 1, 0, 0, 0), 0, 100, 'cyan', .5, 'O3')
+        
+fig3.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Firedt_O3_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+#====================================================================
+#====================================================================
+fig5, ax5 = plt.subplots(1,1,figsize=(12, 7))
+
+corrs = np.ones((len(labels), len(labels)), float) * -999
+fire_labels = []
+O3_labels = []
+for i in range(len(labels)):
+    for j in range(len(labels)):
+        #print(labels[i]+'fire_means', labels[j]+'O3_means', np.corrcoef(intersect_dict[labels[i]+'_fire_means'], intersect_dict[labels[j]+'_O3_means'])[0][1])
+        
+        corrs[i][j] = np.corrcoef(intersect_dict[labels[i]+'_fire_means'],
+                                  intersect_dict[labels[j]+'_O3_means'])[0][1]
+    fire_labels.append(labels[i]+' fire')
+    O3_labels.append(labels[i]+' O3')
+
+lol = ax5.imshow(corrs, cmap='bwr', vmin=-1, vmax=1)
+
+divider = make_axes_locatable(ax5)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(lol, cax=cax)
+cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
+
+ax5.set_xticks(range(len(O3_labels)), O3_labels, rotation=30)
+ax5.set_yticks(range(len(fire_labels)), fire_labels)
+ax5.set_title('Fire vs. Ozone')
+for i in range(np.shape(corrs)[0]):
+    for j in range(np.shape(corrs)[1]):
+        ax5.text(j, i, f"{corrs[i, j]:.4f}", ha="center", va="center", color="black")
+
+fig5.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Corr_Fire_O3_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+fig6, ax6 = plt.subplots(1,1,figsize=(12, 7))
+
+corrs = np.ones((len(labels), len(labels)), float) * -999
+fire_labels = []
+for i in range(len(labels)):
+    for j in range(len(labels)):
+        #print(labels[i]+'fire_means', labels[j]+'fire_means', np.corrcoef(intersect_dict[labels[i]+'_fire_means'], intersect_dict[labels[j]+'_fire_means'])[0][1])
+        
+        corrs[i][j] = np.corrcoef(intersect_dict[labels[i]+'_fire_means'],
+                                  intersect_dict[labels[j]+'_fire_means'])[0][1]
+    fire_labels.append(labels[i]+' fire')
+
+lol = ax6.imshow(corrs, cmap='bwr', vmin=-1, vmax=1)
+
+divider = make_axes_locatable(ax6)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(lol, cax=cax)
+cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
+
+ax6.set_xticks(range(len(fire_labels)), fire_labels, rotation=30)
+ax6.set_yticks(range(len(fire_labels)), fire_labels)
+ax6.set_title('Fire vs. Fire')
+for i in range(np.shape(corrs)[0]):
+    for j in range(np.shape(corrs)[1]):
+        ax6.text(j, i, f"{corrs[i, j]:.4f}", ha="center", va="center", color="black")
+
+fig6.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Corr_fire_fire_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+fig7, ax7 = plt.subplots(1,1,figsize=(12, 7))
+
+corrs = np.ones((len(labels), len(labels)), float) * -999
+O3_labels = []
+for i in range(len(labels)):
+    for j in range(len(labels)):
+        #print(labels[i]+'O3_means', labels[j]+'O3_means', np.corrcoef(intersect_dict[labels[i]+'_O3_means'], intersect_dict[labels[j]+'_O3_means'])[0][1])
+        
+        corrs[i][j] = np.corrcoef(intersect_dict[labels[i]+'_O3_means'],
+                                  intersect_dict[labels[j]+'_O3_means'])[0][1]
+    O3_labels.append(labels[i]+' O3')
+
+lol = ax7.imshow(corrs, cmap='bwr', vmin=-1, vmax=1)
+
+divider = make_axes_locatable(ax7)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(lol, cax=cax)
+cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
+
+ax7.set_xticks(range(len(O3_labels)), O3_labels, rotation=30)
+ax7.set_yticks(range(len(O3_labels)), O3_labels)
+ax7.set_title('Ozone vs. Ozone')
+for i in range(np.shape(corrs)[0]):
+    for j in range(np.shape(corrs)[1]):
+        ax7.text(j, i, f"{corrs[i, j]:.4f}", ha="center", va="center", color="black")
+
+fig7.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Corr_O3_O3_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+fig8, ax8 = plt.subplots(1,1,figsize=(12, 7))
+
+corrs = np.ones((len(labels), len(labels)), float) * -999
+O3_labels = []
+fire_dt_labels = []
+for i in range(len(labels)):
+    for j in range(len(labels)):
+        #print(labels[i]+'O3_means', labels[j]+'O3_means', np.corrcoef(intersect_dict[labels[i]+'_O3_means'], intersect_dict[labels[j]+'_O3_means'])[0][1])
+        
+        corrs[i][j] = np.corrcoef(intersect_dict[labels[i]+'_fire_dt_means'],
+                                  intersect_dict[labels[j]+'_O3_means'])[0][1]
+    fire_dt_labels.append(labels[i]+' '+r'$\frac{dFire}{dt}$')
+    O3_labels.append(labels[i]+' O3')
+
+lol = ax8.imshow(corrs, cmap='bwr', vmin=-1, vmax=1)
+
+divider = make_axes_locatable(ax8)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(lol, cax=cax)
+cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
+
+ax8.set_xticks(range(len(O3_labels)), O3_labels, rotation=30)
+ax8.set_yticks(range(len(fire_dt_labels)), fire_dt_labels)
+ax8.set_title(r'$\frac{dFire}{dt}$'+' vs. Ozone')
+for i in range(np.shape(corrs)[0]):
+    for j in range(np.shape(corrs)[1]):
+        ax8.text(j, i, f"{corrs[i, j]:.4f}", ha="center", va="center", color="black")
+
+fig8.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Corr_dFiredt_O3_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+fig9, ax9 = plt.subplots(1,1,figsize=(12, 7))
+
+corrs = np.ones((len(labels), len(labels)), float) * -999
+O3_dt_labels = []
+fire_labels = []
+for i in range(len(labels)):
+    for j in range(len(labels)):
+        #print(labels[i]+'O3_means', labels[j]+'O3_means', np.corrcoef(intersect_dict[labels[i]+'_O3_means'], intersect_dict[labels[j]+'_O3_means'])[0][1])
+        
+        corrs[i][j] = np.corrcoef(intersect_dict[labels[i]+'_fire_means'],
+                                  intersect_dict[labels[j]+'_O3_dt_means'])[0][1]
+    fire_labels.append(labels[i]+' fire')
+    O3_dt_labels.append(labels[i]+' '+r'$\frac{O_3}{dt}$')
+
+lol = ax9.imshow(corrs, cmap='bwr', vmin=-1, vmax=1)
+
+divider = make_axes_locatable(ax9)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(lol, cax=cax)
+cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
+
+ax9.set_xticks(range(len(O3_dt_labels)), O3_dt_labels, rotation=30)
+ax9.set_yticks(range(len(fire_labels)), fire_labels)
+ax9.set_title('Fire vs. '+r'$\frac{O_3}{dt}$')
+for i in range(np.shape(corrs)[0]):
+    for j in range(np.shape(corrs)[1]):
+        ax9.text(j, i, f"{corrs[i, j]:.4f}", ha="center", va="center", color="black")
+
+fig9.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Corr_O3_dFiredt_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)
+#====================================================================
+fig10, ax10 = plt.subplots(1,1,figsize=(12, 7))
+
+corrs = np.ones((len(labels), len(labels)), float) * -999
+fire_dt_labels = []
+O3_dt_labels = []
+for i in range(len(labels)):
+    for j in range(len(labels)):
+        #print(labels[i]+'O3_means', labels[j]+'O3_means', np.corrcoef(intersect_dict[labels[i]+'_O3_means'], intersect_dict[labels[j]+'_O3_means'])[0][1])
+        
+        corrs[i][j] = np.corrcoef(intersect_dict[labels[i]+'_fire_dt_means'],
+                                  intersect_dict[labels[j]+'_O3_dt_means'])[0][1]
+    fire_dt_labels.append(labels[i]+' '+r'$\frac{dFire}{dt}$')
+    O3_dt_labels.append(labels[i]+' '+r'$\frac{O_3}{dt}$')
+
+lol = ax10.imshow(corrs, cmap='bwr', vmin=-1, vmax=1)
+
+divider = make_axes_locatable(ax10)
+cax = divider.append_axes("right", size="5%", pad=0.05)
+cbar = plt.colorbar(lol, cax=cax)
+cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=180)
+
+ax10.set_xticks(range(len(O3_dt_labels)), O3_dt_labels, rotation=30)
+ax10.set_yticks(range(len(fire_dt_labels)), fire_dt_labels)
+ax10.set_title('Smooth '+ r'$\frac{dFire}{dt}$' + ' vs. ' + r'$\frac{dO_3}{dt}$')
+for i in range(np.shape(corrs)[0]):
+    for j in range(np.shape(corrs)[1]):
+        ax10.text(j, i, f"{corrs[i, j]:.4f}", ha="center", va="center", color="black")
+
+fig10.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Figs", "Smooth_Corr_dFiredt_dO3dt_c="+str(cutoff)+".pdf"), bbox_inches=None, pad_inches=0)      
 #====================================================================
 plt.show()
