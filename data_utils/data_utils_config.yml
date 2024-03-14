@@ -1,3 +1,9 @@
+WHOLE_AREA_BOX:
+  min_lat: -20
+  max_lat: 20
+  min_lon: -20
+  max_lon: 60
+
 WEST_OCEAN_BOX:
   min_lat: -13
   max_lat: 1
