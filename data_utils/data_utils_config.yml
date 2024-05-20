@@ -1,0 +1,63 @@
+WHOLE_AREA_BOX:
+  min_lat: -20
+  max_lat: 20
+  min_lon: -20
+  max_lon: 60
+
+WEST_OCEAN_BOX:
+  min_lat: -13
+  max_lat: 1
+  min_lon: -19
+  max_lon: -5
+
+EAST_OCEAN_BOX:
+  min_lat: -12
+  max_lat: 2
+  min_lon: 45
+  max_lon: 59
+
+NORTH_LAND_BOX:
+  min_lat: 5.5
+  max_lat: 19.5
+  min_lon: 18
+  max_lon: 32
+
+SOUTH_LAND_BOX:
+  min_lat: -19.5
+  max_lat: -5.5
+  min_lon: 18
+  max_lon: 32
+
+PREPROCESSING:
+  HISTORY_DATA:
+    ozone_scale_type: 'standard'
+    fire_scale_type : 'log'
+    temp_scale_type : 'standard'
+    uwind_scale_type: 'standard'
+    vwind_scale_type: 'standard'
+    lat_scale_type  : 'minmax'
+    lon_scale_type  : 'minmax'
+    time_scale_type : 'minmax'
+    scale_factor    : 3
+
+  TARGET_DATA:
+    ozone_scale_type: 'standard'
+    fire_scale_type : 'log'
+    temp_scale_type : 'standard'
+    uwind_scale_type: 'standard'
+    vwind_scale_type: 'standard'
+    lat_scale_type  : 'minmax'
+    lon_scale_type  : 'minmax'
+    time_scale_type : 'minmax'
+    scale_factor    : 3
+
+VARIABLES:
+  - 'Time'
+  - 'LatitudeCenter'
+  - 'LongitudeCenter'
+  - 'IntegratedVerticalProfile'
+
+FOLDERS:
+  in_folder: "/Users/joshuamiller/Documents/Lancaster/Data/Gome"
+  out_folder: "/Users/joshuamiller/Documents/Lancaster/Data/Filtered_GOME"
+  map: "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"

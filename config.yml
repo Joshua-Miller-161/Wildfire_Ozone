@@ -1,0 +1,50 @@
+MODEL_TYPE: 'ConvLSTM' # Choices: 'RF', 'GB', 'Trans', 'Dense', 'ConvLSTM'
+
+REGION: 'South_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
+
+HIST_TARG:
+  'history_len': 5
+  'target_len': 1
+
+HISTORY_DATA: # Choices: 'ozone', 'fire', 'temp', 'u-wind', 'v-wind', 'lon', 'lat', 'time'
+  - 'ozone'
+  - 'fire'
+  - 'temp'
+  - 'u-wind'
+  - 'v-wind'
+  - 'lon'
+  - 'lat'
+  - 'time'
+
+TARGET_DATA: # Choices: 'ozone', 'fire', 'temp', 'u-wind', 'v-wind', 'lon', 'lat', 'time'
+  - 'ozone'
+
+TRAIN_TEST: 0.75
+
+RF_OFFSET: 1
+
+TIME_WINDOW: # Format as YYYY-MM-DD; keep between 2018-04-30 - 2022-07-31
+  'start_date': '2018-04-30'
+  'end_date'  : '2022-07-31'
+
+HYPERPARAMETERS:
+  rf_hyperparams_dict:
+    'num_trees': 50
+
+  gb_hyperparams_dict:
+    'num_trees': 69
+
+  dense_hyperparams_dict:
+    'epochs': 10
+    'num_neurons': 100
+
+  convlstm_dict:
+    'epochs': 10
+    'batch_size': 10
+    'num_outer_filters': 16
+    'num_inner_filters': 64
+
+  trans_hyperparams_dict:
+    'epochs': 10
+    'num_heads': 4
+    'num_neurons': 100
