@@ -10,7 +10,7 @@ import yaml
 
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, Dense, ConvLSTM2D, LayerNormalization, BatchNormalizationV2, Dropout, AveragePooling3D, UpSampling3D, Reshape
+from keras.layers import Input, Concatenate, Dense, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape
 
 sys.path.append(os.getcwd())
 from ml.ml_utils import Funnel

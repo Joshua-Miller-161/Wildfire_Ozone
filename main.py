@@ -21,11 +21,12 @@ region = config['REGION']
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
 assert (model_type in ['RF', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must be 'RF', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(model_type)
 #====================================================================
-# if (model_type == 'ConvLSTM'):
-#     TrainConvLSTM('config.yml', )
+if (model_type == 'ConvLSTM'):
+    TrainConvLSTM('config.yml')
+    TestConvLSTM('config.yml')
 
-# elif (model_type == 'RF'):
-
+elif (model_type == 'RF'):
+    TrainNaiveRF('config.yml', )
 #====================================================================
 # ''' Prepare data '''
 
