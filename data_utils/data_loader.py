@@ -13,8 +13,7 @@ from data_utils.preprocessing_funcs import Scale
 #====================================================================
 def DataLoader(config_path,
                data_config_path,
-               data_type,
-               data_path='/Users/joshuamiller/Documents/Lancaster/Data'):
+               data_type):
     #----------------------------------------------------------------
     ''' Get variables from config '''
 
@@ -38,6 +37,8 @@ def DataLoader(config_path,
     with open(data_config_path, 'r') as c:
         data_config = yaml.load(c, Loader=yaml.FullLoader)
 
+    data_path = data_config['DATA_FOLDER']
+    
     scale_types = data_config['PREPROCESSING'][data_type]
     print("ASDASDASDASDADS", type(scale_types), list(scale_types.values()))
 

@@ -23,10 +23,10 @@ assert (model_type in ['RF', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must 
 #====================================================================
 if (model_type == 'ConvLSTM'):
     TrainConvLSTM('config.yml')
-    TestConvLSTM('config.yml')
+    TestConvLSTM('config.yml', 'ConvLSTM')
 
 elif (model_type == 'RF'):
-    TrainNaiveRF('config.yml', )
+    TrainNaiveRF('config.yml', 'data_utils/data_utils_config.yml', 'SavedModels/RF')
 #====================================================================
 # ''' Prepare data '''
 

@@ -51,13 +51,4 @@ PREPROCESSING:
     time_scale_type : 'minmax'
     scale_factor    : 3
 
-VARIABLES:
-  - 'Time'
-  - 'LatitudeCenter'
-  - 'LongitudeCenter'
-  - 'IntegratedVerticalProfile'
-
-FOLDERS:
-  in_folder: "/Users/joshuamiller/Documents/Lancaster/Data/Gome"
-  out_folder: "/Users/joshuamiller/Documents/Lancaster/Data/Filtered_GOME"
-  map: "/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp"
+DATA_FOLDER: '/content/drive/MyDrive/Colab_Notebooks/Data'
