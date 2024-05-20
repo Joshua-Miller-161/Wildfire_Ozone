@@ -222,4 +222,4 @@ def TestConvLSTM(config_path, model_name):
 #====================================================================
 #x_test, y_test, history = TrainConvLSTM('config.yml')
 
-TestConvLSTM('config.yml', 'CONVLSTM_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
+#TestConvLSTM('config.yml', 'CONVLSTM_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
