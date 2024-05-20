@@ -10,7 +10,7 @@ import yaml
 
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, Dense, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape
+from keras.layers import Input, Concatenate, Dense, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten
 
 sys.path.append(os.getcwd())
 from ml.ml_utils import Funnel
@@ -21,7 +21,7 @@ def MakeConvLSTM(config_path,
                  y_data_shape=(1164, 1, 28, 14, 1), 
                  to_file=None):
     #----------------------------------------------------------------
-    ''' Get data from config '''
+    ''' Setup '''
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
@@ -48,6 +48,7 @@ def MakeConvLSTM(config_path,
     outer_convlstm = Dropout(rate=0.2, name='outer_output')(x)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Middle convlstms
+    
     y = AveragePooling3D(pool_size=(1,2,2), strides=(1,2,2))(outer_convlstm)
 
     y = ConvLSTM2D(filters=inner_filters,
@@ -80,29 +81,36 @@ def MakeConvLSTM(config_path,
 
     up = UpSampling3D(size=(1, 2, 2), name='upsample_to_outer')(middle_convlstm)
 
-    merge = Concatenate(name='join_middle_to_outer')([outer_convlstm, up])
+    xx = Concatenate(name='join_middle_to_outer')([outer_convlstm, up])
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Final convlstm outputs
+    # Slim down
 
-    xx = ConvLSTM2D(filters=8,
-                   kernel_size=(3, 3),
-                   padding="same",
-                   return_sequences=True,
-                   activation="tanh")(merge)
-    xx = LayerNormalization()(xx)
-    xx = Dropout(rate=0.05)(xx)
+    final_filters = Funnel(xx.shape[-1], y_data_shape[4]*2)
+    
+    for i in range(len(final_filters)):
+        xx = ConvLSTM2D(filters=final_filters[i],
+                    kernel_size=(3, 3),
+                    padding="same",
+                    return_sequences=True,
+                    activation="tanh")(xx)
+        xx = LayerNormalization()(xx)
+        xx = Dropout(rate=0.05)(xx)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    # Final output
 
     xx = ConvLSTM2D(filters=y_data_shape[4],
-                    kernel_size=(3, 3),
+                    kernel_size=(1, 1),
                     padding="same",
                     return_sequences=False,
                     activation="tanh")(xx)
     xx = Reshape((y_data_shape[1], y_data_shape[2], y_data_shape[3], y_data_shape[4]))(xx)
     xx = LayerNormalization()(xx)
-    xx = Dropout(rate=0.05)(xx)
     
-    output_layer = Dense(units=y_data_shape[-1], activation='linear')(xx)
+    xx = Flatten()(xx)
 
+    xx = Dense(units=y_data_shape[2] * y_data_shape[3] * y_data_shape[4], activation='linear')(xx)
+
+    output_layer = Reshape(y_data_shape[1:])(xx)
     #----------------------------------------------------------------
     model = keras.Model(input_layer, output_layer)
 
