@@ -41,8 +41,8 @@ HYPERPARAMETERS:
   convlstm_dict:
     'epochs': 10
     'batch_size': 10
-    'num_outer_filters': 16
-    'num_inner_filters': 64
+    'num_outer_filters': 64
+    'num_inner_filters': 128
 
   trans_hyperparams_dict:
     'epochs': 10
