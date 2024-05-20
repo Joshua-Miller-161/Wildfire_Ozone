@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 #====================================================================
-def Train_Test_Split(config_path, x_data, y_data, shuffle=True):
+def Train_Test_Split(config_path, x_data, y_data, shuffle=True, del_data=True):
     #----------------------------------------------------------------
     ''' Get variables from config '''
 
@@ -27,5 +27,9 @@ def Train_Test_Split(config_path, x_data, y_data, shuffle=True):
     y_train = y_data[:split_idx, ...]
     y_test  = y_data[split_idx:, ...]
 
+    if del_data:
+        del(x_data)
+        del(y_data)
+    
     return x_train, x_test, y_train, y_test
 #====================================================================

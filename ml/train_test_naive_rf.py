@@ -173,9 +173,9 @@ def TestNaiveRF(config_path, data_config_path, model_path):
 
     plt.show()
 #====================================================================
-x_train_df, x_test_df, y_train_df, y_test_df = TrainNaiveRF('config.yml', 
-                                                            'data_utils/data_utils_config.yml',
-                                                            'SavedModels/RF')
+# x_train_df, x_test_df, y_train_df, y_test_df = TrainNaiveRF('config.yml', 
+#                                                             'data_utils/data_utils_config.yml',
+#                                                             'SavedModels/RF')
 
 # TestNaiveRF('config.yml', 
 #             'data_utils/data_utils_config.yml',

@@ -43,6 +43,7 @@ def TrainConvLSTM(config_path, save_model=True):
     histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=False)
 
     x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=False)
+
     print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
 
     #----------------------------------------------------------------
@@ -87,7 +88,14 @@ def TestConvLSTM(config_path, model_name):
 
     histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=False)
 
+    del(x_data)
+    del(y_data)
+
     x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=False)
+    
+    del(histories)
+    del(targets)
+
     print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
     x_test_orig_shape = np.shape(x_test)
     y_test_orig_shape = np.shape(y_test)
