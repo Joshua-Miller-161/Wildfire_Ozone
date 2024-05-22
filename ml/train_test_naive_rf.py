@@ -13,6 +13,8 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
 from joblib import dump, load
 import geopandas as gpd
+#import cudf
+#from cuml.ensemble import RandomForestRegressor as RAPIDSRandomForestRegressor
 
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
@@ -20,7 +22,7 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
+def TrainNaiveRF(config_path, data_config_path, model_save_path=None, use_RAPIDS=False):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -33,21 +35,40 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     ''' Get data '''
     x_train_df, x_test_df, y_train_df, y_test_df = NaiveRFDataLoader(config_path, data_config_path)
 
+
     #----------------------------------------------------------------
     ''' Train & save model '''
-    rfr = RandomForestRegressor(n_estimators=num_trees, random_state=1)
+    if use_RAPIDS:
+        RAPIDS_x_train_df = cudf.from_pandas(x_train_df)
+        RAPIDS_y_train_df = cudf.from_pandas(y_train_df)
 
-    print("ADADASDASASDDAS", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
-    rfr.fit(x_train_df, y_train_df.values.ravel())
+        rfr = RAPDISRandomForestRegressor(n_estimators=num_trees, 
+                                          max_depth=24,
+                                          bootstrap=False)
 
-    if not (model_save_path == None):
-        if not os.path.exists(model_save_path):
-            os.makedirs(model_save_path)
-        model_name = NameModel(config_path)
-        print('model_name', model_name)
-        dump(rfr, os.path.join(model_save_path, model_name))
+        print("y_train_df.shape:", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
+        rfr.fit(RAPIDS_x_train_df, RAPIDS_y_train_df.values.ravel())
+
+        if not (model_save_path == None):
+            if not os.path.exists(model_save_path):
+                os.makedirs(model_save_path)
+            model_name = NameModel(config_path)
+            print('model_name', 'RAPDIS_'+model_name)
+            dump(rfr, os.path.join(model_save_path, 'RAPDIS_'+model_name))
     
-    return x_train_df, x_test_df, y_train_df, y_test_df
+    else: 
+        rfr = RandomForestRegressor(n_estimators=num_trees, 
+                                    max_depth=24)
+
+        print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
+        rfr.fit(x_train_df, y_train_df.values.ravel())
+
+        if not (model_save_path == None):
+            if not os.path.exists(model_save_path):
+                os.makedirs(model_save_path)
+            model_name = NameModel(config_path)
+            print('model_name', model_name)
+            dump(rfr, os.path.join(model_save_path, model_name))
 #====================================================================
 def TestNaiveRF(config_path, data_config_path, model_path):
     #----------------------------------------------------------------
