@@ -35,8 +35,9 @@ def Histories_Targets(config_path, x_data, y_data, shuffle=True, del_data=True):
 
     #----------------------------------------------------------------
     if shuffle:
-        np.random.shuffle(histories)
-        np.random.shuffle(targets)
+        permutation = np.random.permutation(np.shape(histories)[0])
+        histories   = histories[permutation]
+        targets     = targets[permutation]
 
     if del_data:
         del(x_data)

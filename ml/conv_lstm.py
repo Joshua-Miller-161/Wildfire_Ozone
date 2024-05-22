@@ -10,7 +10,7 @@ import yaml
 
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, Dense, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten
+from keras.layers import Input, Concatenate, TimeDistributed, Dense, Conv2D, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten
 
 sys.path.append(os.getcwd())
 from ml.ml_utils import Funnel
@@ -85,25 +85,26 @@ def MakeConvLSTM(config_path,
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Slim down
 
-    final_filters = Funnel(xx.shape[-1], y_data_shape[4]*2)
+    final_filters = Funnel(xx.shape[-1], y_data_shape[4]*64)
     
     for i in range(len(final_filters)):
         xx = ConvLSTM2D(filters=final_filters[i],
-                    kernel_size=(3, 3),
-                    padding="same",
-                    return_sequences=True,
-                    activation="tanh")(xx)
+                        kernel_size=(3, 3),
+                        padding="same",
+                        return_sequences=True,
+                        activation="tanh")(xx)
         xx = LayerNormalization()(xx)
         xx = Dropout(rate=0.05)(xx)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Final output
 
-    xx = ConvLSTM2D(filters=y_data_shape[4],
+    xx = ConvLSTM2D(filters=outer_filters,
                     kernel_size=(1, 1),
                     padding="same",
                     return_sequences=False,
                     activation="tanh")(xx)
-    xx = Reshape((y_data_shape[1], y_data_shape[2], y_data_shape[3], y_data_shape[4]))(xx)
+    
+    xx = Reshape((y_data_shape[1], y_data_shape[2], y_data_shape[3], xx.shape[-1]))(xx)
     xx = LayerNormalization()(xx)
     
     xx = Flatten()(xx)
@@ -133,3 +134,4 @@ def MakeConvLSTM(config_path,
 #                     batch_size=10,
 #                     epochs=10,
 #                     verbose=1)
+

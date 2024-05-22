@@ -40,9 +40,9 @@ def TrainConvLSTM(config_path, save_model=True):
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
     y_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'TARGET_DATA')
 
-    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=False)
+    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=True)
 
-    x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=False)
+    x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=True)
 
     print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
 
@@ -54,12 +54,17 @@ def TrainConvLSTM(config_path, save_model=True):
                                                      name="MSE"),
                   optimizer=keras.optimizers.Adam(learning_rate=1e-3))
     
+    early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
+                                                      patience=3, 
+                                                      restore_best_weights=True)
+
     history = model.fit(x=x_train,
                         y=y_train,
                         validation_data=(x_test, y_test),
                         batch_size=batch_size,
                         epochs=num_epochs,
-                        verbose=1)
+                        verbose=1,
+                        callbacks=early_stopping_cb)
     #----------------------------------------------------------------
     ''' Save model '''
     if save_model:
@@ -86,12 +91,12 @@ def TestConvLSTM(config_path, model_name):
     x_data = DataLoader(config_path, 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
     y_data = DataLoader(config_path, 'data_utils/data_utils_config.yml', 'TARGET_DATA')
 
-    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=False)
+    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=True)
 
     del(x_data)
     del(y_data)
 
-    x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=False)
+    x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=True)
     
     del(histories)
     del(targets)
@@ -224,10 +229,10 @@ def TestConvLSTM(config_path, model_name):
     
     #model_name = model_path.split('/')[-1]
 
-    #fig.savefig(os.path.join('Figs', model_name+'.pdf'), bbox_inches=None, pad_inches=0)
+    fig.savefig(os.path.join('Figs', model_name+'.pdf'), bbox_inches=None, pad_inches=0)
 
     plt.show()
 #====================================================================
 #x_test, y_test, history = TrainConvLSTM('config.yml')
 
-#TestConvLSTM('config.yml', 'CONVLSTM_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
+TestConvLSTM('config.yml', 'CONVLSTM_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')

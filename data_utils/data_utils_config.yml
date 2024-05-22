@@ -1,4 +1,5 @@
-DATA_FOLDER: '/content/drive/MyDrive/Colab_Notebooks/Data'
+#DATA_FOLDER: '/content/drive/MyDrive/Colab_Notebooks/Data'
+DATA_FOLDER: '/Users/joshuamiller/Documents/Lancaster/Data'
 
 WHOLE_AREA_BOX:
   min_lat: -20
