@@ -30,7 +30,8 @@ if (model_type == 'ConvLSTM'):
 elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 
                  'data_utils/data_utils_config.yml', 
-                 model_save_path=os.path.join(model_save_path, 'RF'))
+                 model_save_path=os.path.join(model_save_path, 'RF'),
+                 use_RAPIDS=True)
 #====================================================================
 # ''' Prepare data '''
 
