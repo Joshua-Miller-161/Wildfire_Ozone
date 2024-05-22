@@ -19,7 +19,7 @@ from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainConvLSTM(config_path, save_model=True):
+def TrainConvLSTM(config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/ConvLSTM'):
     #----------------------------------------------------------------
     ''' Check for GPU access '''
     
@@ -67,19 +67,19 @@ def TrainConvLSTM(config_path, save_model=True):
                         callbacks=early_stopping_cb)
     #----------------------------------------------------------------
     ''' Save model '''
-    if save_model:
+    if not (model_save_path==None):
         model_name = NameModel(config_path)
         print('model_name', model_name)
     
         model_json = model.to_json()
-        with open(os.path.join('SavedModels/ConvLSTM', model_name+'.json'), 'w') as json_file:
+        with open(os.path.join(model_save_path, model_name+'.json'), 'w') as json_file:
             json_file.write(model_json)
 
-        model.save_weights(os.path.join('SavedModels/ConvLSTM', model_name+'.h5'))
+        model.save_weights(os.path.join(model_save_path, model_name+'.h5'))
 
     return x_test, y_test, history
 #====================================================================
-def TestConvLSTM(config_path, model_name):
+def TestConvLSTM(config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -123,7 +123,7 @@ def TestConvLSTM(config_path, model_name):
 
     model_architecture = ''
     model_weights = ''
-    for root, dirs, files in os.walk('SavedModels/ConvLSTM'):
+    for root, dirs, files in os.walk(model_folder):
         for name in files:
             if (model_name in name):
                 if name.endswith('.json'):

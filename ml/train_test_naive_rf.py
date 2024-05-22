@@ -41,6 +41,8 @@ def TrainNaiveRF(config_path, data_config_path, save_path=None):
     rfr.fit(x_train_df, y_train_df.values.ravel())
 
     if not (save_path == None):
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         model_name = NameModel(config_path)
         print('model_name', model_name)
         dump(rfr, os.path.join(save_path, model_name))

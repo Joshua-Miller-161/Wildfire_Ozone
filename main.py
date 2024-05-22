@@ -17,16 +17,20 @@ with open('config.yml', 'r') as c:
 
 model_type = config['MODEL_TYPE']
 region = config['REGION']
+model_save_path = config['MODEL_SAVE_PATH']
 
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
 assert (model_type in ['RF', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must be 'RF', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(model_type)
 #====================================================================
 if (model_type == 'ConvLSTM'):
-    TrainConvLSTM('config.yml')
+    TrainConvLSTM('config.yml',
+                  model_save_path=model_save_path)
     #TestConvLSTM('config.yml', 'ConvLSTM')
 
 elif (model_type == 'RF'):
-    TrainNaiveRF('config.yml', 'data_utils/data_utils_config.yml', 'SavedModels/RF')
+    TrainNaiveRF('config.yml', 
+                 'data_utils/data_utils_config.yml', 
+                 model_save_path=os.path.join(model_save_path, 'RF'))
 #====================================================================
 # ''' Prepare data '''
 
