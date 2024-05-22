@@ -24,7 +24,7 @@ assert (model_type in ['RF', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must 
 #====================================================================
 if (model_type == 'ConvLSTM'):
     TrainConvLSTM('config.yml',
-                  model_save_path=model_save_path)
+                  model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     #TestConvLSTM('config.yml', 'ConvLSTM')
 
 elif (model_type == 'RF'):

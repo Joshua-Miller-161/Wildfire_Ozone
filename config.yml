@@ -49,4 +49,4 @@ HYPERPARAMETERS:
     'num_heads': 4
     'num_neurons': 100
 
-MODEL_SAVE_PATH = '/content/drive/MyDrive'
+MODEL_SAVE_PATH: '/content/drive/MyDrive'
