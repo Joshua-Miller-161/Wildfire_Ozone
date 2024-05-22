@@ -20,7 +20,7 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainNaiveRF(config_path, data_config_path, save_path=None):
+def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -40,12 +40,12 @@ def TrainNaiveRF(config_path, data_config_path, save_path=None):
     print("ADADASDASASDDAS", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
     rfr.fit(x_train_df, y_train_df.values.ravel())
 
-    if not (save_path == None):
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
+    if not (model_save_path == None):
+        if not os.path.exists(model_save_path):
+            os.makedirs(model_save_path)
         model_name = NameModel(config_path)
         print('model_name', model_name)
-        dump(rfr, os.path.join(save_path, model_name))
+        dump(rfr, os.path.join(model_save_path, model_name))
     
     return x_train_df, x_test_df, y_train_df, y_test_df
 #====================================================================
