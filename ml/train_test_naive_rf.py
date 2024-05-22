@@ -13,8 +13,8 @@ from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
 from joblib import dump, load
 import geopandas as gpd
-#import cudf
-#from cuml.ensemble import RandomForestRegressor as RAPIDSRandomForestRegressor
+import cudf
+from cuml.ensemble import RandomForestRegressor as RAPIDSRandomForestRegressor
 
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
