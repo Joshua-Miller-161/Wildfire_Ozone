@@ -5,16 +5,13 @@ os.environ['USE_PYGEOS'] = '0'
 import numpy as np
 import yaml
 import pandas as pd
-from sklearn.model_selection import cross_val_score
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import mean_squared_error
+from xgboost import XGBRFRegressor
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
 from joblib import dump, load
 import geopandas as gpd
-import cudf
-from cuml.ensemble import RandomForestRegressor as RAPIDSRandomForestRegressor
 
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
@@ -22,7 +19,7 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainNaiveRF(config_path, data_config_path, model_save_path=None, use_RAPIDS=False):
+def TrainNaiveRF(config_path, data_config_path, model_save_path=None, use_xgboost=False):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -38,23 +35,21 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None, use_RAPIDS
 
     #----------------------------------------------------------------
     ''' Train & save model '''
-    if use_RAPIDS:
-        RAPIDS_x_train_df = cudf.from_pandas(x_train_df)
-        RAPIDS_y_train_df = cudf.from_pandas(y_train_df)
+    if use_xgboost:
+        xgbrfr = XGBRFRegressor(n_estimators=num_trees, 
+                                    max_depth=24)
 
-        rfr = RAPDISRandomForestRegressor(n_estimators=num_trees, 
-                                          max_depth=24,
-                                          bootstrap=False)
-
-        print("y_train_df.shape:", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
-        rfr.fit(RAPIDS_x_train_df, RAPIDS_y_train_df.values.ravel())
+        print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
+        xgbrfr.fit(x_train_df, y_train_df.values.ravel())
 
         if not (model_save_path == None):
             if not os.path.exists(model_save_path):
                 os.makedirs(model_save_path)
             model_name = NameModel(config_path)
-            print('model_name', 'RAPDIS_'+model_name)
-            dump(rfr, os.path.join(model_save_path, 'RAPDIS_'+model_name))
+            print('model_name', model_name)
+            xgbrfr.save_model(os.path.join(model_save_path, 'XGBRF_'+model_name+'.json'))
+
+
     
     else: 
         rfr = RandomForestRegressor(n_estimators=num_trees, 
@@ -78,9 +73,14 @@ def TestNaiveRF(config_path, data_config_path, model_path):
         config = yaml.load(c, Loader=yaml.FullLoader)
     #----------------------------------------------------------------
     ''' Load model '''
-
+    
+    trained_rfr = 69
     print('model_path', model_path)
-    trained_rfr = load(model_path)
+    if ('XGBRF' in model_path):
+        trained_rfr = XGBRFRegressor()
+        trained_rfr.load_model(model_path)
+    else:
+        trained_rfr = load(model_path)
     #----------------------------------------------------------------
     ''' Get data '''
     x_train_df, x_test_df, y_train_df, y_test_df, x_train_orig_shape, x_test_orig_shape, y_train_orig_shape, y_test_orig_shape = NaiveRFDataLoader(config_path, data_config_path, return_shapes=True)

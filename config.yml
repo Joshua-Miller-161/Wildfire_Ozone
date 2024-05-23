@@ -6,6 +6,8 @@ HIST_TARG:
   'history_len': 5
   'target_len': 1
 
+RF_OFFSET: 1
+
 HISTORY_DATA: # Choices: 'ozone', 'fire', 'temp', 'u-wind', 'v-wind', 'lon', 'lat', 'time'
   - 'ozone'
   - 'fire'
@@ -21,8 +23,6 @@ TARGET_DATA: # Choices: 'ozone', 'fire', 'temp', 'u-wind', 'v-wind', 'lon', 'lat
 
 TRAIN_TEST: 0.75
 
-RF_OFFSET: 1
-
 TIME_WINDOW: # Format as YYYY-MM-DD; keep between 2018-04-30 - 2022-07-31
   'start_date': '2018-04-30'
   'end_date'  : '2022-07-31'
@@ -30,6 +30,7 @@ TIME_WINDOW: # Format as YYYY-MM-DD; keep between 2018-04-30 - 2022-07-31
 HYPERPARAMETERS:
   rf_hyperparams_dict:
     'num_trees': 69
+    'use_xgboost': False
 
   gb_hyperparams_dict:
     'num_trees': 69
