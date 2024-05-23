@@ -39,7 +39,7 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
         xgbrfr = XGBRFRegressor(tree_method="gpu_hist",
                                 num_estimators=num_trees, 
                                 max_depth=24,
-                                device='gpu',
+                                device='cuda',
                                 booster='gbtree',
                                 objective='reg:squarederror')
 
