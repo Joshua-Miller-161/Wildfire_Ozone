@@ -10,7 +10,7 @@ sys.path.append(os.getcwd())
 from data_utils.data_loader import DataLoader
 from data_utils.prepare_histories_targets import Histories_Targets
 from data_utils.train_test_split import Train_Test_Split
-from ml.train_test_keras import TrainConvLSTM, TestConvLSTM
+from ml.train_test_keras import TrainConvLSTM, TestConvLSTM, TrainLinear
 from ml.train_test_naive_rf import TrainNaiveRF, TestNaiveRF
 #====================================================================
 ''' Get infor from config '''
@@ -22,12 +22,16 @@ region = config['REGION']
 model_save_path = config['MODEL_SAVE_PATH']
 
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
-assert (model_type in ['RF', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must be 'RF', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(model_type)
+assert (model_type in ['RF', 'Linear', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must be 'RF', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(model_type)
 #====================================================================
 if (model_type == 'ConvLSTM'):
     TrainConvLSTM('config.yml',
                   model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     #TestConvLSTM('config.yml', 'ConvLSTM')
+
+elif (model_type == 'Linear'):
+    TrainLinear('config.yml',
+                model_save_path=os.path.join(model_save_path, 'Linear'))
 
 elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 
