@@ -19,25 +19,30 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainNaiveRF(config_path, data_config_path, model_save_path=None, use_xgboost=False):
+def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    num_trees = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
-    
+    num_trees   = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
+    use_xgboost = config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost']
     #----------------------------------------------------------------
     ''' Get data '''
+
     x_train_df, x_test_df, y_train_df, y_test_df = NaiveRFDataLoader(config_path, data_config_path)
-
-
     #----------------------------------------------------------------
     ''' Train & save model '''
+
     if use_xgboost:
-        xgbrfr = XGBRFRegressor(n_estimators=num_trees, 
-                                    max_depth=24)
+        xgbrfr = XGBRFRegressor(tree_method="gpu_hist",
+                                num_parallel_tress=num_trees, 
+                                max_depth=24,
+                                device='gpu',
+                                booster='gbtree',
+                                objective='reg:squarederror',
+                                num_boost_round=1)
 
         print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
         xgbrfr.fit(x_train_df, y_train_df.values.ravel())
@@ -49,8 +54,6 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None, use_xgboos
             print('model_name', model_name)
             xgbrfr.save_model(os.path.join(model_save_path, 'XGBRF_'+model_name+'.json'))
 
-
-    
     else: 
         rfr = RandomForestRegressor(n_estimators=num_trees, 
                                     max_depth=24)
