@@ -37,12 +37,11 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
 
     if use_xgboost:
         xgbrfr = XGBRFRegressor(tree_method="gpu_hist",
-                                num_parallel_tress=num_trees, 
+                                num_estimators=num_trees, 
                                 max_depth=24,
                                 device='gpu',
                                 booster='gbtree',
-                                objective='reg:squarederror',
-                                num_boost_round=1)
+                                objective='reg:squarederror')
 
         print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
         xgbrfr.fit(x_train_df, y_train_df.values.ravel())
