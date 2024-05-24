@@ -1,6 +1,6 @@
 MODEL_TYPE: 'RF' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
-REGION: 'Whole_Area' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
+REGION: 'South_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
 HIST_TARG:
   'history_len': 5
@@ -50,5 +50,5 @@ HYPERPARAMETERS:
     'num_heads': 4
     'num_neurons': 100
 
-#MODEL_SAVE_PATH: '/content/drive/MyDrive'
-MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
+MODEL_SAVE_PATH: '/content/drive/MyDrive'
+#MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'

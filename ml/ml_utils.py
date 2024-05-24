@@ -42,12 +42,12 @@ def NameModel(config_path):
 
     if (config['MODEL_TYPE'] == 'RF'):
         model_name = 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        print("ASDASDASD", model_name)
+        print("model_name:", model_name)
 
         for var in history_vars:
             model_name += shorthand_dict[var]
 
-        print("ASDASDASD", model_name)
+        print("model_name:", model_name)
 
         model_name += '_Out='
         for var in target_vars:
@@ -55,9 +55,35 @@ def NameModel(config_path):
         
         model_name += '.joblib'
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (config['MODEL_TYPE'] == 'Linear'):
+        model_name = 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        print("model_name:", model_name)
+
+        for var in history_vars:
+            model_name += shorthand_dict[var]
+
+        model_name += '_Out='
+        for var in target_vars:
+            model_name += shorthand_dict[var]
+        
+        model_name += '_e='+str(epochs)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (config['MODEL_TYPE'] == 'Dense'):
+        model_name = 'Dense_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        print("model_name:", model_name)
+
+        for var in history_vars:
+            model_name += shorthand_dict[var]
+
+        model_name += '_Out='
+        for var in target_vars:
+            model_name += shorthand_dict[var]
+        
+        model_name += '_e='+str(epochs)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
         model_name = 'CONVLSTM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        print("ASDASDASD", model_name)
+        print("model_name:", model_name)
 
         for var in history_vars:
             model_name += shorthand_dict[var]
@@ -70,9 +96,40 @@ def NameModel(config_path):
 
     return model_name
 #====================================================================
+def ParseModelName(input_string, substrs=['reg=', 'In=', 'Out=', 'e='], split_char='_'):
 
+    dict_ = {'WA': 'Whole Area',
+             'EO': 'East Ocean',
+             'WO': 'West Ocean', 
+             'SL': 'South Land',
+             'NL': 'North Land',
+             'RF': 'Random Forest',
+             'Trans': 'Transformer'}
 
+    info = []
+    start = len(input_string.split(split_char)[0]) + 1
+    try:
+        info.append(dict_[input_string.split(split_char)[0]])
+    except KeyError:
+        info.append(input_string.split(split_char)[0])
 
+    print("info:", info, input_string)
+
+    for substr in substrs:
+        temp_str = input_string[start:]
+        if (substr in temp_str):
+
+            lol = temp_str.split(split_char)[0]
+            lol = lol[len(substr):]
+            start += len(substr) + len(lol) + 1
+            print(temp_str, substr, lol)
+
+            try:
+                info.append(dict_[lol])
+            except KeyError:
+                info.append(lol)
+
+    return info
 #====================================================================
 def Funnel(start_size, end_size, r=np.e):
     assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)

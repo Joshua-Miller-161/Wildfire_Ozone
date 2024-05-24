@@ -17,9 +17,11 @@ from data_utils.data_loader import DataLoader
 from data_utils.prepare_histories_targets import Histories_Targets
 from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
-from ml.ml_utils import NameModel
+from ml.linear import MakeLinear
+from ml.dense import MakeDense
+from ml.ml_utils import NameModel, ParseModelName
 #====================================================================
-def TrainConvLSTM(config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/ConvLSTM'):
+def TrainKerasModel(config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
     ''' Check for GPU access '''
     
@@ -31,10 +33,13 @@ def TrainConvLSTM(config_path, model_save_path='/Users/joshuamiller/Documents/La
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    assert (config['MODEL_TYPE'] == 'ConvLSTM'), "To use this, 'MODEL_TYPE' must be 'ConvLSTM'. Got: "+str(config['MODEL_TYPE'])
+    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'ConvLSTM', 'Trans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(config['MODEL_TYPE'])
 
-    num_epochs    = config['HYPERPARAMETERS']['convlstm_dict']['epochs']
-    batch_size    = config['HYPERPARAMETERS']['convlstm_dict']['batch_size']
+    model_name = config['MODEL_TYPE']
+    num_epochs = config['HYPERPARAMETERS']['convlstm_dict']['epochs']
+    batch_size = config['HYPERPARAMETERS']['convlstm_dict']['batch_size']
+
+
     #----------------------------------------------------------------
     ''' Get data '''
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
@@ -42,13 +47,26 @@ def TrainConvLSTM(config_path, model_save_path='/Users/joshuamiller/Documents/La
 
     histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=True)
 
+    del(x_data)
+    del(y_data)
+
     x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=True)
 
     print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
-
+    
+    del(histories)
+    del(targets)
     #----------------------------------------------------------------
     ''' Train model '''
-    model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
+    model = 69
+    if (model_name == 'Linear'):
+        model = MakeLinear(config_path, np.shape(x_train), np.shape(y_train))
+
+    elif (model_name == 'Dense'):
+        model = MakeDense(config_path, np.shape(x_train), np.shape(y_train))
+
+    elif (model_name == 'ConvLSTM'):
+        model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
     
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
                                                      name="MSE"),
@@ -79,12 +97,17 @@ def TrainConvLSTM(config_path, model_save_path='/Users/joshuamiller/Documents/La
 
     return x_test, y_test, history
 #====================================================================
-def TestConvLSTM(config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
+def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
+
+    info = ParseModelName(model_name)
+
+    # direction = info[0].split(' ')[0]
+    # mystring.replace(" ", "_")
     #----------------------------------------------------------------
     ''' Get data '''
 
@@ -224,7 +247,7 @@ def TestConvLSTM(config_path, model_name, model_folder='/Users/joshuamiller/Docu
     #ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
 
     ax_feat.text(0, .6, 
-                 config['MODEL_TYPE']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
+                 info[0]+'\n'+info[1]+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
                  fontsize=12, fontweight='bold')
     
     #model_name = model_path.split('/')[-1]
@@ -232,69 +255,6 @@ def TestConvLSTM(config_path, model_name, model_folder='/Users/joshuamiller/Docu
     fig.savefig(os.path.join('Figs', model_name+'.pdf'), bbox_inches=None, pad_inches=0)
 
     plt.show()
-#====================================================================
-def TrainLinear(config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/Linear'):
-    #----------------------------------------------------------------
-    ''' Check for GPU access '''
-    
-    print(f"TensorFlow has access to the following devices:\n{tf.config.list_physical_devices()}")
-    print(f"TensorFlow version: {tf.__version__}")
-    #----------------------------------------------------------------
-    ''' Get data from config '''
-
-    with open(config_path, 'r') as c:
-        config = yaml.load(c, Loader=yaml.FullLoader)
-
-    assert (config['MODEL_TYPE'] == 'ConvLSTM'), "To use this, 'MODEL_TYPE' must be 'ConvLSTM'. Got: "+str(config['MODEL_TYPE'])
-
-    num_epochs    = config['HYPERPARAMETERS']['convlstm_dict']['epochs']
-    batch_size    = config['HYPERPARAMETERS']['convlstm_dict']['batch_size']
-    #----------------------------------------------------------------
-    ''' Get data '''
-    x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
-    y_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'TARGET_DATA')
-
-    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=True)
-
-    x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=True)
-
-    print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
-
-    #----------------------------------------------------------------
-    ''' Train model '''
-    model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
-    
-    model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
-                                                     name="MSE"),
-                  optimizer=keras.optimizers.Adam(learning_rate=1e-3))
-    
-    early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
-                                                      patience=3, 
-                                                      restore_best_weights=True)
-
-    history = model.fit(x=x_train,
-                        y=y_train,
-                        validation_data=(x_test, y_test),
-                        batch_size=batch_size,
-                        epochs=num_epochs,
-                        verbose=1,
-                        callbacks=early_stopping_cb)
-    #----------------------------------------------------------------
-    ''' Save model '''
-    if not (model_save_path==None):
-        model_name = NameModel(config_path)
-        print('model_name', model_name)
-    
-        model_json = model.to_json()
-        with open(os.path.join(model_save_path, model_name+'.json'), 'w') as json_file:
-            json_file.write(model_json)
-
-        model.save_weights(os.path.join(model_save_path, model_name+'.h5'))
-
-    return x_test, y_test, history
-
-
-#====================================================================
 #x_test, y_test, history = TrainConvLSTM('config.yml')
 
 #TestConvLSTM('config.yml', 'CONVLSTM_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')

@@ -9,31 +9,38 @@ from datetime import datetime, timedelta
 sys.path.append(os.getcwd())
 from misc.plotting_utils import ShowYearMonth
 
-# Example data (replace with your actual data)
-x = np.arange(1, 1001)  # Days from start_date
-y_data = np.random.rand(len(x))  # Example y_data
+def ParseModelName(input_string, substrs=['reg=', 'In=', 'Out=', 'e='], split_char='_'):
 
-# Assuming start_date is known (replace with your actual start date)
-start_date = datetime(2024, 1, 1)
+    dict_ = {'WA': 'Whole Area',
+             'EO': 'East Ocean',
+             'WO': 'West Ocean', 
+             'SL': 'South Land',
+             'NL': 'North Land',
+             'RF': 'Random Forest',
+             'Trans': 'Transformer'}
 
-# Convert days to dates
-dates = [start_date + timedelta(days=int(d)) for d in x]
+    info = []
+    start = len(input_string.split(split_char)[0]) + 1
 
-# Extract years from dates
-years = [date.year for date in dates]
+    info.append(dict_[input_string.split(split_char)[0]])
 
-# Create the plot
-fig, ax = plt.subplots(1,1,figsize=(10, 6))
+    print("info:", info, input_string)
 
+    for substr in substrs:
+        temp_str = input_string[start:]
+        if (substr in temp_str):
 
-ax.scatter(dates, y_data, label='y_data', marker='o')
-ax.set_xlabel('Year')
-ax.set_ylabel('y_data')
-ax.set_title('Plot of y_data vs. Year')
-ax.grid(True)
+            lol = temp_str.split(split_char)[0]
+            lol = lol[len(substr):]
+            start += len(substr) + len(lol) + 1
+            print(temp_str, substr, lol)
 
-ShowYearMonth(ax, dates, fontsize=12, method=0, rotation=0)
+            try:
+                info.append(dict_[lol])
+            except KeyError:
+                info.append(lol)
 
-ax.legend()
-plt.tight_layout()
-plt.show()
+    return info
+# Example usage:
+result = ParseModelName("RF_reg=WA_In=LOL_Out=X_e=10.json")
+print(result) 
