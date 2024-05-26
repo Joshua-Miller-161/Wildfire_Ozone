@@ -25,8 +25,8 @@ def MakeConvLSTM(config_path,
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    outer_filters = config['HYPERPARAMETERS']['convlstm_dict']['num_outer_filters']
-    inner_filters = config['HYPERPARAMETERS']['convlstm_dict']['num_inner_filters']
+    outer_filters = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_outer_filters']
+    inner_filters = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_inner_filters']
     #----------------------------------------------------------------
     input_layer = Input(shape=x_data_shape[1:])
 
@@ -115,7 +115,7 @@ def MakeConvLSTM(config_path,
     #----------------------------------------------------------------
     model = keras.Model(input_layer, output_layer)
 
-    keras.utils.plot_model(model, show_shapes=True, to_file=os.path.join('SavedModels/Figs', 'lol.png'))
+    keras.utils.plot_model(model, show_shapes=True, to_file=os.path.join('SavedModels/Figs', 'ConvLSTM.png'))
     print(model.summary())
     return model
 

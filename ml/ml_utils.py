@@ -4,6 +4,8 @@ import numpy as np
 import os
 import yaml
 import pandas as pd
+from tensorflow import keras
+from keras.callbacks import Callback
 #====================================================================
 def NameModel(config_path):
     model_name = ''
@@ -20,7 +22,6 @@ def NameModel(config_path):
     history_len  = config['HIST_TARG']['history_len']
     target_len   = config['HIST_TARG']['target_len']
     num_trees    = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
-    epochs       = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
     num_nuerons  = config['HYPERPARAMETERS']['trans_hyperparams_dict']['num_neurons']
     #----------------------------------------------------------------
     ''' uh '''
@@ -59,6 +60,8 @@ def NameModel(config_path):
         model_name = 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
         #print("model_name:", model_name)
 
+        epochs = config['HYPERPARAMETERS']['linear_hyperparams_dict']['epochs']
+
         for var in history_vars:
             model_name += shorthand_dict[var]
 
@@ -71,6 +74,7 @@ def NameModel(config_path):
     elif (config['MODEL_TYPE'] == 'Dense'):
         model_name = 'Dense_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
         #print("model_name:", model_name)
+        epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
 
         for var in history_vars:
             model_name += shorthand_dict[var]
@@ -82,8 +86,9 @@ def NameModel(config_path):
         model_name += '_e='+str(epochs)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-        model_name = 'CONVLSTM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        model_name = 'ConvLSTM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
         print("model_name:", model_name)
+        epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
 
         for var in history_vars:
             model_name += shorthand_dict[var]
@@ -158,3 +163,22 @@ def Funnel(start_size, end_size, r=np.e):
                 i += 1
             sizes.append(end_size)
             return sizes
+#====================================================================
+class TriangleWaveLR(Callback):
+    def __init__(self, initial_peak_lr=0.01, floor_lr=0.00001, period=10):
+        super().__init__()
+        self.initial_peak_lr = initial_peak_lr
+        self.peak_lr = initial_peak_lr
+        self.floor_lr = floor_lr
+        self.period = period
+
+    def on_epoch_begin(self, epoch, logs=None):
+        cycle = np.floor(1 + epoch / (2 * self.period))
+        x = np.abs(epoch / self.period - 2 * cycle + 1)
+        lr = self.floor_lr + (self.peak_lr - self.floor_lr) * np.maximum(0, (1 - x))
+        keras.backend.set_value(self.model.optimizer.lr, lr)
+        #print(f"Epoch {epoch + 1}: Learning rate = {lr:.6f}")
+
+    def on_epoch_end(self, epoch, logs=None):
+        if (epoch + 1) % self.period == 0:
+            self.peak_lr /= 2

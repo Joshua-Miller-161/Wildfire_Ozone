@@ -19,7 +19,7 @@ from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
-from ml.ml_utils import NameModel, ParseModelName
+from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
@@ -34,9 +34,6 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         config = yaml.load(c, Loader=yaml.FullLoader)
 
     assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'ConvLSTM', 'Trans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(config['MODEL_TYPE'])
-
-    num_epochs = config['HYPERPARAMETERS']['convlstm_dict']['epochs']
-    batch_size = config['HYPERPARAMETERS']['convlstm_dict']['batch_size']
     #----------------------------------------------------------------
     ''' Get data '''
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
@@ -56,22 +53,29 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     #----------------------------------------------------------------
     ''' Train model '''
     model = 69
+
     if (config['MODEL_TYPE'] == 'Linear'):
         model = MakeLinear(config_path, np.shape(x_train), np.shape(y_train))
+        
 
     elif (config['MODEL_TYPE'] == 'Dense'):
         model = MakeDense(config_path, np.shape(x_train), np.shape(y_train))
-
+        num_epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['dense_hyperparams_dict']['batch_size']
+    
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
         model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['batch_size']
     
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
                                                      name="MSE"),
-                  optimizer=keras.optimizers.Adam(learning_rate=1e-3))
+                  optimizer=keras.optimizers.SGD(learning_rate=0.01))
     
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                       patience=3, 
                                                       restore_best_weights=True)
+    custom_lr = TriangleWaveLR(period=5)
 
     history = model.fit(x=x_train,
                         y=y_train,
@@ -79,7 +83,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                         batch_size=batch_size,
                         epochs=num_epochs,
                         verbose=1,
-                        callbacks=early_stopping_cb)
+                        callbacks=[custom_lr, early_stopping_cb])
     #----------------------------------------------------------------
     ''' Save model '''
     if not (model_save_path==None):
@@ -167,6 +171,7 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
     for folder in folders:
         for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
             for name in files:
+                #print("root=",root, ", name=", name)
                 if (model_name in name):
                     if name.endswith('.json'):
                         model_architecture = os.path.join(root, name)

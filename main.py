@@ -38,9 +38,10 @@ elif (model_type == 'Dense'):
                    model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
 #--------------------------------------------------------------------   
 elif (model_type == 'ConvLSTM'):
-    # TrainKerasModel('config.yml',
-    #               model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
-    TestKerasModel('config.yml', 'ConvLSTM')
+    TrainKerasModel('config.yml',
+                    model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
+    TestKerasModel('config.yml',
+                   model_name='ConvLSTM_reg=NL_f=1_In=OFTUVXYD_Out=O_e=30')
 #--------------------------------------------------------------------
 elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 

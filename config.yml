@@ -1,6 +1,6 @@
-MODEL_TYPE: 'Dense' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'ConvLSTM' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
-REGION: 'South_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
+REGION: 'North_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
 HIST_TARG:
   'history_len': 5
@@ -36,17 +36,19 @@ HYPERPARAMETERS:
     'num_trees': 69
 
   dense_hyperparams_dict:
-    'epochs': 20
+    'epochs': 30
+    'batch_size': 32
     'num_neurons': 100
 
-  convlstm_dict:
-    'epochs': 10
-    'batch_size': 10
+  convlstm_hyperparams_dict:
+    'epochs': 30
+    'batch_size': 32
     'num_outer_filters': 64
     'num_inner_filters': 128
 
   trans_hyperparams_dict:
-    'epochs': 10
+    'epochs': 30
+    'batch_size': 32
     'num_heads': 4
     'num_neurons': 100
 
