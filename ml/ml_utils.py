@@ -42,12 +42,12 @@ def NameModel(config_path):
 
     if (config['MODEL_TYPE'] == 'RF'):
         model_name = 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        print("model_name:", model_name)
+        #print("model_name:", model_name)
 
         for var in history_vars:
             model_name += shorthand_dict[var]
 
-        print("model_name:", model_name)
+        #print("model_name:", model_name)
 
         model_name += '_Out='
         for var in target_vars:
@@ -57,7 +57,7 @@ def NameModel(config_path):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Linear'):
         model_name = 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        print("model_name:", model_name)
+        #print("model_name:", model_name)
 
         for var in history_vars:
             model_name += shorthand_dict[var]
@@ -70,7 +70,7 @@ def NameModel(config_path):
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Dense'):
         model_name = 'Dense_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        print("model_name:", model_name)
+        #print("model_name:", model_name)
 
         for var in history_vars:
             model_name += shorthand_dict[var]

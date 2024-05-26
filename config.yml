@@ -1,4 +1,4 @@
-MODEL_TYPE: 'RF' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'Dense' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
 REGION: 'South_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
@@ -36,7 +36,7 @@ HYPERPARAMETERS:
     'num_trees': 69
 
   dense_hyperparams_dict:
-    'epochs': 10
+    'epochs': 20
     'num_neurons': 100
 
   convlstm_dict:
@@ -50,5 +50,5 @@ HYPERPARAMETERS:
     'num_heads': 4
     'num_neurons': 100
 
-MODEL_SAVE_PATH: '/content/drive/MyDrive'
-#MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
+#MODEL_SAVE_PATH: '/content/drive/MyDrive'
+MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'

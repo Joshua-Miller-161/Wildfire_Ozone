@@ -32,9 +32,10 @@ if (model_type == 'Linear'):
 #--------------------------------------------------------------------
 elif (model_type == 'Dense'):
     TrainKerasModel('config.yml',
+                    model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10',
                     model_save_path=os.path.join(model_save_path, 'Dense'))
     TestKerasModel('config.yml',
-                   model_name='Dense_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
+                   model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
 #--------------------------------------------------------------------   
 elif (model_type == 'ConvLSTM'):
     # TrainKerasModel('config.yml',
@@ -47,9 +48,7 @@ elif (model_type == 'RF'):
                  model_save_path=os.path.join(model_save_path, 'RF'))
 #====================================================================
 # ''' Prepare data '''
-
-print("Finished!")
+print("____________________________________________________________")
+print(" >> >> Finished! << <<")
+print("____________________________________________________________")
 #====================================================================
-
-
-

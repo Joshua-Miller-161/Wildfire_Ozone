@@ -21,7 +21,7 @@ from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.ml_utils import NameModel, ParseModelName
 #====================================================================
-def TrainKerasModel(config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
+def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
     ''' Check for GPU access '''
     
@@ -35,11 +35,8 @@ def TrainKerasModel(config_path, model_save_path='/Users/joshuamiller/Documents/
 
     assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'ConvLSTM', 'Trans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(config['MODEL_TYPE'])
 
-    model_name = config['MODEL_TYPE']
     num_epochs = config['HYPERPARAMETERS']['convlstm_dict']['epochs']
     batch_size = config['HYPERPARAMETERS']['convlstm_dict']['batch_size']
-
-
     #----------------------------------------------------------------
     ''' Get data '''
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
@@ -59,13 +56,13 @@ def TrainKerasModel(config_path, model_save_path='/Users/joshuamiller/Documents/
     #----------------------------------------------------------------
     ''' Train model '''
     model = 69
-    if (model_name == 'Linear'):
+    if (config['MODEL_TYPE'] == 'Linear'):
         model = MakeLinear(config_path, np.shape(x_train), np.shape(y_train))
 
-    elif (model_name == 'Dense'):
+    elif (config['MODEL_TYPE'] == 'Dense'):
         model = MakeDense(config_path, np.shape(x_train), np.shape(y_train))
 
-    elif (model_name == 'ConvLSTM'):
+    elif (config['MODEL_TYPE'] == 'ConvLSTM'):
         model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
     
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
@@ -86,8 +83,13 @@ def TrainKerasModel(config_path, model_save_path='/Users/joshuamiller/Documents/
     #----------------------------------------------------------------
     ''' Save model '''
     if not (model_save_path==None):
-        model_name = NameModel(config_path)
-        print('model_name', model_name)
+        if (model_name == None):
+            model_name = NameModel(config_path)
+        print(' >>')
+        print(' >>')
+        print(' >> model_name', model_name)
+        print(' >>')
+        print(' >>')
     
         model_json = model.to_json()
         with open(os.path.join(model_save_path, model_name+'.json'), 'w') as json_file:
@@ -133,26 +135,43 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
     lat       = UnScale(x_test[..., -2], 'data_utils/scale_files/lat_minmax.json').reshape(x_test_orig_shape[:-1])
     time      = UnScale(x_test[..., -1], 'data_utils/scale_files/time_minmax.json').reshape(x_test_orig_shape[:-1])
     
-    print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
-    print("+++++++++++++++++++++++++++++++")
-    print('UNSCALED LON', np.shape(lon), lon)
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED LAT", np.shape(lat), lat)
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED TIME", np.shape(time), time)
+    # print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
+    # print("+++++++++++++++++++++++++++++++")
+    # print('UNSCALED LON', np.shape(lon), lon)
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED LAT", np.shape(lat), lat)
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED TIME", np.shape(time), time)
 
     #----------------------------------------------------------------
     ''' Get trained model '''
 
     model_architecture = ''
     model_weights = ''
-    for root, dirs, files in os.walk(model_folder):
-        for name in files:
-            if (model_name in name):
-                if name.endswith('.json'):
-                    model_architecture = os.path.join(root, name)
-                elif name.endswith('.h5'):
-                    model_weights = os.path.join(root, name)
+    
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print(os.listdir(model_folder))
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    folders = os.listdir(model_folder)
+    if ('.DS_Store' in folders):
+        folders.remove('.DS_Store')
+
+    for folder in folders:
+        for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
+            for name in files:
+                if (model_name in name):
+                    if name.endswith('.json'):
+                        model_architecture = os.path.join(root, name)
+                    elif name.endswith('.h5'):
+                        model_weights = os.path.join(root, name)
             
     with open(model_architecture, 'r') as json_file:
         loaded_model_json = json_file.read()

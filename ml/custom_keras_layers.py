@@ -1,3 +1,5 @@
+import sys
+sys.dont_write_bytecode = True
 import tensorflow as tf
 from tensorflow import keras
 from keras.layers import Dense, Dropout, LayerNormalization, Permute, Embedding, MultiHeadAttention
@@ -50,7 +52,7 @@ class MaskedPositionEmbedding(keras.layers.Layer):
         self.embed_dim = embed_dim
         
     def compute_output_shape(self, input_shape):
-        return input_shape + (embed_dim,)
+        return input_shape + (self.embed_dim,)
     
     def call(self, x):
         maxlen = tf.shape(x)[-2]

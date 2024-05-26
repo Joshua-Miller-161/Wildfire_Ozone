@@ -108,7 +108,7 @@ def TestNaiveRF(config_path, data_config_path, model_path):
     y_pred = trained_rfr.predict(x_test_df)
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
-                     
+
     print("_________________________________")
     print(np.shape(y_pred))
     print("_________________________________")
