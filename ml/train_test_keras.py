@@ -293,7 +293,8 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
     #model_name = model_path.split('/')[-1]
 
     #fig.savefig(os.path.join('Figs', model_name+'.pdf'), bbox_inches=None, pad_inches=0)
-
+    print("Model source:", os.path.join(root, model_name))
+    print("____________________________________________________________")
     plt.show()
 #x_test, y_test, history = TrainConvLSTM('config.yml')
 
