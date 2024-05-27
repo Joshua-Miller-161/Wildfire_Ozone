@@ -4,6 +4,7 @@ import os
 os.environ['USE_PYGEOS'] = '0'
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import matplotlib.font_manager as font_manager
 import numpy as np
 import pandas as pd
 #====================================================================
@@ -35,15 +36,21 @@ for i in range(len(regions)):
 
 regions2 = regions = ['Whole\nArea', 'South\nLand', 'North\nLand', 'East\nOcean', 'West\nOcean']
 
-ax.set_ylabel('Model error (MSE)', fontweight='bold', fontsize=24)
-ax.set_xticks(x, regions2, fontweight='bold', fontsize=18)  # Set x-axis labels
-ax.set_ylim(10**-7, 10**-5)
+ax.set_ylabel('Model error (MSE)', fontweight='bold', fontsize=28)
+ax.set_xticks(x, regions2, fontweight='bold', fontsize=22)  # Set x-axis labels
+ax.set_ylim(10**-7, 1.1 * 10**-5)
 ax.set_yscale('log')
 ax.grid(axis='y', which='major', linestyle='-')
 ax.grid(axis='y', which='minor', linestyle=':')
-ax.legend(loc='upper left', prop={'size':20})
+
+
+font = font_manager.FontProperties(weight='bold',  # family='Comic Sans MS', 'Times new roman', ,
+                                   style='normal', size=20)
+ax.legend(loc='upper right', prop=font, ncol=2)
 
 # Show the plot
 plt.tight_layout()  # Ensure labels are visible
 plt.show()
+
+fig.savefig('/Users/joshuamiller/Documents/Lancaster/Poster/model_error.pdf', bbox_inches='tight', pad_inches=0)
 #====================================================================
