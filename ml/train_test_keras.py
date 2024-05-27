@@ -19,7 +19,9 @@ from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
+from ml.dense_trans import MakeDenseTrans
 from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR
+from ml.custom_keras_layers import TransformerBlock
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
@@ -67,6 +69,11 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['batch_size']
+    
+    elif (config['MODEL_TYPE'] == 'Trans'):
+        model = MakeDenseTrans(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['trans_hyperparams_dict']['batch_size']
     
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
                                                      name="MSE"),
@@ -152,7 +159,7 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
 
     model_architecture = ''
     model_weights = ''
-    
+    model = 69
     print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
     print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
     print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
@@ -181,8 +188,11 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
     with open(model_architecture, 'r') as json_file:
         loaded_model_json = json_file.read()
 
-    model = keras.models.model_from_json(loaded_model_json)
-
+    if (config['MODEL_TYPE'] == 'Trans'):
+        model = keras.models.model_from_json(loaded_model_json, custom_objects={"TransformerBlock":TransformerBlock})
+    else:
+        model = keras.models.model_from_json(loaded_model_json)
+   
     model.load_weights(model_weights)
 
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3),

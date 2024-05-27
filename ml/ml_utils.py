@@ -181,4 +181,4 @@ class TriangleWaveLR(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
         if (epoch + 1) % self.period == 0:
-            self.peak_lr /= 2
+            self.initial_peak_lr /= (int((epoch + 1) / self.period) + 1)

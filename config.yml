@@ -1,4 +1,4 @@
-MODEL_TYPE: 'ConvLSTM' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'Trans' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
 REGION: 'North_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
@@ -47,7 +47,7 @@ HYPERPARAMETERS:
     'num_inner_filters': 128
 
   trans_hyperparams_dict:
-    'epochs': 30
+    'epochs': 100
     'batch_size': 32
     'num_heads': 4
     'num_neurons': 100

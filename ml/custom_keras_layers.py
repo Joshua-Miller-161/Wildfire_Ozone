@@ -63,8 +63,12 @@ class MaskedPositionEmbedding(keras.layers.Layer):
     
 
 class TransformerBlock(keras.layers.Layer):
-    def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1):
+    def __init__(self, embed_dim, num_heads, ff_dim, rate=0.1, **kwargs):
         super(TransformerBlock, self).__init__()
+        self.embed_dim = embed_dim
+        self.num_heads = num_heads
+        self.ff_dim    = ff_dim
+        self.rate      = rate
         self.att = MultiHeadAttention(num_heads=num_heads,
                                                    key_dim=embed_dim)
         self.ffn = keras.Sequential(
@@ -75,6 +79,16 @@ class TransformerBlock(keras.layers.Layer):
         self.dropout1 = Dropout(rate)
         self.dropout2 = Dropout(rate)
 
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+            "embed_dim": self.embed_dim,
+            "num_heads": self.num_heads,
+            "ff_dim": self.ff_dim,
+            "rate": self.rate
+        })
+        return config
+    
     def call(self, inputs, training):
         attn_output = self.att(inputs, inputs)
         attn_output = self.dropout1(attn_output, training=training)
