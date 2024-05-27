@@ -1,6 +1,6 @@
-MODEL_TYPE: 'Trans' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'RF' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
-REGION: 'West_Ocean' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
+REGION: 'Whole_Area' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
 HIST_TARG:
   'history_len': 5
@@ -29,7 +29,7 @@ TIME_WINDOW: # Format as YYYY-MM-DD; keep between 2018-04-30 - 2022-07-31
 
 HYPERPARAMETERS:
   rf_hyperparams_dict:
-    'num_trees': 69
+    'num_trees': 200
     'use_xgboost': True
 
   gb_hyperparams_dict:

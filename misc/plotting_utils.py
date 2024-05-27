@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 import yaml
 #====================================================================
 def Plot_O3_Fire(ax, fire_x, fire, O3_x, O3, 
-                 fire_color='red', O3_color='blue', alpha=1,
+                 fire_color='red', O3_color='blue', fire_linewidth=1, O3_linewidth=1, alpha=1,
                  fire_ymin=None, fire_ymax=None, O3_ymin=None, O3_ymax=None,
                  fire_xmin=None, fire_xmax=None, O3_xmin=None, O3_xmax=None,
                  num_ticks=None, fire_ylabel=None, O3_ylabel=None, fire_label=None, O3_label=None,
@@ -15,9 +15,9 @@ def Plot_O3_Fire(ax, fire_x, fire, O3_x, O3,
                  fontsize=12, bold=False):
     
     if (fire_label==None):
-        ax.plot(fire_x, fire, color=fire_color, linestyle='-', linewidth=1, alpha=alpha)
+        ax.plot(fire_x, fire, color=fire_color, linestyle='-', linewidth=fire_linewidth, alpha=alpha)
     else:
-        ax.plot(fire_x, fire, color=fire_color, linestyle='-', linewidth=1, alpha=alpha, label=fire_label)
+        ax.plot(fire_x, fire, color=fire_color, linestyle='-', linewidth=fire_linewidth, alpha=alpha, label=fire_label)
 
     if not (fire_ymin == None and fire_ymax == None):
         ax.set_ylim(fire_ymin, fire_ymax)
@@ -61,10 +61,10 @@ def Plot_O3_Fire(ax, fire_x, fire, O3_x, O3,
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ax2 = ax.twinx()  # instantiate a second axes that shares the same x-axis
     if (O3_label == None):
-        ax2.plot(O3_x, O3, color=O3_color, linestyle='-', linewidth=1, alpha=alpha)
+        ax2.plot(O3_x, O3, color=O3_color, linestyle='-', linewidth=O3_linewidth, alpha=alpha)
     else:
         print("AHHHHHHHHHHHH")
-        ax2.plot(O3_x, O3, color=O3_color, linestyle='-', linewidth=1, alpha=alpha, label=O3_label)
+        ax2.plot(O3_x, O3, color=O3_color, linestyle='-', linewidth=O3_linewidth, alpha=alpha, label=O3_label)
 
     if not (O3_ymin == None and O3_ymax == None):
         ax2.set_ylim(O3_ymin, O3_ymax)
