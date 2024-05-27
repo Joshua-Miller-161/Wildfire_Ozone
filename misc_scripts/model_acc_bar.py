@@ -8,7 +8,7 @@ import matplotlib.font_manager as font_manager
 import numpy as np
 import pandas as pd
 #====================================================================
-fig, ax = plt.subplots(1, 1, figsize = (12, 6))
+fig, ax = plt.subplots(1, 1, figsize = (12, 5))
 
 ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
 #====================================================================
@@ -36,8 +36,8 @@ for i in range(len(regions)):
 
 regions2 = regions = ['Whole\nArea', 'South\nLand', 'North\nLand', 'East\nOcean', 'West\nOcean']
 
-ax.set_ylabel('Model error (MSE)', fontweight='bold', fontsize=28)
-ax.set_xticks(x, regions2, fontweight='bold', fontsize=22)  # Set x-axis labels
+ax.set_ylabel('Model error (MSE)', fontweight='bold', fontsize=27)
+ax.set_xticks(x, regions2, fontweight='bold', fontsize=26)  # Set x-axis labels
 ax.set_ylim(10**-7, 1.1 * 10**-5)
 ax.set_yscale('log')
 ax.grid(axis='y', which='major', linestyle='-')
@@ -45,8 +45,8 @@ ax.grid(axis='y', which='minor', linestyle=':')
 
 
 font = font_manager.FontProperties(weight='bold',  # family='Comic Sans MS', 'Times new roman', ,
-                                   style='normal', size=20)
-ax.legend(loc='upper right', prop=font, ncol=2)
+                                   style='normal', size=20.5)
+ax.legend(loc='upper left', prop=font, ncol=4)
 
 # Show the plot
 plt.tight_layout()  # Ensure labels are visible
