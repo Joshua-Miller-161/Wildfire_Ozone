@@ -20,7 +20,7 @@ from ml.conv_lstm import MakeConvLSTM
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
-from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR
+from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR
 from ml.custom_keras_layers import TransformerBlock
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
