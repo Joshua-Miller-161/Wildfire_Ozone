@@ -23,6 +23,10 @@ model_save_path = config['MODEL_SAVE_PATH']
 
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
 assert (model_type in ['RF', 'Linear', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must be 'RF', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(model_type)
+
+
+short = {'Whole_Area':'WO', 'South_Land':'SL', 'North_Land':'NL', 'East_Ocean':'EO', 'West_Ocean':'WO'}
+
 #====================================================================
 if (model_type == 'Linear'):
     # TrainKerasModel('config.yml',
@@ -36,7 +40,7 @@ elif (model_type == 'Dense'):
                     prefix='Diamond',
                     model_save_path=os.path.join(model_save_path, 'Dense'))
     TestKerasModel('config.yml',
-                   model_name='Dense_reg=WO_f=1_In=OFTUVXYD_Out=O_e=100',
+                   model_name='Dense_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e=100',
                    model_folder=model_save_path)
 #--------------------------------------------------------------------   
 elif (model_type == 'ConvLSTM'):
@@ -44,16 +48,16 @@ elif (model_type == 'ConvLSTM'):
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     TestKerasModel('config.yml',
-                   model_name='ConvLSTM_reg=WO_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_name='ConvLSTM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                    model_folder=model_save_path)
 #--------------------------------------------------------------------   
 elif (model_type == 'Trans'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_name='DiamondDenseTrans_reg=WO_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+                    model_name='DiamondDenseTrans_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                     model_save_path=os.path.join(model_save_path, 'Trans'))
     TestKerasModel('config.yml',
-                   model_name='DiamondDenseTrans_reg=WO_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+                   model_name='DiamondDenseTrans_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 
