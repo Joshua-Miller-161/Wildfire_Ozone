@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
 import geopandas as gpd
+import fiona
 
 sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import UnScale
@@ -244,7 +245,11 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
     ax_time.legend()
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Plot 2D maps
-    world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
+    try:
+        world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
+    except fiona.errors.DriverError:
+        world = gpd.read_file("/content/drive/MyDrive/Colab_Notebooks/Data/ne_110m_land/ne_110m_land.shp")
+    
     min_lat = np.min(lat)
     max_lat = np.max(lat)
     min_lon = np.min(lon)

@@ -52,5 +52,5 @@ HYPERPARAMETERS:
     'num_heads': 4
     'num_neurons': 100
 
-MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
-#MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
+#MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
+MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
