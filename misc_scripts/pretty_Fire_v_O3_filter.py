@@ -25,7 +25,7 @@ cutoff = 0.016
 order = 4
 
 corr_fontsize = 22
-year_fontsize = 24
+year_fontsize = 28
 yaxis_fontsize = 40
 linewidth=2
 
@@ -119,7 +119,7 @@ for i in range(len(regions)):
     ShowYearMonth(ax[i], fire_dates, fontsize=year_fontsize)
 
     
-fig.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Fire_O3_poster.pdf',
+fig.savefig('/Users/joshuamiller/Documents/Lancaster/Poster/Fire_O3_poster.pdf',
             bbox_inches='tight', pad_inches=0)
 #====================================================================
 plt.show()

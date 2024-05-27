@@ -31,13 +31,15 @@ if (model_type == 'Linear'):
                    model_name='Linear_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
 #--------------------------------------------------------------------
 elif (model_type == 'Dense'):
+    e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10',
+                    model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                     model_save_path=os.path.join(model_save_path, 'Dense'))
     TestKerasModel('config.yml',
-                   model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e=10')
+                   model_name='DiamondDense_reg=SL_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------   
 elif (model_type == 'ConvLSTM'):
+    e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     TestKerasModel('config.yml',
