@@ -7,8 +7,10 @@ import pandas as pd
 from tensorflow import keras
 from keras.callbacks import Callback
 #====================================================================
-def NameModel(config_path):
+def NameModel(config_path, prefix=''):
     model_name = ''
+    if not (prefix == ''):
+        model_name = prefix + '_'
     print('IN NAME MODEL', model_name)
     #----------------------------------------------------------------
     ''' Get infor from config '''
@@ -185,7 +187,7 @@ class TriangleWaveLR(Callback):
 
 #====================================================================
 class NoisyDecayLR(Callback):
-    def __init__(self, initial_lr, final_lr, total_epochs, mag_noise):
+    def __init__(self, total_epochs, initial_lr=0.005, final_lr=0.00001, mag_noise=1):
         super().__init__()
         self.initial_lr   = initial_lr
         self.final_lr     = final_lr

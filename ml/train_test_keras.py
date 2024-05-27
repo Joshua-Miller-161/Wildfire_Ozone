@@ -24,7 +24,7 @@ from ml.dense_trans import MakeDenseTrans
 from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR
 from ml.custom_keras_layers import TransformerBlock
 #====================================================================
-def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
+def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels', prefix=''):
     #----------------------------------------------------------------
     ''' Check for GPU access '''
     
@@ -84,6 +84,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                                                       patience=3, 
                                                       restore_best_weights=True)
     custom_lr = TriangleWaveLR(period=5)
+    #custom_lr = NoisyDecayLR(num_epochs)
 
     history = model.fit(x=x_train,
                         y=y_train,
@@ -96,7 +97,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     ''' Save model '''
     if not (model_save_path==None):
         if (model_name == None):
-            model_name = NameModel(config_path)
+            model_name = NameModel(config_path, prefix=prefix)
         print(' >>')
         print(' >>')
         print(' >> model_name', model_name)

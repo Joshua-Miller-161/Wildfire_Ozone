@@ -1,6 +1,6 @@
-MODEL_TYPE: 'Dense' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'ConvLSTM' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
-REGION: 'North_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
+REGION: 'West_Ocean' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
 HIST_TARG:
   'history_len': 5
@@ -41,7 +41,7 @@ HYPERPARAMETERS:
     'num_neurons': 100
 
   convlstm_hyperparams_dict:
-    'epochs': 30
+    'epochs': 100
     'batch_size': 32
     'num_outer_filters': 64
     'num_inner_filters': 128
@@ -52,5 +52,5 @@ HYPERPARAMETERS:
     'num_heads': 4
     'num_neurons': 100
 
-#MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
-MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
+MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
+#MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
