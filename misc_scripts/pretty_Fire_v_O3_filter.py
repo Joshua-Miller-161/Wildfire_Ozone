@@ -24,6 +24,10 @@ fire_str  = 'MODIS_C61'
 cutoff = 0.016
 order = 4
 
+corr_fontsize = 24
+year_fontsize = 20
+yaxis_fontsize = 40
+
 fig, ax = plt.subplots(len(regions), 1, figsize=(20, 10), sharex=True)
 fig.subplots_adjust(hspace=0)
 #====================================================================
@@ -72,16 +76,16 @@ for i in range(len(regions)):
         Plot_O3_Fire(ax[i], fire_dates, fire_mean, ozone_dates, ozone_mean,
                      fire_ylabel='Avg.\ fire\ (MW)',
                      O3_ylabel='Avg.\ ozone\ '+r'\left(\frac{mol}{m^2}\right)',
-                     bold=True, fontsize=24, O3_rotation=270, O3_pad=40, fire_xmin=17300, fire_xmax=max(fire_dates)+100)
+                     bold=True, fontsize=yaxis_fontsize, O3_rotation=270, O3_pad=40, fire_xmin=17300, fire_xmax=max(fire_dates)+100)
         
-        ax[i].text(17310, .66*max(fire_mean), regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=20, fontweight='bold')
+        ax[i].text(17310, .66*max(fire_mean), regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=corr_fontsize, fontweight='bold')
 
     elif (regions[i] == 'West_Ocean'):
         Plot_O3_Fire(ax[i], fire_dates, fire_mean, ozone_dates, ozone_mean,
                      fire_ymin=0, fire_ymax=5, O3_ylabel='', fire_ylabel='',
                      O3_ymin=0.008, O3_ymax=0.024)
         
-        ax[i].text(17310, .6*5, regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=20, fontweight='bold')
+        ax[i].text(17310, .6*5, regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=corr_fontsize, fontweight='bold')
 
     else:
         if ('Ocean' in regions[i]):
@@ -89,16 +93,16 @@ for i in range(len(regions)):
             Plot_O3_Fire(ax[i], fire_dates, fire_mean, ozone_dates, ozone_mean,
                         fire_ymin=0, fire_ymax=5, O3_ylabel='', fire_ylabel='')
 
-            ax[i].text(17310, .6*5, regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=20, fontweight='bold')
+            ax[i].text(17310, .6*5, regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=corr_fontsize, fontweight='bold')
 
         else:
             Plot_O3_Fire(ax[i], fire_dates, fire_mean, ozone_dates, ozone_mean,
                          O3_ylabel='', fire_ylabel='')
             
-            ax[i].text(17310, .66*max(fire_mean), regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=20, fontweight='bold')
+            ax[i].text(17310, .66*max(fire_mean), regions2[i]+'\nCorr: '+str(round(corr, 3)), fontsize=corr_fontsize, fontweight='bold')
 
 
-    ShowYearMonth(ax[i], fire_dates)
+    ShowYearMonth(ax[i], fire_dates, fontsize=year_fontsize)
 
     
 fig.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Fire_O3_poster.pdf',

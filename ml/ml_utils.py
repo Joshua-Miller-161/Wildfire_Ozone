@@ -182,3 +182,24 @@ class TriangleWaveLR(Callback):
     def on_epoch_end(self, epoch, logs=None):
         if (epoch + 1) % self.period == 0:
             self.initial_peak_lr /= (int((epoch + 1) / self.period) + 1)
+
+#====================================================================
+class NoisyDecayLR(Callback):
+    def __init__(self, initial_lr, final_lr, total_epochs, mag_noise):
+        super().__init__()
+        self.initial_lr   = initial_lr
+        self.final_lr     = final_lr
+        self.total_epochs = total_epochs
+        self.mag_noise    = mag_noise
+
+    def on_epoch_begin(self, epoch, logs=None):
+        decay_rate = self.final_lr / self.initial_lr
+        decayed_lr = self.initial_lr * (decay_rate ** (epoch / self.total_epochs))
+
+        # Add random noise
+        noise = np.random.uniform(-1, 1) * self.mag_noise * np.sqrt(decayed_lr * self.initial_lr)
+        noisy_lr = decayed_lr + noise
+
+        # Set the learning rate for this epoch
+        keras.backend.set_value(self.model.optimizer.lr, noisy_lr)
+        #print(f"Epoch {epoch + 1} - Learning rate: {noisy_lr:.6f}")

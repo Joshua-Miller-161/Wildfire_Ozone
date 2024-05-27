@@ -46,10 +46,10 @@ elif (model_type == 'ConvLSTM'):
 elif (model_type == 'Trans'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_name='DiamondDenseTrans_reg=NL_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+                    model_name='DiamondDenseTrans_reg=WO_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                     model_save_path=os.path.join(model_save_path, 'Trans'))
     TestKerasModel('config.yml',
-                   model_name='DiamondDenseTrans_reg=NL_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+                   model_name='DiamondDenseTrans_reg=WO_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 

@@ -1,6 +1,6 @@
 MODEL_TYPE: 'Trans' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
-REGION: 'North_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
+REGION: 'West_Ocean' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
 HIST_TARG:
   'history_len': 5
