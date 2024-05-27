@@ -35,10 +35,13 @@ for i in range(len(regions)):
 
 regions2 = regions = ['Whole\nArea', 'South\nLand', 'North\nLand', 'East\nOcean', 'West\nOcean']
 
-ax.set_ylabel('Model error (MSE)', fontweight='bold', fontsize=18)
-ax.set_xticks(x, regions2, fontweight='bold')  # Set x-axis labels
-ax.grid(axis='y')
-ax.legend()
+ax.set_ylabel('Model error (MSE)', fontweight='bold', fontsize=24)
+ax.set_xticks(x, regions2, fontweight='bold', fontsize=18)  # Set x-axis labels
+ax.set_ylim(10**-7, 10**-5)
+ax.set_yscale('log')
+ax.grid(axis='y', which='major', linestyle='-')
+ax.grid(axis='y', which='minor', linestyle=':')
+ax.legend(loc='upper left', prop={'size':20})
 
 # Show the plot
 plt.tight_layout()  # Ensure labels are visible
