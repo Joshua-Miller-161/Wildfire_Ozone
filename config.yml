@@ -55,5 +55,5 @@ HYPERPARAMETERS:
 MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
 #MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
 
-FIG_SAVE_PATH: '/content/drive/MyDrive/Figs'
+FIG_SAVE_PATH: '/content/drive/MyDrive/OzoneFigs'
 #FIG_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/Figs'
