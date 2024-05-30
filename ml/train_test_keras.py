@@ -83,8 +83,8 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                       patience=3, 
                                                       restore_best_weights=True)
-    #custom_lr = TriangleWaveLR(period=5)
-    custom_lr = NoisyDecayLR(num_epochs)
+    custom_lr = TriangleWaveLR(period=5)
+    #custom_lr = NoisyDecayLR(num_epochs)
 
     history = model.fit(x=x_train,
                         y=y_train,
