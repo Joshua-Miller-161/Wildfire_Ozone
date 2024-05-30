@@ -198,10 +198,10 @@ class NoisyDecayLR(Callback):
         decay_rate = self.final_lr / self.initial_lr
         decayed_lr = self.initial_lr * (decay_rate ** (epoch / self.total_epochs))
 
-        # Add random noise
         noise = np.random.uniform(-1, 1) * self.mag_noise * np.sqrt(decayed_lr * self.initial_lr)
         noisy_lr = decayed_lr + noise
 
-        # Set the learning rate for this epoch
+        if (noisy_lr < self.final_lr):
+            noisy_lr = self.final_lr
+        
         keras.backend.set_value(self.model.optimizer.lr, noisy_lr)
-        #print(f"Epoch {epoch + 1} - Learning rate: {noisy_lr:.6f}")

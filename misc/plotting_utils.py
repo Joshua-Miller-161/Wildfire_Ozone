@@ -173,8 +173,8 @@ def PlotBoxes(config_path, ax, plot_text=False):
     ax.plot(box4[0, :], box4[1, :], 'k-')
 
     if plot_text:
-        ax.text(box0[0, 0]+1, box0[1, 0]-2, 'whole area', fontsize=7)
-        ax.text(box1[0, 0]+1, box1[1, 0]-2, 'east ocean', fontsize=7)
-        ax.text(box2[0, 0]+1, box2[1, 0]-2, 'west ocean', fontsize=7)
-        ax.text(box3[0, 0]+1, box3[1, 0]-2, 'north land', fontsize=7)
-        ax.text(box4[0, 0]+1, box4[1, 0]-2, 'south land', fontsize=7)
+        ax.text(box0[0, 0]+1, box0[1, 0]-7, 'Whole\narea', fontsize=20, fontweight='bold')
+        ax.text(box1[0, 0]+1, box1[1, 0]-7, 'East\nocean', fontsize=20, fontweight='bold')
+        ax.text(box2[0, 0]+1, box2[1, 0]-7, 'West\nocean', fontsize=20, fontweight='bold')
+        ax.text(box3[0, 0]+1, box3[1, 0]-7, 'North\nland', fontsize=20, fontweight='bold')
+        ax.text(box4[0, 0]+1, box4[1, 0]-7, 'South\nland', fontsize=20, fontweight='bold')

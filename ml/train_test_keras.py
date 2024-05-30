@@ -83,8 +83,8 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                       patience=3, 
                                                       restore_best_weights=True)
-    custom_lr = TriangleWaveLR(period=5)
-    #custom_lr = NoisyDecayLR(num_epochs)
+    #custom_lr = TriangleWaveLR(period=5)
+    custom_lr = NoisyDecayLR(num_epochs)
 
     history = model.fit(x=x_train,
                         y=y_train,
@@ -112,7 +112,8 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
 
     return x_test, y_test, history
 #====================================================================
-def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
+def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels',
+                   figure_folder='/Users/joshuamiller/Documents/Lancaster/Figs'):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -292,7 +293,7 @@ def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Do
     
     #model_name = model_path.split('/')[-1]
 
-    #fig.savefig(os.path.join('Figs', model_name+'.pdf'), bbox_inches=None, pad_inches=0)
+    fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches=None, pad_inches=0)
     print("Model source:", os.path.join(root, model_name))
     print("____________________________________________________________")
     plt.show()

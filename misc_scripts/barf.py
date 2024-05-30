@@ -43,4 +43,22 @@ def ParseModelName(input_string, substrs=['reg=', 'In=', 'Out=', 'e='], split_ch
     return info
 # Example usage:
 result = ParseModelName("RF_reg=WA_In=LOL_Out=X_e=10.json")
-print(result) 
+print(result)
+#====================================================================
+total_epochs = 100
+initial_lr = 0.005
+final_lr = 0.00001
+mag_noise = 1
+lrs = np.ones(100, float) * -999
+
+decay_rate = final_lr / initial_lr
+for epoch in range(total_epochs):
+    decayed_lr = initial_lr * (decay_rate ** (epoch / total_epochs))
+    noise = np.random.uniform(-1, 1) * mag_noise * np.sqrt(decayed_lr * initial_lr)
+    lrs[epoch] = decayed_lr + noise
+
+    if (lrs[epoch] < final_lr):
+        lrs[epoch] = final_lr
+
+plt.scatter(np.arange(total_epochs), lrs)
+plt.show()

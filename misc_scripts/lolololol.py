@@ -102,6 +102,8 @@ cbar = plt.colorbar(scat_, cax=cax)
 #cbar.set_label(label='Fire (MW)', fontsize=16, weight='bold', rotation=270)
 
 curr_date = datetime(1970, 1, 1) + timedelta(days=days_new[date_idx])
+
+print("DATATATATAT", curr_date)
 #ax2.set_title(curr_date.strftime('%Y-%m-%d %H:%M:%S'))
 #--------------------------------------------------------------------
 ax2.set_xlim(-21, 61)
@@ -112,7 +114,18 @@ ax2.set_ylim(-21, 21)
 ax2.set_xticks([])
 ax2.set_yticks([])
 
-fig1.savefig(os.path.join('Figs', 'Ozone.pdf'), bbox_inches='tight', pad_inches=0)
-fig2.savefig(os.path.join('Figs', 'Fire.pdf'), bbox_inches='tight', pad_inches=0)
+#fig1.savefig(os.path.join('Figs', 'Ozone.pdf'), bbox_inches='tight', pad_inches=0)
+#fig2.savefig(os.path.join('Figs', 'Fire.pdf'), bbox_inches='tight', pad_inches=0)
 #====================================================================
+
+fig3, ax3 = plt.subplots(1,1,figsize=(10, 6))
+
+world.plot(ax=ax3, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
+
+PlotBoxes('data_utils/data_utils_config.yml', ax3, True)
+
+ax3.set_xlim(-21, 61)
+ax3.set_ylim(-21, 21)
+
+fig3.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', pad_inches=0, bbox_inches='tight')
 plt.show()
