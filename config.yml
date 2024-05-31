@@ -1,4 +1,4 @@
-MODEL_TYPE: 'Trans' # Choices: 'RF', 'GBM', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'GBM' # Choices: 'RF', 'GBM', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
 REGION: 'South_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
