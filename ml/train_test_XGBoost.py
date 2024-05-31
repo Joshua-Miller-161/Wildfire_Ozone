@@ -58,8 +58,7 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
                 'reg_lambda': 1,
                 'eval_metric': 'rmse', # fixed. picked a evaluation metric for Regression.
                 'tree_method': 'hist', # XGBoost's built-in GPU support to use Google Colab's GPU
-                'device': 'cuda'
-                }
+                'device': 'cuda'}
     
     evals_result = {}
     model = xgb.train(param_dict,
@@ -125,7 +124,7 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #----------------------------------------------------------------
     ''' Test model '''
 
-    y_pred = model.predict(x_test_df)
+    y_pred = np.asarray(model.predict(xgb.DMatrix(data=x_test_df)))
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
 
