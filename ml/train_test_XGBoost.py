@@ -6,6 +6,7 @@ import numpy as np
 import yaml
 import pandas as pd
 import xgboost as xgb
+from xgboost import XGBRegressor, DMatrix
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
@@ -55,8 +56,8 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
                 'gamma': 0,
                 'reg_alpha': 0.1,
                 'reg_lambda': 1,
-                'eval_metric': 'mse', # fixed. picked a evaluation metric for Regression.
-                'tree_method': 'gpu_hist', # XGBoost's built-in GPU support to use Google Colab's GPU
+                'eval_metric': 'rmse', # fixed. picked a evaluation metric for Regression.
+                'tree_method': 'hist', # XGBoost's built-in GPU support to use Google Colab's GPU
                 'device': 'cuda'
                 }
     
