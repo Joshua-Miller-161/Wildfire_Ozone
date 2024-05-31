@@ -56,8 +56,8 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
                 'reg_alpha': 0.1,
                 'reg_lambda': 1,
                 'eval_metric': 'mse', # fixed. picked a evaluation metric for Regression.
-                'gpu_id': 0, 
-                'tree_method': 'gpu_hist' # XGBoost's built-in GPU support to use Google Colab's GPU
+                'tree_method': 'gpu_hist', # XGBoost's built-in GPU support to use Google Colab's GPU
+                'device': 'cuda'
                 }
     
     evals_result = {}
@@ -101,7 +101,6 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
                 #print("root=",root, ", name=", name)
                 if (model_name in name):
                     if name.endswith('.pkl'):
-
                         model = load(os.path.join(root, name))
     #----------------------------------------------------------------
     ''' Get data '''
