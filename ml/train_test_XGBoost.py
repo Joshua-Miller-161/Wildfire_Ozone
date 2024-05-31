@@ -78,7 +78,7 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
     if model_name == None:
         model_name = NameModel(config_path)
 
-    dump(os.path.join(model_save_path, model_name))
+    dump(model, os.path.join(model_save_path, model_name))
 #====================================================================
 def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #----------------------------------------------------------------
