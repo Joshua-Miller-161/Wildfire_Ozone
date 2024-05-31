@@ -112,12 +112,14 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
 
     return x_test, y_test, history
 #====================================================================
-def TestKerasModel(config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
+def TestKerasModel(config_path, model_name):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
+
+    model_folder = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
 
     info = ParseModelName(model_name)

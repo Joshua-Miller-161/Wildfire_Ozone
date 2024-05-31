@@ -18,7 +18,7 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainNaiveXGBoost(config_path, data_config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/GBM'):
+def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/GBM'):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -74,17 +74,19 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_save_path='/Users/jos
 
     #----------------------------------------------------------------
     ''' Save model '''
-    model_name = NameModel(config_path)
+    if model_name == None:
+        model_name = NameModel(config_path)
 
     dump(os.path.join(model_save_path, model_name))
 #====================================================================
-def TestNaiveXGBoost(config_path, data_config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
+def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
+    model_folder = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
     #----------------------------------------------------------------
     ''' Load model '''

@@ -12,6 +12,7 @@ from data_utils.prepare_histories_targets import Histories_Targets
 from data_utils.train_test_split import Train_Test_Split
 from ml.train_test_keras import TrainKerasModel, TestKerasModel
 from ml.train_test_naive_rf import TrainNaiveRF, TestNaiveRF
+from ml.train_test_XGBoost import TrainNaiveXGBoost, TestNaiveXGBoost
 #====================================================================
 ''' Get infor from config '''
 with open('config.yml', 'r') as c:
@@ -63,6 +64,14 @@ elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 
                  'data_utils/data_utils_config.yml', 
                  model_save_path=os.path.join(model_save_path, 'RF'))
+#--------------------------------------------------------------------
+elif (model_type == 'GBM'):
+    TrainNaiveXGBoost('config.yml', 
+                      'data_utils/data_utils_config.yml', 
+                      model_save_path=os.path.join(model_save_path, 'GBM'))
+    TestNaiveXGBoost('config.yml', 
+                      'data_utils/data_utils_config.yml',
+                      model_name='')
 #====================================================================
 # ''' Prepare data '''
 print("____________________________________________________________")
