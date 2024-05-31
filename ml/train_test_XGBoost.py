@@ -70,8 +70,8 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
                       evals_result=evals_result,
                       verbose_eval=True)
     
-    train_error = evals_result["Train"]["mse"]
-    test_error = evals_result["Test"]["mse"]
+    train_error = evals_result["Train"]["rmse"]
+    test_error = evals_result["Test"]["rmse"]
 
     #----------------------------------------------------------------
     ''' Save model '''
