@@ -25,6 +25,10 @@ def NameModel(config_path, prefix=''):
     target_len   = config['HIST_TARG']['target_len']
     num_trees    = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
     num_nuerons  = config['HYPERPARAMETERS']['trans_hyperparams_dict']['num_neurons']
+    num_boost_round       = config['HYPERPARAMETERS']['gb_hyperparams_dict']['num_boost_round']
+    max_depth             = config['HYPERPARAMETERS']['gb_hyperparams_dict']['max_depth']
+    early_stopping_rounds = config['HYPERPARAMETERS']['gb_hyperparams_dict']['early_stopping_rounds']
+    subsample             = config['HYPERPARAMETERS']['gb_hyperparams_dict']['subsample']
     #----------------------------------------------------------------
     ''' uh '''
     shorthand_dict = {'ozone' : 'O', 
@@ -57,6 +61,21 @@ def NameModel(config_path, prefix=''):
             model_name += shorthand_dict[var]
         
         model_name += '.joblib'
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    if (config['MODEL_TYPE'] == 'GBM'):
+        model_name = 'GBM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        #print("model_name:", model_name)
+
+        for var in history_vars:
+            model_name += shorthand_dict[var]
+
+        #print("model_name:", model_name)
+
+        model_name += '_Out='
+        for var in target_vars:
+            model_name += shorthand_dict[var]
+        
+        model_name += '.pkl'
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Linear'):
         model_name = 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='

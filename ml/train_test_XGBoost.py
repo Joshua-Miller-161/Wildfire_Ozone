@@ -5,7 +5,6 @@ os.environ['USE_PYGEOS'] = '0'
 import numpy as np
 import yaml
 import pandas as pd
-from sklearn.ensemble import RandomForestRegressor
 import xgboost as xgb
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
@@ -19,72 +18,89 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel
 #====================================================================
-def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
+def TrainNaiveXGBoost(config_path, data_config_path, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/GBM'):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    assert (config['MODEL_TYPE'] == 'RF'), "'MODEL_TYPE' must be 'RF'. Got: "+config['MODEL_TYPE']
-    model_type   = config['MODEL_TYPE']
-    num_trees_rf = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
-    use_xgboost  = config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost']
+    assert (config['MODEL_TYPE'] == 'GBM'), "'MODEL_TYPE' must be 'GBM'. Got: "+config['MODEL_TYPE']
+    model_type            = config['MODEL_TYPE']
+    num_boost_round       = config['HYPERPARAMETERS']['gb_hyperparams_dict']['num_boost_round']
+    max_depth             = config['HYPERPARAMETERS']['gb_hyperparams_dict']['max_depth']
+    early_stopping_rounds = config['HYPERPARAMETERS']['gb_hyperparams_dict']['early_stopping_rounds']
+    subsample             = config['HYPERPARAMETERS']['gb_hyperparams_dict']['subsample']
     #----------------------------------------------------------------
     ''' Get data '''
 
     x_train_df, x_test_df, y_train_df, y_test_df = NaiveRFDataLoader(config_path, data_config_path)
     #----------------------------------------------------------------
-    ''' Train & save model '''
-    if (model_type == 'RF'):
-        if use_xgboost:
-            xgbrfr = xgb.XGBRFRegressor(tree_method="gpu_hist",
-                                    num_estimators=num_trees_rf, 
-                                    max_depth=24,
-                                    device='cuda',
-                                    booster='gbtree',
-                                    objective='reg:squarederror')
+    ''' Train model '''
 
-            print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
-            xgbrfr.fit(x_train_df, y_train_df.values.ravel())
+    DM_train = xgb.DMatrix(data=x_train_df, label=y_train_df)
+    DM_test  = xgb.DMatrix(data=x_test_df, label=y_test_df)
 
-            if not (model_save_path == None):
-                if not os.path.exists(model_save_path):
-                    os.makedirs(model_save_path)
-                model_name = NameModel(config_path)
-                print('model_name', model_name)
-                xgbrfr.save_model(os.path.join(model_save_path, 'XGBRF_'+model_name+'.json'))
+    del(x_train_df)
+    del(y_train_df)
+    del(x_test_df)
+    del(y_test_df)
 
-        else: 
-            rfr = RandomForestRegressor(n_estimators=num_trees_rf, 
-                                        max_depth=24)
+    param_dict={'objective': 'reg:squarederror', # fixed. pick an objective function for Regression. 
+                'max_depth': max_depth,
+                'subsample': subsample,
+                'eta': 0.3,
+                'min_child_weight': 1,
+                'colsample_bytree': 1,
+                'gamma': 0,
+                'reg_alpha': 0.1,
+                'reg_lambda': 1,
+                'eval_metric': 'mse', # fixed. picked a evaluation metric for Regression.
+                'gpu_id': 0, 
+                'tree_method': 'gpu_hist' # XGBoost's built-in GPU support to use Google Colab's GPU
+                }
+    
+    evals_result = {}
+    model = xgb.train(param_dict,
+                      dtrain=DM_train,
+                      num_boost_round=num_boost_round,
+                      evals=[(DM_train, "Train"), (DM_test, "Test")],
+                      early_stopping_rounds=early_stopping_rounds,
+                      evals_result=evals_result,
+                      verbose_eval=True)
+    
+    train_error = evals_result["Train"]["mse"]
+    test_error = evals_result["Test"]["mse"]
 
-            print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
-            rfr.fit(x_train_df, y_train_df.values.ravel())
+    #----------------------------------------------------------------
+    ''' Save model '''
+    model_name = NameModel(config_path)
 
-            if not (model_save_path == None):
-                if not os.path.exists(model_save_path):
-                    os.makedirs(model_save_path)
-                model_name = NameModel(config_path)
-                print('model_name', model_name)
-                dump(rfr, os.path.join(model_save_path, model_name))
+    dump(os.path.join(model_save_path, model_name))
 #====================================================================
-def TestNaiveRF(config_path, data_config_path, model_path):
+def TestNaiveXGBoost(config_path, data_config_path, model_name, model_folder='/Users/joshuamiller/Documents/Lancaster/SavedModels'):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
+
+    figure_folder = config['FIG_SAVE_PATH']
     #----------------------------------------------------------------
     ''' Load model '''
-    
-    trained_rfr = 69
-    print('model_path', model_path)
-    if ('XGBRF' in model_path):
-        trained_rfr = xgb.XGBRFRegressor()
-        trained_rfr.load_model(model_path)
-    else:
-        trained_rfr = load(model_path)
+    model = 69
+    folders = os.listdir(model_folder)
+    if ('.DS_Store' in folders):
+        folders.remove('.DS_Store')
+
+    for folder in folders:
+        for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
+            for name in files:
+                #print("root=",root, ", name=", name)
+                if (model_name in name):
+                    if name.endswith('.pkl'):
+
+                        model = load(os.path.join(root, name))
     #----------------------------------------------------------------
     ''' Get data '''
     x_train_df, x_test_df, y_train_df, y_test_df, x_train_orig_shape, x_test_orig_shape, y_train_orig_shape, y_test_orig_shape = NaiveRFDataLoader(config_path, data_config_path, return_shapes=True)
@@ -107,7 +123,7 @@ def TestNaiveRF(config_path, data_config_path, model_path):
     #----------------------------------------------------------------
     ''' Test model '''
 
-    y_pred = trained_rfr.predict(x_test_df)
+    y_pred = model.predict(x_test_df)
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
 
@@ -117,7 +133,7 @@ def TestNaiveRF(config_path, data_config_path, model_path):
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
 
-    model_ranks = pd.Series(trained_rfr.feature_importances_,
+    model_ranks = pd.Series(model.feature_importances_,
                             index=x_test_df.columns,
                             name="Importance").sort_values(ascending=True, inplace=False) 
     
@@ -194,16 +210,8 @@ def TestNaiveRF(config_path, data_config_path, model_path):
                  config['MODEL_TYPE']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
                  fontsize=12, fontweight='bold')
     
-    model_name = model_path.split('/')[-1]
+    model_name = model_name.split('.')[0]
 
-    #fig.savefig(os.path.join('Figs', model_name[:-6]+'.pdf'), bbox_inches=None, pad_inches=0)
+    fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches='tight', pad_inches=0)
 
     plt.show()
-#====================================================================
-# x_train_df, x_test_df, y_train_df, y_test_df = TrainNaiveRF('config.yml', 
-#                                                             'data_utils/data_utils_config.yml',
-#                                                             'SavedModels/RF')
-
-# TestNaiveRF('config.yml', 
-#             'data_utils/data_utils_config.yml',
-#             'SavedModels/RF/RF_reg=SL_f=1_In=OFTUVXYD_Out=O.joblib')

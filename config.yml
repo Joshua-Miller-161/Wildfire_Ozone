@@ -1,4 +1,4 @@
-MODEL_TYPE: 'ConvLSTM' # Choices: 'RF', 'GB', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
+MODEL_TYPE: 'Trans' # Choices: 'RF', 'GBM', 'Linear', 'Trans', 'Dense', 'ConvLSTM'
 
 REGION: 'South_Land' # Choices: 'Whole_Area', 'East_Ocean', 'West_Ocean', 'South_Land', 'North_Land'
 
@@ -33,7 +33,10 @@ HYPERPARAMETERS:
     'use_xgboost': True
 
   gb_hyperparams_dict:
-    'num_trees': 69
+    'num_boost_round': 1000
+    'max_depth': 20
+    'early_stopping_rounds': 10
+    'subsample': 0.5
 
   dense_hyperparams_dict:
     'epochs': 100
@@ -52,8 +55,8 @@ HYPERPARAMETERS:
     'num_heads': 4
     'num_neurons': 100
 
-MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
-#MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
+#MODEL_SAVE_PATH: '/content/drive/MyDrive/SavedModels'
+MODEL_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/SavedModels'
 
-FIG_SAVE_PATH: '/content/drive/MyDrive/OzoneFigs'
-#FIG_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/Figs'
+#FIG_SAVE_PATH: '/content/drive/MyDrive/OzoneFigs'
+FIG_SAVE_PATH: '/Users/joshuamiller/Documents/Lancaster/Figs'
