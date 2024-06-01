@@ -24,7 +24,7 @@ def NameModel(config_path, prefix=''):
     history_len  = config['HIST_TARG']['history_len']
     target_len   = config['HIST_TARG']['target_len']
     num_trees    = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
-    num_nuerons  = config['HYPERPARAMETERS']['trans_hyperparams_dict']['num_neurons']
+    num_neurons  = config['HYPERPARAMETERS']['trans_hyperparams_dict']['num_neurons']
     num_boost_round       = config['HYPERPARAMETERS']['gb_hyperparams_dict']['num_boost_round']
     max_depth             = config['HYPERPARAMETERS']['gb_hyperparams_dict']['max_depth']
     early_stopping_rounds = config['HYPERPARAMETERS']['gb_hyperparams_dict']['early_stopping_rounds']
@@ -48,19 +48,22 @@ def NameModel(config_path, prefix=''):
     ''' Make names '''
 
     if (config['MODEL_TYPE'] == 'RF'):
-        model_name = 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        #print("model_name:", model_name)
+        if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
+            model_name = 'XGBRF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        else:
+            model_name = 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
 
         for var in history_vars:
             model_name += shorthand_dict[var]
-
-        #print("model_name:", model_name)
 
         model_name += '_Out='
         for var in target_vars:
             model_name += shorthand_dict[var]
         
-        model_name += '.joblib'
+        if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
+            model_name += '.pkl'
+        else:
+            model_name += '.joblib'
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if (config['MODEL_TYPE'] == 'GBM'):
         model_name = 'GBM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
@@ -93,7 +96,7 @@ def NameModel(config_path, prefix=''):
         model_name += '_e='+str(epochs)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Dense'):
-        model_name = 'Dense_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        model_name = 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
         #print("model_name:", model_name)
         epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
 
@@ -106,10 +109,38 @@ def NameModel(config_path, prefix=''):
         
         model_name += '_e='+str(epochs)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (config['MODEL_TYPE'] == 'Conv'):
+        model_name = 'Conv_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+        print("model_name:", model_name)
+        epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
+
+        for var in history_vars:
+            model_name += shorthand_dict[var]
+
+        model_name += '_Out='
+        for var in target_vars:
+            model_name += shorthand_dict[var]
+        
+        model_name += '_e='+str(epochs)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-        model_name = 'ConvLSTM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        model_name = 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
         print("model_name:", model_name)
         epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
+
+        for var in history_vars:
+            model_name += shorthand_dict[var]
+
+        model_name += '_Out='
+        for var in target_vars:
+            model_name += shorthand_dict[var]
+        
+        model_name += '_e='+str(epochs)
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (config['MODEL_TYPE'] == 'Trans'):
+        model_name = 'Trans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+        print("model_name:", model_name)
+        epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
 
         for var in history_vars:
             model_name += shorthand_dict[var]
@@ -122,40 +153,75 @@ def NameModel(config_path, prefix=''):
 
     return model_name
 #====================================================================
-def ParseModelName(input_string, substrs=['reg=', 'In=', 'Out=', 'e='], split_char='_'):
+def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e='], split_char='_'):
 
-    dict_ = {'WA': 'Whole Area',
-             'EO': 'East Ocean',
-             'WO': 'West Ocean', 
-             'SL': 'South Land',
-             'NL': 'North Land',
+    dict_ = {'WA': 'Whole_Area',
+             'EO': 'East_Ocean',
+             'WO': 'West_Ocean', 
+             'SL': 'South_Land',
+             'NL': 'North_Land',
              'RF': 'Random Forest',
-             'Trans': 'Transformer'}
+             'XGBRF': 'XGBoost Random Forest',
+             'GBM': 'Gradient Boosting Machine',
+             'Trans': 'Transformer',
+             'O': 'ozone',
+             'F': 'fire',
+             'T': 'temp',
+             'U': 'u-wind',
+             'V': 'v-wind',
+             'X': 'lon',
+             'Y': 'lat',
+             'D': 'time'}
+    
+    final_dict = {}
+    #----------------------------------------------------------------
+    input_string = input_string.split('.')[0]
+
+    print('input_string:', input_string)
+
+    chunks = input_string.split(split_char)
 
     info = []
-    start = len(input_string.split(split_char)[0]) + 1
     try:
-        info.append(dict_[input_string.split(split_char)[0]])
+        info.append(dict_[chunks[0]])
     except KeyError:
-        info.append(input_string.split(split_char)[0])
+        info.append(chunks[0])
 
-    print("info:", info, input_string)
+    final_dict['MODEL_TYPE'] = chunks[0]
+    final_dict['MODEL_TYPE_LONG'] = info[0]
 
-    for substr in substrs:
-        temp_str = input_string[start:]
-        if (substr in temp_str):
+    for i in range(1, len(chunks)):
+        for substr in substrs:
+            if (substr in chunks[i]):
+                lol = chunks[i][len(substr):]
+                try:
+                    info.append(dict_[lol])
+                except KeyError:
+                    info.append(lol)
 
-            lol = temp_str.split(split_char)[0]
-            lol = lol[len(substr):]
-            start += len(substr) + len(lol) + 1
-            print(temp_str, substr, lol)
-
-            try:
-                info.append(dict_[lol])
-            except KeyError:
-                info.append(lol)
-
-    return info
+                if (substr == 'reg='):
+                    final_dict['REGION'] = info[-1]
+                
+                elif (substr == 'h='):
+                    final_dict['history_len'] = int(lol)
+                
+                elif (substr == 'f='):
+                    final_dict['target_len'] = int(lol)
+                    final_dict['RF_OFFSET']  = int(lol)
+                
+                elif (substr == 'In='):
+                    HISTORY_DATA = []
+                    for char in lol:
+                        HISTORY_DATA.append(dict_[char])
+                    final_dict['HISTORY_DATA'] = HISTORY_DATA
+                
+                elif (substr == 'Out='):
+                    TARGET_DATA = []
+                    for char in lol:
+                        TARGET_DATA.append(dict_[char])
+                    final_dict['TARGET_DATA'] = TARGET_DATA
+    #----------------------------------------------------------------
+    return info, final_dict
 #====================================================================
 def Funnel(start_size, end_size, r=np.e):
     assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)
@@ -224,3 +290,4 @@ class NoisyDecayLR(Callback):
             noisy_lr = self.final_lr
         
         keras.backend.set_value(self.model.optimizer.lr, noisy_lr)
+

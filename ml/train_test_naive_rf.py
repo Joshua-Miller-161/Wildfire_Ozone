@@ -14,10 +14,9 @@ from joblib import dump, load
 import geopandas as gpd
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import Extract_netCDF4
 from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
-from ml.ml_utils import NameModel
+from ml.ml_utils import NameModel, ParseModelName
 #====================================================================
 def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     #----------------------------------------------------------------
@@ -30,30 +29,55 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     model_type   = config['MODEL_TYPE']
     num_trees_rf = config['HYPERPARAMETERS']['rf_hyperparams_dict']['num_trees']
     use_xgboost  = config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost']
+    max_depth    = config['HYPERPARAMETERS']['rf_hyperparams_dict']['max_depth']
+    subsample    = config['HYPERPARAMETERS']['rf_hyperparams_dict']['subsample']
+    device       = config['HYPERPARAMETERS']['rf_hyperparams_dict']['device']
     #----------------------------------------------------------------
     ''' Get data '''
 
     x_train_df, x_test_df, y_train_df, y_test_df = NaiveRFDataLoader(config_path, data_config_path)
+    #print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
     #----------------------------------------------------------------
     ''' Train & save model '''
     if (model_type == 'RF'):
         if use_xgboost:
-            xgbrfr = xgb.XGBRFRegressor(tree_method="gpu_hist",
-                                    num_estimators=num_trees_rf, 
-                                    max_depth=24,
-                                    device='cuda',
-                                    booster='gbtree',
-                                    objective='reg:squarederror')
+            DM_train = xgb.DMatrix(data=x_train_df, label=y_train_df)
+            DM_test  = xgb.DMatrix(data=x_test_df, label=y_test_df)
 
-            print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
-            xgbrfr.fit(x_train_df, y_train_df.values.ravel())
+            del(x_train_df)
+            del(y_train_df)
+            del(x_test_df)
+            del(y_test_df)
+
+            param_dict = {"objective": "reg:squarederror",
+                          "booster": "gbtree",
+                          "colsample_bynode": 0.8,
+                          "learning_rate": 1, # DO NOT CHANGE, ENSURES XGBOOST MAKES A RANDOM FOREST
+                          "max_depth": max_depth,
+                          "num_parallel_tree": num_trees_rf,
+                          "subsample": subsample,
+                          "tree_method": "hist",
+                          "device": device}
+            
+            evals_result = {}
+            model = xgb.train(param_dict,
+                             dtrain=DM_train,
+                             num_boost_round=1, # DO NOT CHANGE, ENSURES XGBOOST MAKES A RANDOM FOREST
+                             evals=[(DM_train, "Train"), (DM_test, "Test")],
+                             evals_result=evals_result,
+                             verbose_eval=True)
+            
+            train_error = evals_result["Train"]["rmse"]
+            test_error = evals_result["Test"]["rmse"]
 
             if not (model_save_path == None):
                 if not os.path.exists(model_save_path):
                     os.makedirs(model_save_path)
                 model_name = NameModel(config_path)
                 print('model_name', model_name)
-                xgbrfr.save_model(os.path.join(model_save_path, 'XGBRF_'+model_name+'.json'))
+                if model_name == None:
+                    model_name = NameModel(config_path)
+                dump(model, os.path.join(model_save_path, model_name))
 
         else: 
             rfr = RandomForestRegressor(n_estimators=num_trees_rf, 
@@ -69,24 +93,51 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
                 print('model_name', model_name)
                 dump(rfr, os.path.join(model_save_path, model_name))
 #====================================================================
-def TestNaiveRF(config_path, data_config_path, model_path):
+def TestNaiveRF(config_path, data_config_path, model_name):
+    #----------------------------------------------------------------
+    ''' Get info from model name '''
+    info, param_dict = ParseModelName(model_name)
+    print("param_dict:", param_dict)
+
     #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
+
+    model_folder = config['MODEL_SAVE_PATH']
+    figure_folder = config['FIG_SAVE_PATH']
+
+    if (param_dict['MODEL_TYPE'] == 'XGBRF'):
+        config['MODEL_TYPE'] = 'RF'
+        config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] = True
+    else:
+        config['MODEL_TYPE']   = param_dict['MODEL_TYPE']
+    config['REGION']       = param_dict['REGION']
+    config['RF_OFFSET']    = param_dict['RF_OFFSET']
+    config['HISTORY_DATA'] = param_dict['HISTORY_DATA']
+    config['TARGET_DATA']  = param_dict['TARGET_DATA']
+
+    with open(config_path, 'w') as config_file:
+        yaml.dump(config, config_file)
     #----------------------------------------------------------------
     ''' Load model '''
-    
-    trained_rfr = 69
-    print('model_path', model_path)
-    if ('XGBRF' in model_path):
-        trained_rfr = xgb.XGBRFRegressor()
-        trained_rfr.load_model(model_path)
-    else:
-        trained_rfr = load(model_path)
+
+    model_path = 69
+    folders = os.listdir(model_folder)
+    if ('.DS_Store' in folders):
+        folders.remove('.DS_Store')
+
+    for folder in folders:
+        for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
+            for name in files:
+                #print("root=",root, ", name=", name)
+                if (model_name in name):
+                    if (name.endswith('.joblib') or name.endswith('.pkl')):
+                        trained_rfr = load(os.path.join(root, name))
     #----------------------------------------------------------------
     ''' Get data '''
+
     x_train_df, x_test_df, y_train_df, y_test_df, x_train_orig_shape, x_test_orig_shape, y_train_orig_shape, y_test_orig_shape = NaiveRFDataLoader(config_path, data_config_path, return_shapes=True)
 
     del(x_train_df)
@@ -106,8 +157,11 @@ def TestNaiveRF(config_path, data_config_path, model_path):
     print("UNSCALED TIME", np.shape(time), time)
     #----------------------------------------------------------------
     ''' Test model '''
-
-    y_pred = trained_rfr.predict(x_test_df)
+    y_pred = 69
+    if ('XGB' in model_name):
+        y_pred = np.asarray(trained_rfr.predict(xgb.DMatrix(data=x_test_df)))
+    else:
+        y_pred = trained_rfr.predict(x_test_df)
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
 
@@ -122,6 +176,7 @@ def TestNaiveRF(config_path, data_config_path, model_path):
                             name="Importance").sort_values(ascending=True, inplace=False) 
     
     print("mse:", mse)
+    print("_________________________________")
     #print("model_ranks:", model_ranks)
 
     #----------------------------------------------------------------
@@ -191,12 +246,12 @@ def TestNaiveRF(config_path, data_config_path, model_path):
     ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
 
     ax_feat.text(0, .6, 
-                 config['MODEL_TYPE']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
+                 param_dict['MODEL_TYPE_LONG']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
                  fontsize=12, fontweight='bold')
     
-    model_name = model_path.split('/')[-1]
+    model_name = model_name.split('.')[0]
 
-    #fig.savefig(os.path.join('Figs', model_name[:-6]+'.pdf'), bbox_inches=None, pad_inches=0)
+    fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches=None, pad_inches=0)
 
     plt.show()
 #====================================================================

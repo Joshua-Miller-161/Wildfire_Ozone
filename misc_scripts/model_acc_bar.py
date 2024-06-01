@@ -12,7 +12,7 @@ fig, ax = plt.subplots(1, 1, figsize = (12, 5))
 
 ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
 #====================================================================
-colors = ['#C0504D', '#488DC8', '#9BBB59', '#8064A2', '#F79646']
+colors = ['#C0504D', '#488DC8', '#9BBB59', '#8064A2', '#F79646', '#AAAAAA']
 
 df = pd.read_excel("/Users/joshuamiller/Documents/Lancaster/Poster/ModelErrorPoster.xlsx", index_col=0)
 
@@ -52,5 +52,5 @@ ax.legend(loc='upper left', prop=font, ncol=4)
 plt.tight_layout()  # Ensure labels are visible
 plt.show()
 
-fig.savefig('/Users/joshuamiller/Documents/Lancaster/Poster/model_error.pdf', bbox_inches='tight', pad_inches=0)
+#fig.savefig('/Users/joshuamiller/Documents/Lancaster/Poster/model_error.pdf', bbox_inches='tight', pad_inches=0)
 #====================================================================

@@ -15,10 +15,9 @@ import geopandas as gpd
 import fiona
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import Extract_netCDF4
 from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
-from ml.ml_utils import NameModel
+from ml.ml_utils import NameModel, ParseModelName
 #====================================================================
 def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/GBM'):
     #----------------------------------------------------------------
@@ -59,7 +58,8 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
                 'reg_lambda': 1,
                 'eval_metric': 'rmse', # fixed. picked a evaluation metric for Regression.
                 'tree_method': 'hist', # XGBoost's built-in GPU support to use Google Colab's GPU
-                'device': 'cuda'}
+                #'device': 'cuda'}
+                }
     
     evals_result = {}
     model = xgb.train(param_dict,
@@ -82,6 +82,11 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
 #====================================================================
 def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #----------------------------------------------------------------
+    ''' Get info from model name '''
+    info, param_dict = ParseModelName(model_name)
+    print("param_dict:", param_dict)
+
+    #----------------------------------------------------------------
     ''' Get data from config '''
 
     with open(config_path, 'r') as c:
@@ -89,8 +94,18 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
 
     model_folder = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
+
+    config['MODEL_TYPE']   = param_dict['MODEL_TYPE']
+    config['REGION']       = param_dict['REGION']
+    config['RF_OFFSET']    = param_dict['RF_OFFSET']
+    config['HISTORY_DATA'] = param_dict['HISTORY_DATA']
+    config['TARGET_DATA']  = param_dict['TARGET_DATA']
+
+    with open(config_path, 'w') as config_file:
+        yaml.dump(config, config_file)
     #----------------------------------------------------------------
     ''' Load model '''
+
     model = 69
     folders = os.listdir(model_folder)
     if ('.DS_Store' in folders):
@@ -115,13 +130,13 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     lat       = UnScale(x_test_df['lat'], 'data_utils/scale_files/lat_minmax.json').reshape(x_test_orig_shape[:-1])
     time      = UnScale(x_test_df['time'], 'data_utils/scale_files/time_minmax.json').reshape(x_test_orig_shape[:-1])
     
-    print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
+    print('UNSCALED OZONE', np.shape(raw_ozone))
     print("+++++++++++++++++++++++++++++++")
-    print('UNSCALED LON', np.shape(lon), lon)
+    print('UNSCALED LON', np.shape(lon))
     print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED LAT", np.shape(lat), lat)
+    print("UNSCALED LAT", np.shape(lat))
     print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED TIME", np.shape(time), time)
+    print("UNSCALED TIME", np.shape(time))
     #----------------------------------------------------------------
     ''' Test model '''
 
@@ -142,9 +157,9 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     print("mse:", mse)
     print("_________________________________")
     #print("model_ranks:", model_ranks)
-
     #----------------------------------------------------------------
     ''' Plot '''
+
     fig = plt.figure(layout="constrained", figsize=(10, 7))
     gs = GridSpec(3, 3, figure=fig, wspace=.05, hspace=.05)
     
@@ -215,9 +230,11 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
 
     ax_feat.text(0, .6, 
-                 config['MODEL_TYPE']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
+                 param_dict['MODEL_TYPE_LONG']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
                  fontsize=12, fontweight='bold')
     
+
+    print("model_name=", model_name)
     model_name = model_name.split('.')[0]
 
     fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches='tight', pad_inches=0)
