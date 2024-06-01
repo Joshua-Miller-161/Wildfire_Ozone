@@ -205,7 +205,7 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     fig.colorbar(lol, cax=cbar_ax)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Plot feature importance
-    ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
+    #ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
 
     ax_feat.text(0, .6, 
                  config['MODEL_TYPE']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
