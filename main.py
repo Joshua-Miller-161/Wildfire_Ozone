@@ -61,9 +61,9 @@ elif (model_type == 'Trans'):
                    model_name='DiamondDenseTrans_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'RF'):
-    # TrainNaiveRF('config.yml', 
-    #              'data_utils/data_utils_config.yml', 
-    #              model_save_path=os.path.join(model_save_path, 'RF'))
+    TrainNaiveRF('config.yml', 
+                 'data_utils/data_utils_config.yml', 
+                 model_save_path=os.path.join(model_save_path, 'RF'))
     TestNaiveRF('config.yml', 
                  'data_utils/data_utils_config.yml', 
                  model_name='XGBRF_reg=SL_f=1_In=OFTUVXYD_Out=O.pkl')
