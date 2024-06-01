@@ -27,7 +27,7 @@ HYPERPARAMETERS:
     num_boost_round: 1000
     subsample: 0.5
   rf_hyperparams_dict:
-    device: cpu
+    device: 'cuda'
     max_depth: 24
     num_trees: 200
     subsample: 0.5
