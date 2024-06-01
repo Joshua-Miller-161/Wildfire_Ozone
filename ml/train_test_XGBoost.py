@@ -134,11 +134,12 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
 
-    model_ranks = pd.Series(model.feature_importances_,
-                            index=x_test_df.columns,
-                            name="Importance").sort_values(ascending=True, inplace=False) 
+    # model_ranks = pd.Series(model.feature_importances_,
+    #                         index=x_test_df.columns,
+    #                         name="Importance").sort_values(ascending=True, inplace=False) 
     
     print("mse:", mse)
+    print("_________________________________")
     #print("model_ranks:", model_ranks)
 
     #----------------------------------------------------------------
