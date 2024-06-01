@@ -123,7 +123,7 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     #----------------------------------------------------------------
     ''' Load model '''
 
-    model_path = 69
+    trained_rfr = 69
     folders = os.listdir(model_folder)
     if ('.DS_Store' in folders):
         folders.remove('.DS_Store')
@@ -171,10 +171,11 @@ def TestNaiveRF(config_path, data_config_path, model_name):
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
 
-    model_ranks = pd.Series(trained_rfr.feature_importances_,
-                            index=x_test_df.columns,
-                            name="Importance").sort_values(ascending=True, inplace=False) 
-    
+    if not ('XGB' in model_name):
+        model_ranks = pd.Series(trained_rfr.feature_importances_,
+                                index=x_test_df.columns,
+                                name="Importance").sort_values(ascending=True, inplace=False) 
+        
     print("mse:", mse)
     print("_________________________________")
     #print("model_ranks:", model_ranks)
@@ -243,7 +244,8 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     fig.colorbar(lol, cax=cbar_ax)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Plot feature importance
-    ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
+    if not ('XGB' in model_name):
+        ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
 
     ax_feat.text(0, .6, 
                  param_dict['MODEL_TYPE_LONG']+'\n'+config['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
