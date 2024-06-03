@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def NameModel(config_path, prefix=''):
     model_name = ''
     if not (prefix == ''):
-        model_name = prefix
+        model_name = prefix+'-'
     print('IN NAME MODEL', model_name)
     #----------------------------------------------------------------
     ''' Get infor from config '''
@@ -292,30 +292,31 @@ class NoisyDecayLR(Callback):
         
         keras.backend.set_value(self.model.optimizer.lr, noisy_lr)
 #====================================================================
-# class SinusoidalLR(Callback):
-#     def __init__(self, init_lr, final_lr, freq, mag_noise):
-#         super().__init__()
-#         """
-#         Custom learning rate scheduler that generates a sinusoidal learning rate.
+class NoisySinLR(Callback):
+    def __init__(self, total_epochs, init_lr, final_lr, freq, mag_noise):
+        super().__init__()
+        """
+        Custom learning rate scheduler that generates a sinusoidal learning rate.
 
-#         Args:
-#             init_lr (float): Initial learning rate.
-#             final_lr (float): Final learning rate.
-#             freq (float): Frequency of oscillation (in cycles per epoch).
-#             mag_noise (float): Magnitude of random noise to add to the sine wave.
-#         """
-#         self.init_lr = init_lr
-#         self.final_lr = final_lr
-#         self.freq = freq
-#         self.mag_noise = mag_noise
+        Args:
+            init_lr (float): Initial learning rate.
+            final_lr (float): Final learning rate.
+            freq (float): Frequency of oscillation (in cycles per epoch).
+            mag_noise (float): Magnitude of random noise to add to the sine wave.
+        """
+        self.total_epochs = total_epochs
+        self.init_lr = init_lr
+        self.final_lr = final_lr
+        self.freq = freq
+        self.mag_noise = mag_noise
 
-#     def on_epoch_begin(self, epoch, logs=None):
-#         t = epoch / self.freq
-#         sine_lr = 0.5 * (1 + np.sin(2 * np.pi * t))
-#         noisy_lr = sine_lr + np.random.normal(scale=self.mag_noise)
-#         new_lr =  self.init_lr + (self.final_lr - self.init_lr) * noisy_lr
-        
-#         keras.backend.set_value(self.model.optimizer.lr, new_lr)
+    def on_epoch_begin(self, epoch, logs=None):
+        line = self.init_lr + ((self.final_lr - self.init_lr) * epoch / self.total_epochs)
+        sin  = np.cos((2 * np.pi / self.freq) * epoch) * self.init_lr - self.init_lr
+        new_lr = line + self.mag_noise * np.random.uniform(size=1) * sin
+        if (new_lr < self.final_lr):
+            new_lr = self.final_lr
+        keras.backend.set_value(self.model.optimizer.lr, new_lr)
 
 # # Example usage:
 # init_lr = 0.01
@@ -326,15 +327,20 @@ class NoisyDecayLR(Callback):
        
 # epochs = np.arange(0, 100)
 # print(epochs)
-# lrs    = np.ones_like(epochs) * -999
+# lrs    = np.ones(np.shape(epochs)[0], dtype=float) * -999
 # #lrs = np.sin((2 * np.pi / frequency) * epochs)
 # # noisy_lr = sine_lr + np.random.normal(scale=mag_noise)
 # # lrs[i] = init_lr + (final_lr - init_lr) * noisy_lr
 # #print(lrs)
 
 # for i in range(np.shape(epochs)[0]):
-#     lrs[i] = np.sin((2 * np.pi / frequency) * epochs[i])
+#     line = init_lr + ((final_lr - init_lr) * epochs[i] / np.shape(epochs)[0])
+#     sin  = np.cos((2 * np.pi / frequency) * epochs[i]) * init_lr - (init_lr)
+#     lrs[i] = line + .1 * np.random.uniform(size=1) * sin
+
+#     print(i, epochs[i], lrs[i])
 
 # plt.scatter(epochs, lrs)
+# plt.plot(epochs, init_lr + (final_lr - init_lr)/100*epochs, 'r-')
 # plt.show()
  
