@@ -293,7 +293,7 @@ class NoisyDecayLR(Callback):
         keras.backend.set_value(self.model.optimizer.lr, noisy_lr)
 #====================================================================
 class NoisySinLR(Callback):
-    def __init__(self, total_epochs, init_lr=0.01, final_lr=0.00001, freq=10, mag_noise=1):
+    def __init__(self, total_epochs, init_lr=0.01, final_lr=0.00001, freq=10, mag_noise=.1):
         super().__init__()
         """
         Custom learning rate scheduler that generates a sinusoidal learning rate.
@@ -305,15 +305,15 @@ class NoisySinLR(Callback):
             mag_noise (float): Magnitude of random noise to add to the sine wave.
         """
         self.total_epochs = total_epochs
-        self.init_lr = init_lr
-        self.final_lr = final_lr
-        self.freq = freq
-        self.mag_noise = mag_noise
+        self.init_lr      = init_lr
+        self.final_lr     = final_lr
+        self.freq         = freq
+        self.mag_noise    = mag_noise
 
     def on_epoch_begin(self, epoch, logs=None):
         line = self.init_lr + ((self.final_lr - self.init_lr) * epoch / self.total_epochs)
         sin  = np.cos((2 * np.pi / self.freq) * epoch) * self.init_lr - self.init_lr
-        new_lr = line + self.mag_noise * np.random.uniform(size=1) * sin
+        new_lr = line + self.mag_noise * np.random.uniform() * sin
         if (new_lr < self.final_lr):
             new_lr = self.final_lr
         keras.backend.set_value(self.model.optimizer.lr, new_lr)

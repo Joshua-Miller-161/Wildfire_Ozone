@@ -21,7 +21,7 @@ from ml.conv_lstm import MakeConvLSTM
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
-from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR
+from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR
 from ml.custom_keras_layers import TransformerBlock
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels', prefix=''):
@@ -85,7 +85,8 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                                                       restore_best_weights=True)
     custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
-    #custom_lr = NoisyDecayLR()
+    #custom_lr = NoisySinLR(num_epochs)
+
     history = model.fit(x=x_train,
                         y=y_train,
                         validation_data=(x_test, y_test),
