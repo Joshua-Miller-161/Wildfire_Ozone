@@ -27,7 +27,7 @@ HYPERPARAMETERS:
     num_boost_round: 1000
     subsample: 0.5
   rf_hyperparams_dict:
-    device: 'cuda'
+    device: cpu
     max_depth: 24
     num_trees: 200
     subsample: 0.5
@@ -39,7 +39,7 @@ HYPERPARAMETERS:
     num_neurons: 100
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: RF
-REGION: South_Land
+REGION: Whole_Area
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

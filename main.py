@@ -66,7 +66,7 @@ elif (model_type == 'RF'):
                  model_save_path=os.path.join(model_save_path, 'RF'))
     TestNaiveRF('config.yml', 
                  'data_utils/data_utils_config.yml', 
-                 model_name='XGBRF_reg=SL_f=1_In=OFTUVXYD_Out=O.pkl')
+                 model_name='XGBRF_reg=WA_f=1_In=OFTUVXYD_Out=O.pkl')
 #--------------------------------------------------------------------
 elif (model_type == 'GBM'):
     TrainNaiveXGBoost('config.yml', 
