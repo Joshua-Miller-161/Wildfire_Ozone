@@ -38,8 +38,8 @@ HYPERPARAMETERS:
     num_heads: 4
     num_neurons: 100
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: RF
-REGION: Whole_Area
+MODEL_TYPE: Dense
+REGION: South_Land
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone
