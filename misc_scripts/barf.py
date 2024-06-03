@@ -62,3 +62,24 @@ for epoch in range(total_epochs):
 
 plt.scatter(np.arange(total_epochs), lrs)
 plt.show()
+
+import numpy as np
+import json
+
+# Create an empty dictionary to store permutations
+permutations_dict = {}
+
+# Generate permutations for each integer from 1 to 1554
+for i in range(1, 1555):
+    permutations = list(map(int, np.random.permutation(np.arange(i))))
+    permutations_dict[str(i)] = permutations
+    print('-----------------------------------------------')
+    #print(permutations_dict[str(i)])
+
+print(type(permutations_dict))
+# Save the dictionary to a .json file
+output_filename = "/Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/data_utils/permutations.json"
+with open(output_filename, "w") as json_file:
+    json.dump(permutations_dict, json_file)
+
+print(f"Permutations saved to {output_filename}")

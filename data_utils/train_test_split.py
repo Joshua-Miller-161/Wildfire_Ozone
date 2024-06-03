@@ -1,7 +1,8 @@
 import numpy as np
 import yaml
+import json
 #====================================================================
-def Train_Test_Split(config_path, x_data, y_data, shuffle=True, del_data=True):
+def Train_Test_Split(config_path, x_data, y_data, shuffle=True, perm_path='data_utils/permutations.json', del_data=True):
     #----------------------------------------------------------------
     ''' Get variables from config '''
 
@@ -18,9 +19,13 @@ def Train_Test_Split(config_path, x_data, y_data, shuffle=True, del_data=True):
     split_idx = int(split * np.shape(x_data)[0])
 
     if shuffle:
-        permutation = np.random.permutation(x_data.shape[0])
+        with open(perm_path) as json_file:
+            permutation_dict = json.load(json_file)
+        permutation = permutation_dict[str(np.shape(x_data)[0])]
         x_data = x_data[permutation]
         y_data = y_data[permutation]
+        del(permutation_dict)
+        del(permutation)
 
     x_train = x_data[:split_idx, ...]
     x_test  = x_data[split_idx:, ...]

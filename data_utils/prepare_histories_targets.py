@@ -1,7 +1,7 @@
 import numpy as np
 import yaml
 #====================================================================
-def Histories_Targets(config_path, x_data, y_data, shuffle=True, del_data=True):
+def Histories_Targets(config_path, x_data, y_data, del_data=True):
     #----------------------------------------------------------------
     ''' Get variables from config '''
 
@@ -34,11 +34,6 @@ def Histories_Targets(config_path, x_data, y_data, shuffle=True, del_data=True):
         targets[i, ...]   = y_data[i+history_len : i+history_len+target_len, ...]
 
     #----------------------------------------------------------------
-    if shuffle:
-        permutation = np.random.permutation(np.shape(histories)[0])
-        histories   = histories[permutation]
-        targets     = targets[permutation]
-
     if del_data:
         del(x_data)
         del(y_data)

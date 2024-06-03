@@ -202,7 +202,6 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     for i in range(len(axes)):
         axes[i].set_xlim(min_lon-5, max_lon+5)
         axes[i].set_ylim(min_lat-5, max_lat+5)
-        world.plot(ax=axes[i], facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
 
         if (i == 0):
             axes[i].set_title("data "+str(int(time_axis[idx1])))
@@ -222,6 +221,11 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     ax_pred1.scatter(x=lon[idx1, ...], y=lat[idx1, ...], c=y_pred[idx1, ...], norm=norm, cmap='bwr')
     ax_orig2.scatter(x=lon[idx2, ...], y=lat[idx2, ...], c=raw_ozone[idx2, ...], norm=norm, cmap='bwr')
     ax_pred2.scatter(x=lon[idx2, ...], y=lat[idx2, ...], c=y_pred[idx2, ...], norm=norm, cmap='bwr')
+
+    world.plot(ax=ax_orig1, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
+    world.plot(ax=ax_pred1, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
+    world.plot(ax=ax_orig2, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
+    world.plot(ax=ax_pred2, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
 
     cbar_ax = fig.add_axes([0.61, 0.08, 0.03, 0.59])  # Adjust as necessary
     fig.colorbar(lol, cax=cbar_ax)
