@@ -37,11 +37,11 @@ if (model_type == 'Linear'):
 #--------------------------------------------------------------------
 elif (model_type == 'Dense'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
-    TrainKerasModel('config.yml',
-                    prefix='Diamond',
-                    model_save_path=os.path.join(model_save_path, 'Dense'))
+    # TrainKerasModel('config.yml',
+    #                 prefix='Diamond',
+    #                 model_save_path=os.path.join(model_save_path, 'Dense'))
     TestKerasModel('config.yml',
-                   model_name='Dense_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e=100')
+                   model_name='Diamond_Dense_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e=100')
 #--------------------------------------------------------------------   
 elif (model_type == 'ConvLSTM'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
