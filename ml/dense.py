@@ -33,7 +33,7 @@ def MakeDense(config_path,
     # Spatial part
     spat_flat = Reshape((input_layer.shape[1], -1))(input_layer)
     
-    num_spat_nuerons = Funnel(spat_flat.shape[-1], y_data_shape[2] * y_data_shape[3] * y_data_shape[4])
+    num_spat_nuerons = Funnel(spat_flat.shape[-1], y_data_shape[2] * y_data_shape[3] * y_data_shape[4], r=10)
     for i in range(np.shape(num_spat_nuerons)[0]):
         spat_flat = Dense(units=num_spat_nuerons[i], activation='relu')(spat_flat)
         spat_flat = LayerNormalization()(spat_flat)
@@ -56,7 +56,7 @@ def MakeDense(config_path,
 
     flat = Flatten()(final_dense)
 
-    num_flat_neurons = Funnel(flat.shape[-1], int(y_data_shape[2] * y_data_shape[3] * y_data_shape[4] * np.e)+1)
+    num_flat_neurons = Funnel(flat.shape[-1], int(y_data_shape[2] * y_data_shape[3] * y_data_shape[4] * 10)+1, r=10)
     for i in range(np.shape(num_flat_neurons)[0]):
         flat = Dense(units=num_flat_neurons[i], activation='relu')(flat)
         flat = LayerNormalization()(flat)
