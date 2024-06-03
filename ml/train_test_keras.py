@@ -42,7 +42,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
     y_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'TARGET_DATA')
 
-    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=True)
+    histories, targets = Histories_Targets('config.yml', x_data, y_data)
 
     del(x_data)
     del(y_data)
@@ -211,14 +211,14 @@ def TestKerasModel(config_path, model_name):
 
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
                      
-    print("_________________________________")
+    print("____________________________________________________________")
     print("y_pred=", np.shape(y_pred), ", y_data=", np.shape(raw_ozone),
           ", lon=", np.shape(lon), ", lat=", np.shape(lat))
-    print("_________________________________")
+    print("____________________________________________________________")
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
     print("MSE:", mse)
-
+    print("____________________________________________________________")
     #----------------------------------------------------------------
     ''' Plot '''
     fig = plt.figure(layout="constrained", figsize=(10, 7))
