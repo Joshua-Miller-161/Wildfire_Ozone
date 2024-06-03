@@ -293,7 +293,7 @@ class NoisyDecayLR(Callback):
         keras.backend.set_value(self.model.optimizer.lr, noisy_lr)
 #====================================================================
 class NoisySinLR(Callback):
-    def __init__(self, total_epochs, init_lr, final_lr, freq, mag_noise):
+    def __init__(self, total_epochs, init_lr=0.01, final_lr=0.00001, freq=10, mag_noise=1):
         super().__init__()
         """
         Custom learning rate scheduler that generates a sinusoidal learning rate.

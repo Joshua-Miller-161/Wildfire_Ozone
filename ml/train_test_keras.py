@@ -85,7 +85,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                                                       restore_best_weights=True)
     custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
-
+    #custom_lr = NoisyDecayLR()
     history = model.fit(x=x_train,
                         y=y_train,
                         validation_data=(x_test, y_test),
