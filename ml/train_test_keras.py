@@ -122,7 +122,7 @@ def TestKerasModel(config_path, model_name):
     model_folder = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
 
-    info = ParseModelName(model_name)
+    info, param_dict = ParseModelName(model_name)
 
     # direction = info[0].split(' ')[0]
     # mystring.replace(" ", "_")
@@ -202,8 +202,6 @@ def TestKerasModel(config_path, model_name):
 
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3),
                   loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", name="MSE"))
-
-
     #----------------------------------------------------------------
     ''' Test model '''
 
@@ -290,7 +288,7 @@ def TestKerasModel(config_path, model_name):
     #ax=model_ranks.plot(kind='bar', ax=ax_feat, rot=45)
 
     ax_feat.text(0, .6, 
-                 info[0]+'\n'+info[1]+'\nMSE: '+str(round(mse, 10))+'\n'+str(config['RF_OFFSET'])+' days ahead', 
+                 param_dict['MODEL_TYPE_LONG']+'\n'+param_dict['REGION']+'\nMSE: '+str(round(mse, 10))+'\n'+str(param_dict['history_len'])+' days of data'+'\n'+str(param_dict['target_len'])+' days ahead', 
                  fontsize=12, fontweight='bold')
     
     #model_name = model_path.split('/')[-1]

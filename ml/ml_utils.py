@@ -49,9 +49,9 @@ def NameModel(config_path, prefix=''):
 
     if (config['MODEL_TYPE'] == 'RF'):
         if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
-            model_name = 'XGBRF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+            model_name += 'XGBRF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
         else:
-            model_name = 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+            model_name += 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
 
         for var in history_vars:
             model_name += shorthand_dict[var]
@@ -66,7 +66,7 @@ def NameModel(config_path, prefix=''):
             model_name += '.joblib'
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     if (config['MODEL_TYPE'] == 'GBM'):
-        model_name = 'GBM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        model_name += 'GBM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
         #print("model_name:", model_name)
 
         for var in history_vars:
@@ -81,7 +81,7 @@ def NameModel(config_path, prefix=''):
         model_name += '.pkl'
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Linear'):
-        model_name = 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+        model_name += 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
         #print("model_name:", model_name)
 
         epochs = config['HYPERPARAMETERS']['linear_hyperparams_dict']['epochs']
@@ -96,7 +96,7 @@ def NameModel(config_path, prefix=''):
         model_name += '_e='+str(epochs)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Dense'):
-        model_name = 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+        model_name += 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
         #print("model_name:", model_name)
         epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
 
@@ -124,7 +124,7 @@ def NameModel(config_path, prefix=''):
         model_name += '_e='+str(epochs)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-        model_name = 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+        model_name += 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
         print("model_name:", model_name)
         epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
 
@@ -138,7 +138,7 @@ def NameModel(config_path, prefix=''):
         model_name += '_e='+str(epochs)
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Trans'):
-        model_name = 'Trans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+        model_name += 'Trans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
         print("model_name:", model_name)
         epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
 
