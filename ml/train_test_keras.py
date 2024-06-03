@@ -36,7 +36,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'ConvLSTM', 'Trans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(config['MODEL_TYPE'])
+    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
     #----------------------------------------------------------------
     ''' Get data '''
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')

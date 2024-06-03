@@ -41,16 +41,15 @@ elif (model_type == 'Dense'):
                     prefix='Diamond',
                     model_save_path=os.path.join(model_save_path, 'Dense'))
     TestKerasModel('config.yml',
-                   model_name='Dense_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e=100',
-                   model_folder=model_save_path)
+                   model_name='Dense_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e=100')
 #--------------------------------------------------------------------   
 elif (model_type == 'ConvLSTM'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
+                    model_name='ConvLSTM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                     model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     TestKerasModel('config.yml',
-                   model_name='ConvLSTM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
-                   model_folder=model_save_path)
+                   model_name='ConvLSTM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------   
 elif (model_type == 'Trans'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
