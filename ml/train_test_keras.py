@@ -132,7 +132,7 @@ def TestKerasModel(config_path, model_name):
     x_data = DataLoader(config_path, 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
     y_data = DataLoader(config_path, 'data_utils/data_utils_config.yml', 'TARGET_DATA')
 
-    histories, targets = Histories_Targets('config.yml', x_data, y_data, shuffle=True)
+    histories, targets = Histories_Targets('config.yml', x_data, y_data)
 
     del(x_data)
     del(y_data)
