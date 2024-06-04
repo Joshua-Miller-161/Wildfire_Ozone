@@ -18,6 +18,7 @@ from data_utils.data_loader import DataLoader
 from data_utils.prepare_histories_targets import Histories_Targets
 from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
+from ml.conv import MakeConv
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
@@ -66,6 +67,11 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         num_epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['dense_hyperparams_dict']['batch_size']
     
+    elif (config['MODEL_TYPE'] == 'Conv'):
+        model = MakeConv(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['conv_hyperparams_dict']['batch_size']
+    
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
         model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
@@ -81,7 +87,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                   optimizer=keras.optimizers.SGD(learning_rate=0.01))
     
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
-                                                      patience=3, 
+                                                      patience=15, 
                                                       restore_best_weights=True)
     custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)

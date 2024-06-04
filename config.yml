@@ -17,6 +17,11 @@ HYPERPARAMETERS:
     epochs: 100
     num_inner_filters: 128
     num_outer_filters: 64
+  conv_hyperparams_dict:
+    batch_size: 32
+    epochs: 100
+    num_inner_filters: 128
+    num_outer_filters: 64
   dense_hyperparams_dict:
     batch_size: 32
     epochs: 100
@@ -38,7 +43,7 @@ HYPERPARAMETERS:
     num_heads: 4
     num_neurons: 100
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: Dense
+MODEL_TYPE: Conv
 REGION: West_Ocean
 RF_OFFSET: 1
 TARGET_DATA:
