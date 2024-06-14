@@ -19,11 +19,14 @@ from data_utils.prepare_histories_targets import Histories_Targets
 from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
 from ml.conv import MakeConv
+from ml.rbdn import MakeRBDN
+from ml.splitter import MakeSplitter
+from ml.denoise3D import MakeDenoise
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
-from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR
-from ml.custom_keras_layers import TransformerBlock
+from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR, FractaLR
+from ml.custom_keras_layers import TransformerBlock, RecombineLayer
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels', prefix=''):
     #----------------------------------------------------------------
@@ -37,7 +40,9 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
+    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
+
+    patience = config['PATIENCE']
     #----------------------------------------------------------------
     ''' Get data '''
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
@@ -50,8 +55,6 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
 
     x_train, x_test, y_train, y_test = Train_Test_Split('config.yml', histories, targets, shuffle=True)
 
-    print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
-    
     del(histories)
     del(targets)
     #----------------------------------------------------------------
@@ -60,7 +63,6 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
 
     if (config['MODEL_TYPE'] == 'Linear'):
         model = MakeLinear(config_path, np.shape(x_train), np.shape(y_train))
-        
 
     elif (config['MODEL_TYPE'] == 'Dense'):
         model = MakeDense(config_path, np.shape(x_train), np.shape(y_train))
@@ -68,9 +70,37 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         batch_size = config['HYPERPARAMETERS']['dense_hyperparams_dict']['batch_size']
     
     elif (config['MODEL_TYPE'] == 'Conv'):
+        x_train = np.transpose(x_train, (0, 2, 3, 1, 4))
+        y_train = np.transpose(y_train, (0, 2, 3, 1, 4))
+        x_test = np.transpose(x_test, (0, 2, 3, 1, 4))
+        y_test = np.transpose(y_test, (0, 2, 3, 1, 4))
+
+        print("____________________________________________________________")
+        print(" >> Conv transpose")
+        print(" >> x_train:", np.shape(x_train))
+        print(" >> y_train:", np.shape(y_train))
+        print(" >> x_test :", np.shape(x_test))
+        print(" >> y_test :", np.shape(y_test))
+        print("____________________________________________________________")
+        
         model = MakeConv(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['conv_hyperparams_dict']['batch_size']
+    
+    elif (config['MODEL_TYPE'] == 'RBDN'):
+        model = MakeRBDN(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['batch_size']
+    
+    elif (config['MODEL_TYPE'] == 'Split'):
+        model = MakeSplitter(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['split_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['split_hyperparams_dict']['batch_size']
+    
+    elif (config['MODEL_TYPE'] == 'Denoise'):
+        model = MakeDenoise(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
     
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
         model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
@@ -84,15 +114,23 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
                                                      name="MSE"),
-                  optimizer=keras.optimizers.SGD(learning_rate=0.01))
+                  optimizer=keras.optimizers.SGD())
     
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
-                                                      patience=15, 
+                                                      patience=patience, 
                                                       restore_best_weights=True)
     custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
     #custom_lr = NoisySinLR(num_epochs)
+    #custom_lr = FractaLR(num_epochs)
 
+    print(" >> x_train:", np.shape(x_train))
+    print(" >> y_train:", np.shape(y_train))
+    print(" >> x_test :", np.shape(x_test))
+    print(" >> y_test :", np.shape(y_test))
+    print("____________________________________________________________")
+    print(" >> Training model type:", config['MODEL_TYPE'])
+    print("____________________________________________________________")
     history = model.fit(x=x_train,
                         y=y_train,
                         validation_data=(x_test, y_test),
@@ -105,11 +143,6 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     if not (model_save_path==None):
         if (model_name == None):
             model_name = NameModel(config_path, prefix=prefix)
-        print(' >>')
-        print(' >>')
-        print(' >> model_name', model_name)
-        print(' >>')
-        print(' >>')
     
         model_json = model.to_json()
         with open(os.path.join(model_save_path, model_name+'.json'), 'w') as json_file:
@@ -117,6 +150,12 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
 
         model.save_weights(os.path.join(model_save_path, model_name+'.h5'))
 
+        print(' >>')
+        print(' >>')
+        print(' >> model_name', model_name)
+        print(' >>')
+        print(' >> Architecture file:', os.path.join(model_save_path, model_name+'.json'))
+        print(' >> Weights file:', os.path.join(model_save_path, model_name+'.h5'))
     return x_test, y_test, history
 #====================================================================
 def TestKerasModel(config_path, model_name):
@@ -126,7 +165,7 @@ def TestKerasModel(config_path, model_name):
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    model_folder = config['MODEL_SAVE_PATH']
+    model_folder  = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
 
     info, param_dict = ParseModelName(model_name)
@@ -148,8 +187,19 @@ def TestKerasModel(config_path, model_name):
     
     del(histories)
     del(targets)
-
-    print("x_train", np.shape(x_train), ", y_train", np.shape(y_train), ", x_test", np.shape(x_test), ", y_test", np.shape(y_test))
+    
+    if ('Conv_' in model_name):
+        x_train = np.transpose(x_train, (0, 2, 3, 1, 4))
+        y_train = np.transpose(y_train, (0, 2, 3, 1, 4))
+        x_test = np.transpose(x_test, (0, 2, 3, 1, 4))
+        y_test = np.transpose(y_test, (0, 2, 3, 1, 4))
+    
+    print(" >> x_train:", np.shape(x_train))
+    print(" >> y_train:", np.shape(y_train))
+    print(" >> x_test :", np.shape(x_test))
+    print(" >> y_test :", np.shape(y_test))
+    print("____________________________________________________________")
+    print(" >> Testing model type:", config['MODEL_TYPE'])
     x_test_orig_shape = np.shape(x_test)
     y_test_orig_shape = np.shape(y_test)
 
@@ -172,17 +222,17 @@ def TestKerasModel(config_path, model_name):
     model_architecture = ''
     model_weights = ''
     model = 69
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print(os.listdir(model_folder))
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print(os.listdir(model_folder))
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
+    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
     folders = os.listdir(model_folder)
     if ('.DS_Store' in folders):
         folders.remove('.DS_Store')
@@ -190,21 +240,27 @@ def TestKerasModel(config_path, model_name):
     for folder in folders:
         for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
             for name in files:
-                #print("root=",root, ", name=", name)
+                print("root=",root, ", name=", name)
                 if (model_name in name):
                     if name.endswith('.json'):
                         model_architecture = os.path.join(root, name)
+                        print(" >> model: ", os.path.join(root, name))
                     elif name.endswith('.h5'):
                         model_weights = os.path.join(root, name)
-            
+                        print(" >> weights: ", os.path.join(root, name))
+
     with open(model_architecture, 'r') as json_file:
         loaded_model_json = json_file.read()
 
     if (config['MODEL_TYPE'] == 'Trans'):
         model = keras.models.model_from_json(loaded_model_json, custom_objects={"TransformerBlock":TransformerBlock})
+    elif (config['MODEL_TYPE'] == 'Split'):
+        model = keras.models.model_from_json(loaded_model_json, custom_objects={"RecombineLayer":RecombineLayer})
     else:
         model = keras.models.model_from_json(loaded_model_json)
-   
+
+    print("____________________________________________________________")
+
     model.load_weights(model_weights)
 
     model.compile(optimizer=keras.optimizers.Adam(learning_rate=1e-3),
@@ -215,7 +271,16 @@ def TestKerasModel(config_path, model_name):
     y_pred = model.predict(x_test)
 
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
-                     
+    print("____________________________________________________________")
+    print("orig y_pred=", np.shape(y_pred))
+    if ('Conv_' in model_name):
+        y_pred    = np.transpose(y_pred, (0, 3, 1, 2))
+        raw_ozone = np.transpose(raw_ozone, (0, 3, 1, 2))
+        lon       = np.transpose(lon, (0, 3, 1, 2))
+        lat       = np.transpose(lat, (0, 3, 1, 2))
+        time      = np.transpose(time, ((0, 3, 1, 2)))
+    # raw_ozone = raw_ozone[:, 0, :, :].reshape(np.shape(raw_ozone)[0], 1, np.shape(raw_ozone)[2], np.shape(raw_ozone)[3])
+    # y_pred    = y_pred[:, 0, :, :].reshape(np.shape(y_pred)[0], 1, np.shape(y_pred)[2], np.shape(y_pred)[3])
     print("____________________________________________________________")
     print("y_pred=", np.shape(y_pred), ", y_data=", np.shape(raw_ozone),
           ", lon=", np.shape(lon), ", lat=", np.shape(lat))

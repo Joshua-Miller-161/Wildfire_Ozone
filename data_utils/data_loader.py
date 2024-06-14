@@ -40,10 +40,10 @@ def DataLoader(config_path,
     data_path = data_config['DATA_FOLDER']
     
     scale_types = data_config['PREPROCESSING'][data_type]
-    print("ASDASDASDASDADS", type(scale_types), list(scale_types.values()))
+    #print("ASDASDASDASDADS", type(scale_types), list(scale_types.values()))
 
     for scale_type in list(scale_types.values()):
-        print(scale_type)
+        #print(scale_type)
         if (type(scale_type) == str):
             assert (scale_type in ['none', 'minmax', 'standard', 'log']), var+" must be: 'none', 'minmax', 'standard', 'log'"
 
@@ -77,7 +77,7 @@ def DataLoader(config_path,
                     data_paths_dict[var] = os.path.join(var_path, file)
 
     #print(data_paths_dict)
-    print("variables", variables)
+    print(" >> variables", variables)
     #----------------------------------------------------------------
     ''' Prepare to extract data '''
 
@@ -103,7 +103,7 @@ def DataLoader(config_path,
     lon_dim  = np.shape(dict_[var_names_dict['ozone'][1]])[0]
 
     data = np.ones((num_days, lat_dim, lon_dim, len(variables)), float) * -999
-    print("data", np.shape(data))
+    print(" >> data", np.shape(data))
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Filter time
 
@@ -112,7 +112,7 @@ def DataLoader(config_path,
     start_offset = (start_date - data_start_date).days
     end          = (end_date - data_start_date).days
     valid_date_idx = np.arange(start_offset, end+1)
-    print("start_offset =", start_offset, end, np.shape(valid_date_idx))
+    #print("start_offset =", start_offset, end, np.shape(valid_date_idx))
     #----------------------------------------------------------------
     ''' Loop through desired variables and extract data '''
 
@@ -198,7 +198,7 @@ def DataLoader(config_path,
         elif (var == 'time'):
             if not (time_scale_type == 'none'):
                 filtered_data = Scale(filtered_data, time_scale_type, data_name='time')
-        print("----------------------------------------------------")
+        print("____________________________________________________________")
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         data[:, :, :, idx] = filtered_data
     #----------------------------------------------------------------

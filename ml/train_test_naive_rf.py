@@ -10,7 +10,9 @@ import xgboost as xgb
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
-from joblib import dump, load
+import joblib
+import pickle
+
 import geopandas as gpd
 import fiona
 
@@ -38,10 +40,21 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
 
     x_train_df, x_test_df, y_train_df, y_test_df = NaiveRFDataLoader(config_path, data_config_path)
     #print("y_train_df.shape", np.shape(y_train_df.values), np.shape(y_train_df.values.ravel()))
+    
+    print("}}}}}}}}}}")
+    print("}}}}}}}}}}")
+    print("}}}}}}}}}}")
+    print("}}}}}}}}}}")
+    print("xgboostingggg", use_xgboost)
+    print("}}}}}}}}}}")
+    print("}}}}}}}}}}")
+    print("}}}}}}}}}}")
+    print("}}}}}}}}}}")
     #----------------------------------------------------------------
     ''' Train & save model '''
     if (model_type == 'RF'):
         if use_xgboost:
+
             DM_train = xgb.DMatrix(data=x_train_df, label=y_train_df)
             DM_test  = xgb.DMatrix(data=x_test_df, label=y_test_df)
 
@@ -78,7 +91,7 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
                 print('model_name', model_name)
                 if model_name == None:
                     model_name = NameModel(config_path)
-                dump(model, os.path.join(model_save_path, model_name))
+                joblib.dump(model, os.path.join(model_save_path, model_name))
 
         else: 
             rfr = RandomForestRegressor(n_estimators=num_trees_rf, 
@@ -92,7 +105,7 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
                     os.makedirs(model_save_path)
                 model_name = NameModel(config_path)
                 print('model_name', model_name)
-                dump(rfr, os.path.join(model_save_path, model_name))
+                pickle.dump(rfr, open(os.path.join(model_save_path, model_name), 'wb'))
 #====================================================================
 def TestNaiveRF(config_path, data_config_path, model_name):
     #----------------------------------------------------------------
@@ -134,8 +147,11 @@ def TestNaiveRF(config_path, data_config_path, model_name):
             for name in files:
                 #print("root=",root, ", name=", name)
                 if (model_name in name):
-                    if (name.endswith('.joblib') or name.endswith('.pkl')):
-                        trained_rfr = load(os.path.join(root, name))
+                    if name.endswith('.joblib'):
+                        trained_rfr = joblib.load(os.path.join(root, name))
+                        print("WOOOOOOWEWIJW:EPW\nWEQWEIJQWEPRIJQWE\nWERIJR:OIWEJR:OQWIJR:WEMRFPWEMF")
+                    elif name.endswith('.pkl'):
+                        trained_rfr = pickle.load(open(os.path.join(root, name), 'rb'))
     #----------------------------------------------------------------
     ''' Get data '''
 
@@ -149,13 +165,20 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     lat       = UnScale(x_test_df['lat'], 'data_utils/scale_files/lat_minmax.json').reshape(x_test_orig_shape[:-1])
     time      = UnScale(x_test_df['time'], 'data_utils/scale_files/time_minmax.json').reshape(x_test_orig_shape[:-1])
     
-    print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
-    print("+++++++++++++++++++++++++++++++")
-    print('UNSCALED LON', np.shape(lon), lon)
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED LAT", np.shape(lat), lat)
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED TIME", np.shape(time), time)
+    print(" >> x_train:", x_train_df.shape)
+    print(" >> y_train:", y_train_df.shape)
+    print(" >> x_test :", x_test_df.shape)
+    print(" >> y_test :", y_test_df.shape)
+    print("____________________________________________________________")
+    print(" >> Testing model type:", config['MODEL_TYPE'])
+    print("____________________________________________________________")
+    # print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
+    # print("+++++++++++++++++++++++++++++++")
+    # print('UNSCALED LON', np.shape(lon), lon)
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED LAT", np.shape(lat), lat)
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED TIME", np.shape(time), time)
     #----------------------------------------------------------------
     ''' Test model '''
     y_pred = 69
@@ -166,9 +189,8 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
 
-    print("_________________________________")
-    print(np.shape(y_pred))
-    print("_________________________________")
+    print('y_pred:', np.shape(y_pred))
+    print("____________________________________________________________")
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
 
@@ -176,9 +198,11 @@ def TestNaiveRF(config_path, data_config_path, model_name):
         model_ranks = pd.Series(trained_rfr.feature_importances_,
                                 index=x_test_df.columns,
                                 name="Importance").sort_values(ascending=True, inplace=False) 
-        
+    
     print("mse:", mse)
-    print("_________________________________")
+    print("____________________________________________________________")
+    print("Model source:", os.path.join(root, model_name))
+    print("____________________________________________________________")
     #print("model_ranks:", model_ranks)
 
     #----------------------------------------------------------------

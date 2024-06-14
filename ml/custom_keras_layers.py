@@ -2,7 +2,7 @@ import sys
 sys.dont_write_bytecode = True
 import tensorflow as tf
 from tensorflow import keras
-from keras.layers import Dense, Dropout, LayerNormalization, Permute, Embedding, MultiHeadAttention
+from keras.layers import Dense, Dropout, LayerNormalization, Permute, Embedding, MultiHeadAttention, Concatenate
 
 class Transpose(keras.layers.Layer):
     def __init__(self, dims=None, **kwargs):
@@ -145,3 +145,24 @@ class DoubleTransformerBlock(keras.layers.Layer):
         ffn_output = self.ffn(out2)
         ffn_output = self.dropout3(ffn_output, training=training)
         return self.layernorm2(out2 + ffn_output)
+#====================================================================
+class RecombineLayer(keras.layers.Layer):
+    def __init__(self, lat_kern, **kwargs):
+        super(RecombineLayer, self).__init__(**kwargs)
+        self.lat_kern = lat_kern
+
+    def call(self, inputs):
+        # Assuming 'inputs' is a list of lists where each sublist contains tensors to be concatenated
+        BB = []
+        for i in range(self.lat_kern):
+            BB.append(Concatenate(axis=-2)(inputs[i]))
+
+        final = Concatenate(axis=-3)(BB)
+        return final
+
+    def get_config(self):
+        config = super(RecombineLayer, self).get_config()
+        config.update({
+            'lat_kern': self.lat_kern
+        })
+        return config

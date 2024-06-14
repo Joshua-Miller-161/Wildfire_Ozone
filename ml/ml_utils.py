@@ -12,7 +12,7 @@ def NameModel(config_path, prefix=''):
     model_name = ''
     if not (prefix == ''):
         model_name = prefix+'-'
-    print('IN NAME MODEL', model_name)
+    #print('IN NAME MODEL', model_name)
     #----------------------------------------------------------------
     ''' Get infor from config '''
     with open(config_path, 'r') as c:
@@ -47,102 +47,83 @@ def NameModel(config_path, prefix=''):
                       'West_Ocean': 'WO',}
     #----------------------------------------------------------------
     ''' Make names '''
+    if (config['MODEL_TYPE'] == 'RF' or config['MODEL_TYPE'] == 'GBM'):
+        if (config['MODEL_TYPE'] == 'RF'):
+            if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
+                model_name += 'XGBRF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+            else:
+                model_name += 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
 
-    if (config['MODEL_TYPE'] == 'RF'):
-        if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
-            model_name += 'XGBRF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        else:
-            model_name += 'RF_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+            for var in history_vars:
+                model_name += shorthand_dict[var]
 
-        for var in history_vars:
-            model_name += shorthand_dict[var]
+            model_name += '_Out='
+            for var in target_vars:
+                model_name += shorthand_dict[var]
 
-        model_name += '_Out='
-        for var in target_vars:
-            model_name += shorthand_dict[var]
-        
-        if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
+            if (config['HYPERPARAMETERS']['rf_hyperparams_dict']['use_xgboost'] == True):
+                model_name += '.pkl'
+            else:
+                model_name += '.joblib'
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        if (config['MODEL_TYPE'] == 'GBM'):
+            model_name += 'GBM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+            #print("model_name:", model_name)
+
+            for var in history_vars:
+                model_name += shorthand_dict[var]
+
+            #print("model_name:", model_name)
+
+            model_name += '_Out='
+            for var in target_vars:
+                model_name += shorthand_dict[var]
+            
             model_name += '.pkl'
-        else:
-            model_name += '.joblib'
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    if (config['MODEL_TYPE'] == 'GBM'):
-        model_name += 'GBM_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        #print("model_name:", model_name)
+    #----------------------------------------------------------------
+    else:
+        epochs = -999
+        if (config['MODEL_TYPE'] == 'Linear'):
+            model_name += 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
+            #print("model_name:", model_name)
 
-        for var in history_vars:
-            model_name += shorthand_dict[var]
-
-        #print("model_name:", model_name)
-
-        model_name += '_Out='
-        for var in target_vars:
-            model_name += shorthand_dict[var]
-        
-        model_name += '.pkl'
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (config['MODEL_TYPE'] == 'Linear'):
-        model_name += 'Linear_reg='+shorthand_dict[region]+'_f='+str(int(rf_offset))+'_In='
-        #print("model_name:", model_name)
-
-        epochs = config['HYPERPARAMETERS']['linear_hyperparams_dict']['epochs']
-
-        for var in history_vars:
-            model_name += shorthand_dict[var]
-
-        model_name += '_Out='
-        for var in target_vars:
-            model_name += shorthand_dict[var]
-        
-        model_name += '_e='+str(epochs)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (config['MODEL_TYPE'] == 'Dense'):
-        model_name += 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
-        #print("model_name:", model_name)
-        epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
-
-        for var in history_vars:
-            model_name += shorthand_dict[var]
-
-        model_name += '_Out='
-        for var in target_vars:
-            model_name += shorthand_dict[var]
-        
-        model_name += '_e='+str(epochs)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (config['MODEL_TYPE'] == 'Conv'):
-        model_name = 'Conv_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
-        print("model_name:", model_name)
-        epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
-
-        for var in history_vars:
-            model_name += shorthand_dict[var]
-
-        model_name += '_Out='
-        for var in target_vars:
-            model_name += shorthand_dict[var]
-        
-        model_name += '_e='+str(epochs)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-        model_name += 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
-        print("model_name:", model_name)
-        epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
-
-        for var in history_vars:
-            model_name += shorthand_dict[var]
-
-        model_name += '_Out='
-        for var in target_vars:
-            model_name += shorthand_dict[var]
-        
-        model_name += '_e='+str(epochs)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (config['MODEL_TYPE'] == 'Trans'):
-        model_name += 'Trans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
-        print("model_name:", model_name)
-        epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
-
+            epochs = config['HYPERPARAMETERS']['linear_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'Dense'):
+            model_name += 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            #print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'Conv'):
+            model_name = 'Conv_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            #print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'ConvLSTM'):
+            model_name += 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'RBDN'):
+            model_name += 'RBDN_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'Split'):
+            model_name += 'Split_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['split_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'Denoise'):
+            model_name += 'Denoise_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'Trans'):
+            model_name += 'Trans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         for var in history_vars:
             model_name += shorthand_dict[var]
 
@@ -165,6 +146,7 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e=
              'XGBRF': 'XGBoost Random Forest',
              'GBM': 'Gradient Boosting Machine',
              'Trans': 'Transformer',
+             'Split': 'Splitter',
              'O': 'ozone',
              'F': 'fire',
              'T': 'temp',
@@ -178,7 +160,7 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e=
     #----------------------------------------------------------------
     input_string = input_string.split('.')[0]
 
-    print('input_string:', input_string)
+    print(' >> input_string:', input_string)
 
     chunks = input_string.split(split_char)
 
@@ -270,7 +252,33 @@ class TriangleWaveLR(Callback):
     def on_epoch_end(self, epoch, logs=None):
         if (epoch + 1) % self.period == 0:
             self.initial_peak_lr /= (int((epoch + 1) / self.period) + 1)
+#====================================================================
+class FractaLR(Callback):
+    def __init__(self, total_epochs, init_lr=0.01, floor_lr=0.00001, period=10, num_waves=4):
+        super().__init__()
+        self.total_epochs = total_epochs
+        self.init_lr = init_lr
+        self.floor_lr = floor_lr
+        self.period = period
+        self.num_waves = num_waves
 
+    def PeakHeights(self, epoch, top, floor_lr, period, num_waves):
+        m = (self.floor_lr - top) / (self.period * self.num_waves)
+        y_curr = m * epoch + top
+        y_peak = m * (self.period * int(epoch / self.period)) + top
+        return max(y_curr, y_peak)
+
+    def WaveLine(self, epoch, peak, floor_lr, period):
+        m = (self.floor_lr - peak) / self.period
+        b = peak - m * self.period * (int(epoch / self.period))
+        return m * epoch + b
+    
+    def on_epoch_begin(self, epoch, logs=None):
+        scale    = (1 / (self.num_waves + 1))
+        start_lr = self.init_lr * (1 - scale * int(epoch / (self.num_waves * self.period)))
+        peak_lr  = self.PeakHeights(epoch % (self.num_waves * self.period), start_lr, self.floor_lr, self.period, self.num_waves)
+        lr       = self.WaveLine(epoch, peak_lr, self.floor_lr, self.period)
+        keras.backend.set_value(self.model.optimizer.lr, lr)
 #====================================================================
 class NoisyDecayLR(Callback):
     def __init__(self, total_epochs, initial_lr=0.005, final_lr=0.00001, mag_noise=1):
@@ -320,25 +328,36 @@ class NoisySinLR(Callback):
 
 # # Example usage:
 # init_lr = 0.01
-# final_lr = 0.0001
-# frequency = 20  # Oscillate every 10 epochs
-# mag_noise = 0.0005
+# final_lr = 0.00001
+# period = 5  # Oscillate every 10 epochs
+# num_waves = 4
+# scale = 0.25
 
-       
+# def PeakHeights(epoch, top, final_lr, period, num_waves):
+#     m = (final_lr - top) / (period * num_waves)
+#     y_curr = m * epoch + top
+#     y_peak = m * (period * int(epoch / period)) + top
+#     return max(y_curr, y_peak)
+
+# def WaveLine(epoch, peak, final_lr, period):
+#     m = (final_lr - peak) / period
+#     b = peak - m * period * (int(epoch / period))
+#     return m * epoch + b
+
+
 # epochs = np.arange(0, 100)
-# print(epochs)
 # lrs    = np.ones(np.shape(epochs)[0], dtype=float) * -999
-# #lrs = np.sin((2 * np.pi / frequency) * epochs)
-# # noisy_lr = sine_lr + np.random.normal(scale=mag_noise)
-# # lrs[i] = init_lr + (final_lr - init_lr) * noisy_lr
-# #print(lrs)
 
 # for i in range(np.shape(epochs)[0]):
-#     line = init_lr + ((final_lr - init_lr) * epochs[i] / np.shape(epochs)[0])
-#     sin  = np.cos((2 * np.pi / frequency) * epochs[i]) * init_lr - (init_lr)
-#     lrs[i] = line + .1 * np.random.uniform(size=1) * sin
+#     start_lr = init_lr * (1 - scale * int(epochs[i] / (num_waves * period)))
+    
+#     peak_lr = PeakHeights(epochs[i] % (num_waves * period), start_lr, final_lr, period, num_waves)
 
-#     print(i, epochs[i], lrs[i])
+#     lrs[i] = WaveLine(epochs[i], peak_lr, final_lr, period)
+
+#     if (lrs[i] < final_lr):
+#         lrs[i] = final_lr
+#     print(i, epochs[i], lrs[i], peak_lr)
 
 # plt.scatter(epochs, lrs)
 # plt.plot(epochs, init_lr + (final_lr - init_lr)/100*epochs, 'r-')

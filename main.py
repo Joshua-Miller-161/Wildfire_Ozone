@@ -23,10 +23,10 @@ region = config['REGION']
 model_save_path = config['MODEL_SAVE_PATH']
 
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
-assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'ConvLSTM', 'Trans']), "'model_type' must be 'RF', 'Dense', 'ConvLSTM', 'Trans'. Got: "+str(model_type)
+assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans']), "'model_type' must be 'RF', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans'. Got: "+str(model_type)
 
 
-short = {'Whole_Area':'WO', 'South_Land':'SL', 'North_Land':'NL', 'East_Ocean':'EO', 'West_Ocean':'WO'}
+short = {'Whole_Area':'WA', 'South_Land':'SL', 'North_Land':'NL', 'East_Ocean':'EO', 'West_Ocean':'WO'}
 
 #====================================================================
 if (model_type == 'Linear'):
@@ -46,34 +46,56 @@ elif (model_type == 'Dense'):
 elif (model_type == 'Conv'):
     e = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_name='Conv_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
-                    model_save_path=os.path.join(model_save_path, 'LSTM'))
+                    prefix='Sig',
+                    model_save_path=os.path.join(model_save_path, 'Conv'))
     TestKerasModel('config.yml',
-                   model_name='Conv_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e))
-#--------------------------------------------------------------------   
+                   model_name='Conv_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+#--------------------------------------------------------------------
+elif (model_type == 'RBDN'):
+    e = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['epochs']
+    TrainKerasModel('config.yml',
+                    model_save_path=os.path.join(model_save_path, 'RBDN'))
+    TestKerasModel('config.yml',
+                   model_name='RBDN_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+#--------------------------------------------------------------------
+elif (model_type == 'Denoise'):
+    e = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+    TrainKerasModel('config.yml',
+                    model_save_path=os.path.join(model_save_path, 'RBDN'))
+    TestKerasModel('config.yml',
+                   model_name='Denoise_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+#-------------------------------------------------------------------- 
 elif (model_type == 'ConvLSTM'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_name='ConvLSTM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+                    model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                     model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     TestKerasModel('config.yml',
-                   model_name='ConvLSTM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+                   model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+#-------------------------------------------------------------------- 
+elif (model_type == 'Split'):
+    e = config['HYPERPARAMETERS']['split_hyperparams_dict']['epochs']
+    # TrainKerasModel('config.yml',
+    #                 model_name='Split_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+    #                 model_save_path=os.path.join(model_save_path, 'Split'))
+    TestKerasModel('config.yml',
+                   model_name='Split_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------   
 elif (model_type == 'Trans'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_name='DiamondDenseTrans_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+                   prefix='DiamondDense',
                     model_save_path=os.path.join(model_save_path, 'Trans'))
     TestKerasModel('config.yml',
-                   model_name='DiamondDenseTrans_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+                   model_name='DiamondDense-Trans_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'RF'):
     TrainNaiveRF('config.yml', 
                  'data_utils/data_utils_config.yml', 
                  model_save_path=os.path.join(model_save_path, 'RF'))
-    TestNaiveRF('config.yml', 
-                 'data_utils/data_utils_config.yml', 
-                 model_name='XGBRF_reg=WA_f=1_In=OFTUVXYD_Out=O.pkl')
+    TestNaiveRF('config.yml',
+                'data_utils/data_utils_config.yml',
+                model_name='RF_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O.joblib')
 #--------------------------------------------------------------------
 elif (model_type == 'GBM'):
     TrainNaiveXGBoost('config.yml', 
@@ -81,7 +103,7 @@ elif (model_type == 'GBM'):
                       model_save_path=os.path.join(model_save_path, 'GBM'))
     TestNaiveXGBoost('config.yml', 
                       'data_utils/data_utils_config.yml',
-                      model_name='GBM_reg=SL_f=1_In=OFTUVXYD_Out=O.pkl')
+                      model_name='GBM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O.pkl')
 #====================================================================
 # ''' Prepare data '''
 print("____________________________________________________________")
