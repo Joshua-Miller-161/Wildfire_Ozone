@@ -51,7 +51,8 @@ HYPERPARAMETERS:
   denoise_hyperparams_dict:
     batch_size: 32
     epochs: 200
-    latent_size: 512
+    num_latent_layers: 0
+    latent_size: 256
     outer_filters: 32
     middle_filters: 64
     inner_filters: 128

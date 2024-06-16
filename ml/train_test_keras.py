@@ -21,7 +21,8 @@ from ml.conv_lstm import MakeConvLSTM
 from ml.conv import MakeConv
 from ml.rbdn import MakeRBDN
 from ml.splitter import MakeSplitter
-from ml.denoise3D import MakeDenoise
+#from ml.denoise3D import MakeDenoise
+from ml.denoise3DOrig import MakeDenoise
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
@@ -111,7 +112,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         model = MakeDenseTrans(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['trans_hyperparams_dict']['batch_size']
-    
+
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
                                                      name="MSE"),
                   optimizer=keras.optimizers.SGD())
@@ -123,7 +124,11 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     #custom_lr = NoisyDecayLR(num_epochs)
     #custom_lr = NoisySinLR(num_epochs)
     #custom_lr = FractaLR(num_epochs)
-
+    print("____________________________________________________________")
+    print(" >> Creating model type:", config['MODEL_TYPE'])
+    print("____________________________________________________________")
+    print(model.summary())
+    print("____________________________________________________________")
     print(" >> x_train:", np.shape(x_train))
     print(" >> y_train:", np.shape(y_train))
     print(" >> x_test :", np.shape(x_test))
@@ -138,9 +143,14 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                         epochs=num_epochs,
                         verbose=1,
                         callbacks=[custom_lr, early_stopping_cb])
+    print(" >> Finished training model type:", config['MODEL_TYPE'])
+    print("____________________________________________________________")
     #----------------------------------------------------------------
     ''' Save model '''
     if not (model_save_path==None):
+        if not os.path.exists(model_save_path):
+            os.makedirs(model_save_path)
+        
         if (model_name == None):
             model_name = NameModel(config_path, prefix=prefix)
     
@@ -151,11 +161,12 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         model.save_weights(os.path.join(model_save_path, model_name+'.h5'))
 
         print(' >>')
-        print(' >>')
-        print(' >> model_name', model_name)
+        print(' >> Saving:', model_name)
         print(' >>')
         print(' >> Architecture file:', os.path.join(model_save_path, model_name+'.json'))
         print(' >> Weights file:', os.path.join(model_save_path, model_name+'.h5'))
+
+        keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', model_name+'.png'))
     return x_test, y_test, history
 #====================================================================
 def TestKerasModel(config_path, model_name):
@@ -207,14 +218,6 @@ def TestKerasModel(config_path, model_name):
     lon       = UnScale(x_test[..., -3], 'data_utils/scale_files/lon_minmax.json').reshape(x_test_orig_shape[:-1])
     lat       = UnScale(x_test[..., -2], 'data_utils/scale_files/lat_minmax.json').reshape(x_test_orig_shape[:-1])
     time      = UnScale(x_test[..., -1], 'data_utils/scale_files/time_minmax.json').reshape(x_test_orig_shape[:-1])
-    
-    # print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
-    # print("+++++++++++++++++++++++++++++++")
-    # print('UNSCALED LON', np.shape(lon), lon)
-    # print("+++++++++++++++++++++++++++++++")
-    # print("UNSCALED LAT", np.shape(lat), lat)
-    # print("+++++++++++++++++++++++++++++++")
-    # print("UNSCALED TIME", np.shape(time), time)
 
     #----------------------------------------------------------------
     ''' Get trained model '''
@@ -222,17 +225,6 @@ def TestKerasModel(config_path, model_name):
     model_architecture = ''
     model_weights = ''
     model = 69
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print(os.listdir(model_folder))
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
-    # print("ASDASDOUPHONJKKNNKJOODASJNOFAS")
     folders = os.listdir(model_folder)
     if ('.DS_Store' in folders):
         folders.remove('.DS_Store')
@@ -240,7 +232,7 @@ def TestKerasModel(config_path, model_name):
     for folder in folders:
         for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
             for name in files:
-                print("root=",root, ", name=", name)
+                #print("root=",root, ", name=", name)
                 if (model_name in name):
                     if name.endswith('.json'):
                         model_architecture = os.path.join(root, name)
@@ -366,8 +358,6 @@ def TestKerasModel(config_path, model_name):
     #model_name = model_path.split('/')[-1]
 
     fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches=None, pad_inches=0)
-    print("Model source:", os.path.join(root, model_name))
-    print("____________________________________________________________")
     plt.show()
 #x_test, y_test, history = TrainConvLSTM('config.yml')
 

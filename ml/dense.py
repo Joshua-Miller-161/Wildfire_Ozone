@@ -68,8 +68,8 @@ def MakeDense(config_path,
     #----------------------------------------------------------------
     model = keras.Model(input_layer, output_layer)
 
-    keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'DiamondDense.png'))
-    print(model.summary())
+    # keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'DiamondDense.png'))
+    # print(model.summary())
     return model
 
 #====================================================================

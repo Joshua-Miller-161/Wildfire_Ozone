@@ -7,14 +7,11 @@ import sys
 import yaml
 
 sys.path.append(os.getcwd())
-from data_utils.data_loader import DataLoader
-from data_utils.prepare_histories_targets import Histories_Targets
-from data_utils.train_test_split import Train_Test_Split
 from ml.train_test_keras import TrainKerasModel, TestKerasModel
 from ml.train_test_naive_rf import TrainNaiveRF, TestNaiveRF
 from ml.train_test_XGBoost import TrainNaiveXGBoost, TestNaiveXGBoost
 #====================================================================
-''' Get infor from config '''
+''' Get info from config '''
 with open('config.yml', 'r') as c:
     config = yaml.load(c, Loader=yaml.FullLoader)
 
@@ -28,6 +25,10 @@ assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN
 
 short = {'Whole_Area':'WA', 'South_Land':'SL', 'North_Land':'NL', 'East_Ocean':'EO', 'West_Ocean':'WO'}
 
+print(model_type)
+print(model_type)
+print(model_type)
+print(model_type)
 #====================================================================
 if (model_type == 'Linear'):
     # TrainKerasModel('config.yml',
@@ -59,9 +60,10 @@ elif (model_type == 'RBDN'):
                    model_name='RBDN_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'Denoise'):
+    print("fdhgfjhgfjhgfjhgf\nkdjydjycjyf\njfdjhfdgcikv")
     e = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
-                    model_save_path=os.path.join(model_save_path, 'RBDN'))
+                    model_save_path=os.path.join(model_save_path, 'Denoise'))
     TestKerasModel('config.yml',
                    model_name='Denoise_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #-------------------------------------------------------------------- 

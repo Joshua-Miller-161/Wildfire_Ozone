@@ -97,8 +97,6 @@ def MakeSplitter_v2(config_path,
     #----------------------------------------------------------------
     model = keras.Model(input_layer, final)
 
-    keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'splitter.png'))
-    print(model.summary())
     return model
 #====================================================================
 # x = np.random.random((200, 5, 28, 14, 8))
@@ -116,42 +114,42 @@ def MakeSplitter_v2(config_path,
 #                     epochs=2,
 #                     verbose=1)
 
-class NonSharedWeightsConv3D(keras.layers.Layer):
-    def __init__(self, num_filters, kernel_size, **kwargs):
-        super(NonSharedWeightsConv3D, self).__init__(**kwargs)
-        self.num_filters = num_filters
-        self.kernel_size = kernel_size
-        self.conv_layers = [Conv2D(num_filters, kernel_size, padding='same') for _ in range(10)]
+# class NonSharedWeightsConv3D(keras.layers.Layer):
+#     def __init__(self, num_filters, kernel_size, **kwargs):
+#         super(NonSharedWeightsConv3D, self).__init__(**kwargs)
+#         self.num_filters = num_filters
+#         self.kernel_size = kernel_size
+#         self.conv_layers = [Conv2D(num_filters, kernel_size, padding='same') for _ in range(10)]
 
-    def call(self, inputs):
-        # Expecting input shape: (batch, time, height, width, channels)
-        outputs = []
-        for i in range(10):
-            # Select the frame at time step i
-            frame = inputs[:, i, :, :, :]
-            # Apply the corresponding Conv2D layer
-            conv_output = self.conv_layersi
-            # Add the conv_output to the list of outputs
-            outputs.append(conv_output)
-        # Stack the outputs along the time dimension
-        return tf.stack(outputs, axis=1)
+#     def call(self, inputs):
+#         # Expecting input shape: (batch, time, height, width, channels)
+#         outputs = []
+#         for i in range(10):
+#             # Select the frame at time step i
+#             frame = inputs[:, i, :, :, :]
+#             # Apply the corresponding Conv2D layer
+#             conv_output = self.conv_layersi
+#             # Add the conv_output to the list of outputs
+#             outputs.append(conv_output)
+#         # Stack the outputs along the time dimension
+#         return tf.stack(outputs, axis=1)
 
-# Define the model
-input_shape = (10, 25, 25, 3)
-model = keras.Sequential([
-    NonSharedWeightsConv3D(num_filters=32, kernel_size=(3, 3), input_shape=input_shape),
-    # Additional layers can be added here
-    Reshape((10, 25 * 25 * 32)),  # Reshape for Dense layer
-    Dense(units=25 * 25 * 3),  # Output layer
-    Reshape((1, 25, 25, 3))  # Reshape to the desired output shape
-])
+# # Define the model
+# input_shape = (10, 25, 25, 3)
+# model = keras.Sequential([
+#     NonSharedWeightsConv3D(num_filters=32, kernel_size=(3, 3), input_shape=input_shape),
+#     # Additional layers can be added here
+#     Reshape((10, 25 * 25 * 32)),  # Reshape for Dense layer
+#     Dense(units=25 * 25 * 3),  # Output layer
+#     Reshape((1, 25, 25, 3))  # Reshape to the desired output shape
+# ])
 
-# Compile the model
-model.compile(optimizer='adam', loss='mse')
+# # Compile the model
+# model.compile(optimizer='adam', loss='mse')
 
-# Generate synthetic data
-x_train = np.random.rand(100, 10, 25, 25, 3)
-y_train = np.random.rand(100, 1, 25, 25, 3)
+# # Generate synthetic data
+# x_train = np.random.rand(100, 10, 25, 25, 3)
+# y_train = np.random.rand(100, 1, 25, 25, 3)
 
-# Train the model
-model.fit(x_train, y_train, epochs=10)
+# # Train the model
+# model.fit(x_train, y_train, epochs=10)
