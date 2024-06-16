@@ -54,10 +54,11 @@ def MakeDenoise3DTrans(config_path,
     x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
 
-    x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
-                         num_heads=4,
-                         ff_dim=outer_filters, # Must always be next_layer.shape[-1]
-                         attn_axes=(1, 2, 3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+    for _ in range(num_trans):
+        x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
+                            num_heads=4,
+                            ff_dim=outer_filters, # Must always be next_layer.shape[-1]
+                            attn_axes=(1, 2, 3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
     pre_latent_size = x.shape
     #---------------------------------------------------------------
@@ -109,13 +110,13 @@ def MakeDenoise3DTrans(config_path,
 # x_train = np.random.rand(100, 5, 28, 14, 8)
 # y_train = np.random.rand(100, 1, 28, 14, 1)
 
-# autoencoder = MakeDenoise('config.yml',
-#                           x_data_shape=x_train.shape,
-#                           y_data_shape=y_train.shape)
+# model = MakeDenoise3DTrans('config.yml',
+#                            x_data_shape=x_train.shape,
+#                            y_data_shape=y_train.shape)
 
-# autoencoder.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
+# model.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
 
-# history = autoencoder.fit(x=x_train,
+# history = model.fit(x=x_train,
 #                           y=y_train,
 #                           epochs=10,
 #                           batch_size=32)

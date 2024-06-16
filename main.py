@@ -20,15 +20,9 @@ region = config['REGION']
 model_save_path = config['MODEL_SAVE_PATH']
 
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
-assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans']), "'model_type' must be 'RF', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans'. Got: "+str(model_type)
-
+assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans']), "'model_type' must be 'RF', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans'. Got: "+str(model_type)
 
 short = {'Whole_Area':'WA', 'South_Land':'SL', 'North_Land':'NL', 'East_Ocean':'EO', 'West_Ocean':'WO'}
-
-print(model_type)
-print(model_type)
-print(model_type)
-print(model_type)
 #====================================================================
 if (model_type == 'Linear'):
     # TrainKerasModel('config.yml',
@@ -67,11 +61,12 @@ elif (model_type == 'Denoise'):
                    model_name='Denoise_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'DenoiseTrans'):
-    e = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+    e         = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+    num_trans = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['num_trans']
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'DenoiseTrans'))
     TestKerasModel('config.yml',
-                   model_name='DenoiseTrans_reg='+short[region]+'_h=5_f=1_t=1_In=OFTUVXYD_Out=O_e='+str(e))
+                   model_name='DenoiseTrans_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e))
 #-------------------------------------------------------------------- 
 elif (model_type == 'ConvLSTM'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']

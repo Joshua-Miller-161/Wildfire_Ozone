@@ -53,7 +53,7 @@ HYPERPARAMETERS:
     batch_size: 32
     epochs: 200
     num_latent_layers: 0
-    num_trans: 3
+    num_trans: 1
     latent_size: 256
     outer_filters: 64
     middle_filters: 64

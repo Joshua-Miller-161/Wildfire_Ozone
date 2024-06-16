@@ -106,7 +106,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
     
     elif (config['MODEL_TYPE'] == 'DenoiseTrans'):
-        model = MakeDenoise(config_path, np.shape(x_train), np.shape(y_train))
+        model = MakeDenoise3DTrans(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
     
