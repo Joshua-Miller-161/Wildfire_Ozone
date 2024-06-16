@@ -44,6 +44,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
 
     patience = config['PATIENCE']
+    model_fig_save_path = config['MODEL_FIG_SAVE_PATH']
     #----------------------------------------------------------------
     ''' Get data '''
     x_data = DataLoader('config.yml', 'data_utils/data_utils_config.yml', 'HISTORY_DATA')
@@ -166,7 +167,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         print(' >> Architecture file:', os.path.join(model_save_path, model_name+'.json'))
         print(' >> Weights file:', os.path.join(model_save_path, model_name+'.h5'))
 
-        keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', model_name+'.png'))
+        keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join(model_fig_save_path, model_name+'.png'))
     return x_test, y_test, history
 #====================================================================
 def TestKerasModel(config_path, model_name):

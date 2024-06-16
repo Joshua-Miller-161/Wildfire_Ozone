@@ -1,4 +1,5 @@
 FIG_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/Figs
+MODEL_FIG_SAVE_PATH: /Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/SavedModels/Figs
 HISTORY_DATA:
 - ozone
 - fire
