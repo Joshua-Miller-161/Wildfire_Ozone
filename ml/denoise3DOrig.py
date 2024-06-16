@@ -44,8 +44,8 @@ def MakeDenoise(config_path,
                 strides=(2, 2, 2),
                 padding="same",
                 activation=LeakyReLU(alpha=0.2))(x)
-    #x = BatchNormalization(axis=chanDim)(x)
-    x = LayerNormalization()(x)
+    x = BatchNormalization(axis=chanDim)(x)
+    #x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
 
     x = Conv3D(filters=inner_filters,
@@ -53,8 +53,8 @@ def MakeDenoise(config_path,
                strides=(x.shape[1], 2, 2),
                padding="same",
                activation=LeakyReLU(alpha=0.2))(x)
-    #x = BatchNormalization(axis=chanDim)(x)
-    x = LayerNormalization()(x)
+    x = BatchNormalization(axis=chanDim)(x)
+    #x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
     pre_latent_size = x.shape
 
@@ -86,8 +86,8 @@ def MakeDenoise(config_path,
                                padding="same",
                                output_padding=(0, 1, 0),
                                activation=LeakyReLU(alpha=0.2))(x)
-    #x = BatchNormalization(axis=chanDim)(x)
-    x = LayerNormalization()(x)
+    x = BatchNormalization(axis=chanDim)(x)
+    #x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
     # apply a single CONV_TRANSPOSE layer used to recover the
     # original depth of the image
@@ -96,8 +96,8 @@ def MakeDenoise(config_path,
                                strides=(1, 2, 2),
                                padding="same",
                                activation=LeakyReLU(alpha=0.2))(x)
-    #x = BatchNormalization(axis=chanDim)(x)
-    x = LayerNormalization()(x)
+    x = BatchNormalization(axis=chanDim)(x)
+    #x = LayerNormalization()(x)
 
     output = Convolution3DTranspose(filters=y_data_shape[4], 
                                     kernel_size=(1, 3, 3),
