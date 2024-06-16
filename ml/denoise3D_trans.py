@@ -17,7 +17,7 @@ from ml.ml_utils import Funnel
 from ml.custom_keras_layers import RecombineLayer
 from ml.custom_keras_layers import TransformerBlock
 
-def MakeDenoiseTrans(config_path,
+def MakeDenoise3DTrans(config_path,
                      x_data_shape=(1164, 5, 28, 14, 8), 
                      y_data_shape=(1164, 1, 28, 14, 1)):
     #----------------------------------------------------------------
@@ -99,12 +99,12 @@ def MakeDenoiseTrans(config_path,
                     padding="same",
                     activation='linear')(x)
     #----------------------------------------------------------------
-    autoencoder = keras.Model(input_, output, name="autoencoder")
+    model = keras.Model(input_, output, name="Denoise3DTrans")
     
-    print(autoencoder.summary())
-    keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1StageTrans.png'))
+    print(model.summary())
+    keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1StageTrans.png'))
 
-    return autoencoder
+    return model
 #====================================================================
 # x_train = np.random.rand(100, 5, 28, 14, 8)
 # y_train = np.random.rand(100, 1, 28, 14, 1)

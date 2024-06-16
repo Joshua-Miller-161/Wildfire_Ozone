@@ -53,7 +53,7 @@ HYPERPARAMETERS:
     batch_size: 32
     epochs: 200
     num_latent_layers: 0
-    num_trans: 1
+    num_trans: 3
     latent_size: 256
     outer_filters: 64
     middle_filters: 64
@@ -64,7 +64,7 @@ HYPERPARAMETERS:
     num_heads: 4
     num_neurons: 100
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: Denoise
+MODEL_TYPE: DenoiseTrans
 PATIENCE: 15
 REGION: South_Land
 RF_OFFSET: 1
