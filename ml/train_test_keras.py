@@ -21,8 +21,9 @@ from ml.conv_lstm import MakeConvLSTM
 from ml.conv import MakeConv
 from ml.rbdn import MakeRBDN
 from ml.splitter import MakeSplitter
-#from ml.denoise3D import MakeDenoise
-from ml.denoise3DOrig import MakeDenoise
+from ml.denoise3D import MakeDenoise
+#from ml.denoise3DOrig import MakeDenoise
+from ml.denoise3D_trans import MakeDenoiseTrans
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
@@ -41,7 +42,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
+    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
 
     patience = config['PATIENCE']
     model_fig_save_path = config['MODEL_FIG_SAVE_PATH']
@@ -100,6 +101,11 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         batch_size = config['HYPERPARAMETERS']['split_hyperparams_dict']['batch_size']
     
     elif (config['MODEL_TYPE'] == 'Denoise'):
+        model = MakeDenoise(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
+    
+    elif (config['MODEL_TYPE'] == 'DenoiseTrans'):
         model = MakeDenoise(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
@@ -245,7 +251,7 @@ def TestKerasModel(config_path, model_name):
     with open(model_architecture, 'r') as json_file:
         loaded_model_json = json_file.read()
 
-    if (config['MODEL_TYPE'] == 'Trans'):
+    if ('Trans' in config['MODEL_TYPE']):
         model = keras.models.model_from_json(loaded_model_json, custom_objects={"TransformerBlock":TransformerBlock})
     elif (config['MODEL_TYPE'] == 'Split'):
         model = keras.models.model_from_json(loaded_model_json, custom_objects={"RecombineLayer":RecombineLayer})

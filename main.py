@@ -60,12 +60,18 @@ elif (model_type == 'RBDN'):
                    model_name='RBDN_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'Denoise'):
-    print("fdhgfjhgfjhgfjhgf\nkdjydjycjyf\njfdjhfdgcikv")
     e = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'Denoise'))
     TestKerasModel('config.yml',
                    model_name='Denoise_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+#--------------------------------------------------------------------
+elif (model_type == 'DenoiseTrans'):
+    e = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+    TrainKerasModel('config.yml',
+                    model_save_path=os.path.join(model_save_path, 'DenoiseTrans'))
+    TestKerasModel('config.yml',
+                   model_name='DenoiseTrans_reg='+short[region]+'_h=5_f=1_t=1_In=OFTUVXYD_Out=O_e='+str(e))
 #-------------------------------------------------------------------- 
 elif (model_type == 'ConvLSTM'):
     e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']

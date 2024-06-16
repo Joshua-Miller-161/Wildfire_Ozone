@@ -119,6 +119,12 @@ def NameModel(config_path, prefix=''):
             print("model_name:", model_name)
             epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+        elif (config['MODEL_TYPE'] == 'DenoiseTrans'):
+            num_trans = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['num_trans']
+            model_name += 'DenoiseTrans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_t='+str(num_trans)+'_In='
+            print("model_name:", model_name)
+            epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
+        # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elif (config['MODEL_TYPE'] == 'Trans'):
             model_name += 'Trans_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
             print("model_name:", model_name)

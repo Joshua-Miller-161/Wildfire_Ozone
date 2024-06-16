@@ -15,7 +15,7 @@ from keras.layers import Input, Concatenate, TimeDistributed, Dense, Conv2D, Con
 sys.path.append(os.getcwd())
 from ml.ml_utils import Funnel
 from ml.custom_keras_layers import RecombineLayer
-
+from ml.custom_keras_layers import TransformerBlock
 
 def MakeDenoise(config_path,
                 x_data_shape=(1164, 5, 28, 14, 8), 
@@ -39,11 +39,13 @@ def MakeDenoise(config_path,
     input_ = Input(shape=x_data_shape[1:])
     x = input_
     
-    x = Conv3D(filters=outer_filters,
-               kernel_size=(x.shape[1], 5, 5), # orig 4, 2
-               strides=(x.shape[1], 4, 2),  # orig 4, 2
-               padding="same",
-               activation=LeakyReLU(alpha=0.2))(x)
+    x = ConvLSTM2D(filters=outer_filters,
+                   kernel_size=(5, 5), # orig 4, 2
+                   strides=(4, 2),  # orig 4, 2
+                   padding="same",
+                   activation=LeakyReLU(alpha=0.2),
+                   recurrent_activation='tanh',
+                   return_sequences=False)(x)
     #x = BatchNormalization(axis=chanDim)(x)
     x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
@@ -67,7 +69,10 @@ def MakeDenoise(config_path,
         x = Reshape((y_data_shape[1], pre_latent_size[2], pre_latent_size[3], pre_latent_size[4]))(x)
     
     else:
-        x = Reshape((y_data_shape[1], pre_latent_size[2], pre_latent_size[3], pre_latent_size[4]))(x)
+        try: # Conv3D
+            x = Reshape((y_data_shape[1], pre_latent_size[2], pre_latent_size[3], pre_latent_size[4]))(x)
+        except IndexError: #ConvLSTM2D
+            x = Reshape((y_data_shape[1], pre_latent_size[1], pre_latent_size[2], pre_latent_size[3]))(x)
     #----------------------------------------------------------------
     ''' Decoder '''
     
@@ -85,11 +90,10 @@ def MakeDenoise(config_path,
                     padding="same",
                     activation='linear')(x)
     #----------------------------------------------------------------
-    
     autoencoder = keras.Model(input_, output, name="autoencoder")
     
     print(autoencoder.summary())
-    keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1StageTest.png'))
+    keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1Stage.png'))
 
     return autoencoder
 #====================================================================
@@ -99,8 +103,6 @@ def MakeDenoise(config_path,
 # autoencoder = MakeDenoise('config.yml',
 #                           x_data_shape=x_train.shape,
 #                           y_data_shape=y_train.shape)
-# keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, expand_nested=True, to_file=os.path.join('SavedModels/Figs', 'denoise3D.png'))
-# print(autoencoder.summary())
 
 # autoencoder.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
 
