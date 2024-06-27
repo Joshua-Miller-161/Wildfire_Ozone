@@ -5,6 +5,7 @@ os.environ['USE_PYGEOS'] = '0'
 import numpy as np
 import yaml
 import pandas as pd
+import sklearn
 from sklearn.ensemble import RandomForestRegressor
 import xgboost as xgb
 import matplotlib.pyplot as plt

@@ -54,6 +54,7 @@ elif (model_type == 'RBDN'):
                    model_name='RBDN_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'Denoise'):
+    print("DFKJBSDFB\nFIFSAPHOFSPDFPOUH\nAFSOFDSPOSFAPOIH\nAFOHFDOHIFSA")
     e = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'Denoise'))
@@ -85,7 +86,7 @@ elif (model_type == 'Split'):
                    model_name='Split_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------   
 elif (model_type == 'Trans'):
-    e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
+    e = config['HYPERPARAMETERS']['trans_hyperssparams_dict']['epochs']
     TrainKerasModel('config.yml',
                    prefix='DiamondDense',
                     model_save_path=os.path.join(model_save_path, 'Trans'))

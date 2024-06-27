@@ -21,8 +21,8 @@ from ml.conv_lstm import MakeConvLSTM
 from ml.conv import MakeConv
 from ml.rbdn import MakeRBDN
 from ml.splitter import MakeSplitter
-from ml.denoise3D import MakeDenoise
-#from ml.denoise3DOrig import MakeDenoise
+#from ml.denoise3D import MakeDenoise
+from ml.denoise3DOrig import MakeDenoise
 from ml.denoise3D_trans import MakeDenoise3DTrans
 from ml.linear import MakeLinear
 from ml.dense import MakeDense

@@ -18,8 +18,8 @@ from ml.custom_keras_layers import RecombineLayer
 from ml.custom_keras_layers import TransformerBlock
 
 def MakeDenoise3DTrans(config_path,
-                     x_data_shape=(1164, 5, 28, 14, 8), 
-                     y_data_shape=(1164, 1, 28, 14, 1)):
+                       x_data_shape=(1164, 5, 28, 14, 8), 
+                       y_data_shape=(1164, 1, 28, 14, 1)):
     #----------------------------------------------------------------
     ''' Setup '''
     with open(config_path, 'r') as c:
@@ -43,31 +43,30 @@ def MakeDenoise3DTrans(config_path,
     input_ = Input(shape=x_data_shape[1:])
     x = input_
     
-    x = ConvLSTM2D(filters=outer_filters,
-                   kernel_size=(5, 5), # orig 4, 2
-                   strides=(4, 2),  # orig 4, 2
+    x = Conv3D(filters=middle_filters, # On website 32
+                   kernel_size=(x.shape[1], 4, 2),
+                   strides=(x.shape[1], 4, 2),
                    padding="same",
-                   activation=LeakyReLU(alpha=0.2),
-                   recurrent_activation='tanh',
-                   return_sequences=False)(x)
+                   activation=LeakyReLU(alpha=0.2),)(x)
     #x = BatchNormalization(axis=chanDim)(x)
-    x = LayerNormalization()(x)
-    x = Dropout(rate=0.1)(x)
-
+    # x = LayerNormalization()(x)
+    # x = Dropout(rate=0.1)(x)
+    
     for _ in range(num_trans):
         x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
                             num_heads=4,
-                            ff_dim=outer_filters, # Must always be next_layer.shape[-1]
-                            attn_axes=(1, 2, 3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+                            ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
+                            attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
     pre_latent_size = x.shape
+
     #---------------------------------------------------------------
     ''' Bottleneck '''
 
     if (num_latent_layers > 0):
         x = Flatten()(x)
 
-        for i in range(num_latent_layers):
+        for i in range(num_latent_layers-1):
             x = Dense(latent_size, activation='tanh')(x)
             x = LayerNormalization()(x)
             x = Dropout(rate=0.1)(x)
@@ -76,8 +75,10 @@ def MakeDenoise3DTrans(config_path,
         x = LayerNormalization()(x)
         x = Dropout(rate=0.1)(x)
 
-        x = Reshape((y_data_shape[1], pre_latent_size[2], pre_latent_size[3], pre_latent_size[4]))(x)
-    
+        try: # Conv3D
+            x = Reshape((y_data_shape[1], pre_latent_size[2], pre_latent_size[3], pre_latent_size[4]))(x)
+        except IndexError: #ConvLSTM2D
+            x = Reshape((y_data_shape[1], pre_latent_size[1], pre_latent_size[2], pre_latent_size[3]))(x)
     else:
         try: # Conv3D
             x = Reshape((y_data_shape[1], pre_latent_size[2], pre_latent_size[3], pre_latent_size[4]))(x)
@@ -86,37 +87,47 @@ def MakeDenoise3DTrans(config_path,
     #----------------------------------------------------------------
     ''' Decoder '''
     
-    x = Convolution3DTranspose(filters=outer_filters, 
-                               kernel_size=(y_data_shape[1], 5, 5),
+    # apply a single CONV_TRANSPOSE layer used to recover the
+    # original depth of the image
+    x = Convolution3DTranspose(filters=middle_filters, # On website 32
+                               kernel_size=(y_data_shape[1], 4, 2),
                                strides=(y_data_shape[1], 4, 2),
                                padding="same",
-                               activation=LeakyReLU(alpha=0.2))(x)
+                               activation='linear')(x)
+    
     #x = BatchNormalization(axis=chanDim)(x)
-    x = LayerNormalization()(x)
+    #x = LayerNormalization()(x)
+    for _ in range(num_trans):
+        x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
+                            num_heads=4,
+                            ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
+                            attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
-    output = Conv3D(filters=y_data_shape[4], 
-                    kernel_size=(1, 1, 1),
-                    strides=(1, 1, 1),
-                    padding="same",
-                    activation='linear')(x)
+
+    output = Convolution3DTranspose(filters=y_data_shape[4], 
+                                    kernel_size=(y_data_shape[1], 3, 3),
+                                    strides=(y_data_shape[1], 1, 1),
+                                    padding="same",
+                                    activation='linear')(x)
     #----------------------------------------------------------------
     model = keras.Model(input_, output, name="Denoise3DTrans")
     
-    print(model.summary())
-    keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1StageTrans.png'))
+    #print(model.summary())
+    #keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D2StageTrans.png'))
 
     return model
 #====================================================================
+# if not os.path.basename(__file__) == 'main.py':
 # x_train = np.random.rand(100, 5, 28, 14, 8)
 # y_train = np.random.rand(100, 1, 28, 14, 1)
 
 # model = MakeDenoise3DTrans('config.yml',
-#                            x_data_shape=x_train.shape,
-#                            y_data_shape=y_train.shape)
+#                         x_data_shape=x_train.shape,
+#                         y_data_shape=y_train.shape)
 
 # model.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
 
 # history = model.fit(x=x_train,
-#                           y=y_train,
-#                           epochs=10,
-#                           batch_size=32)
+#                     y=y_train,
+#                     epochs=10,
+#                     batch_size=32)

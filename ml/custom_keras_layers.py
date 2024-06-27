@@ -86,7 +86,8 @@ class TransformerBlock(keras.layers.Layer):
             "embed_dim": self.embed_dim,
             "num_heads": self.num_heads,
             "ff_dim": self.ff_dim,
-            "rate": self.rate
+            "rate": self.rate,
+            "attn_axes": self.attn_axes
         })
         return config
     

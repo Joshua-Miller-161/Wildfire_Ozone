@@ -92,21 +92,23 @@ def MakeDenoise(config_path,
     #----------------------------------------------------------------
     autoencoder = keras.Model(input_, output, name="autoencoder")
     
-    print(autoencoder.summary())
-    keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1Stage.png'))
+    if not os.path.basename(__file__) == 'main.py':
+        print(autoencoder.summary())
+        keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1Stage.png'))
 
     return autoencoder
 #====================================================================
-# x_train = np.random.rand(100, 5, 28, 14, 8)
-# y_train = np.random.rand(100, 1, 28, 14, 1)
+# if not os.path.basename(__file__) == 'main.py':
+#     x_train = np.random.rand(100, 5, 28, 14, 8)
+#     y_train = np.random.rand(100, 1, 28, 14, 1)
 
-# autoencoder = MakeDenoise('config.yml',
-#                           x_data_shape=x_train.shape,
-#                           y_data_shape=y_train.shape)
+#     autoencoder = MakeDenoise('config.yml',
+#                             x_data_shape=x_train.shape,
+#                             y_data_shape=y_train.shape)
 
-# autoencoder.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
+#     autoencoder.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
 
-# history = autoencoder.fit(x=x_train,
-#                           y=y_train,
-#                           epochs=10,
-#                           batch_size=32)
+#     history = autoencoder.fit(x=x_train,
+#                             y=y_train,
+#                             epochs=10,
+#                             batch_size=32)
