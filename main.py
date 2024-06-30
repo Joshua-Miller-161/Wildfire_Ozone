@@ -20,7 +20,7 @@ region = config['REGION']
 model_save_path = config['MODEL_SAVE_PATH']
 
 assert (region in ['Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean']), "'region' must be 'Whole_Area', 'South_Land', 'North_Land', 'East_Ocean', 'West_Ocean'. Got: "+str(region)
-assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans']), "'model_type' must be 'RF', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans'. Got: "+str(model_type)
+assert (model_type in ['RF', 'GBM', 'Linear', 'Dense', 'Conv', 'LSTM', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans']), "'model_type' must be 'RF', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans'. Got: "+str(model_type)
 
 short = {'Whole_Area':'WA', 'South_Land':'SL', 'North_Land':'NL', 'East_Ocean':'EO', 'West_Ocean':'WO'}
 #====================================================================
@@ -45,6 +45,14 @@ elif (model_type == 'Conv'):
                     model_save_path=os.path.join(model_save_path, 'Conv'))
     TestKerasModel('config.yml',
                    model_name='Conv_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e))
+#--------------------------------------------------------------------
+elif (model_type == 'LSTM'):
+    e         = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
+    num_trans = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['num_trans']
+    TrainKerasModel('config.yml',
+                    model_save_path=os.path.join(model_save_path, 'LSTM'))
+    TestKerasModel('config.yml',
+                   model_name='LSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e))
 #--------------------------------------------------------------------
 elif (model_type == 'RBDN'):
     e = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['epochs']

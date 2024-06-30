@@ -43,11 +43,13 @@ def MakeDenoise3DTrans(config_path,
     input_ = Input(shape=x_data_shape[1:])
     x = input_
     
-    x = Conv3D(filters=middle_filters, # On website 32
-                   kernel_size=(x.shape[1], 4, 2),
-                   strides=(x.shape[1], 4, 2),
+    x = ConvLSTM2D(filters=middle_filters, # On website 32
+                   kernel_size=(5, 5),
+                   strides=(4, 4),
                    padding="same",
-                   activation=LeakyReLU(alpha=0.2),)(x)
+                   activation=LeakyReLU(alpha=0.2),
+                   recurrent_activation='tanh',
+                   return_sequences=False)(x)
     #x = BatchNormalization(axis=chanDim)(x)
     # x = LayerNormalization()(x)
     # x = Dropout(rate=0.1)(x)
@@ -56,7 +58,7 @@ def MakeDenoise3DTrans(config_path,
         x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
                             num_heads=4,
                             ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
-                            attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+                            attn_axes=(1,2,3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
     pre_latent_size = x.shape
 
@@ -90,20 +92,14 @@ def MakeDenoise3DTrans(config_path,
     # apply a single CONV_TRANSPOSE layer used to recover the
     # original depth of the image
     x = Convolution3DTranspose(filters=middle_filters, # On website 32
-                               kernel_size=(y_data_shape[1], 4, 2),
-                               strides=(y_data_shape[1], 4, 2),
+                               kernel_size=(y_data_shape[1], 5, 5),
+                               strides=(y_data_shape[1], 4, 4),
                                padding="same",
                                activation='linear')(x)
     
     #x = BatchNormalization(axis=chanDim)(x)
     #x = LayerNormalization()(x)
-    for _ in range(num_trans):
-        x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
-                            num_heads=4,
-                            ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
-                            attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
-
-
+    
     output = Convolution3DTranspose(filters=y_data_shape[4], 
                                     kernel_size=(y_data_shape[1], 3, 3),
                                     strides=(y_data_shape[1], 1, 1),

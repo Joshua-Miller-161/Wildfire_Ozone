@@ -18,6 +18,10 @@ HYPERPARAMETERS:
     epochs: 200
     num_inner_filters: 128
     num_outer_filters: 64
+  lstm_hyperparams_dict:
+    batch_size: 32
+    epochs: 200
+    num_trans: 0
   convlstm_hyperparams_dict:
     batch_size: 32
     epochs: 100
@@ -55,7 +59,7 @@ HYPERPARAMETERS:
     num_latent_layers: 0
     num_trans: 1
     latent_size: 256
-    outer_filters: 32
+    outer_filters: 64
     middle_filters: 64
     inner_filters: 128
   trans_hyperparams_dict:
@@ -66,7 +70,7 @@ HYPERPARAMETERS:
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: DenoiseTrans
 PATIENCE: 15
-REGION: South_Land
+REGION: Whole_Area
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

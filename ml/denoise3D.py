@@ -41,7 +41,7 @@ def MakeDenoise(config_path,
     
     x = ConvLSTM2D(filters=outer_filters,
                    kernel_size=(5, 5), # orig 4, 2
-                   strides=(4, 2),  # orig 4, 2
+                   strides=(4, 4),  # orig 4, 2
                    padding="same",
                    activation=LeakyReLU(alpha=0.2),
                    recurrent_activation='tanh',
@@ -78,7 +78,7 @@ def MakeDenoise(config_path,
     
     x = Convolution3DTranspose(filters=outer_filters, 
                                kernel_size=(y_data_shape[1], 5, 5),
-                               strides=(y_data_shape[1], 4, 2),
+                               strides=(y_data_shape[1], 4, 4),
                                padding="same",
                                activation=LeakyReLU(alpha=0.2))(x)
     #x = BatchNormalization(axis=chanDim)(x)
@@ -92,23 +92,21 @@ def MakeDenoise(config_path,
     #----------------------------------------------------------------
     autoencoder = keras.Model(input_, output, name="autoencoder")
     
-    if not os.path.basename(__file__) == 'main.py':
-        print(autoencoder.summary())
-        keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1Stage.png'))
+    # print(autoencoder.summary())
+    # keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1Stage.png'))
 
     return autoencoder
 #====================================================================
-# if not os.path.basename(__file__) == 'main.py':
-#     x_train = np.random.rand(100, 5, 28, 14, 8)
-#     y_train = np.random.rand(100, 1, 28, 14, 1)
+# x_train = np.random.rand(100, 5, 28, 14, 8)
+# y_train = np.random.rand(100, 1, 28, 14, 1)
 
-#     autoencoder = MakeDenoise('config.yml',
-#                             x_data_shape=x_train.shape,
-#                             y_data_shape=y_train.shape)
+# autoencoder = MakeDenoise('config.yml',
+#                         x_data_shape=x_train.shape,
+#                         y_data_shape=y_train.shape)
 
-#     autoencoder.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
+# autoencoder.compile(loss='mse',optimizer=keras.optimizers.Adam(learning_rate=0.001))
 
-#     history = autoencoder.fit(x=x_train,
-#                             y=y_train,
-#                             epochs=10,
-#                             batch_size=32)
+# history = autoencoder.fit(x=x_train,
+#                         y=y_train,
+#                         epochs=10,
+#                         batch_size=32)

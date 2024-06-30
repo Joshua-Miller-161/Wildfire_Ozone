@@ -19,10 +19,11 @@ from data_utils.prepare_histories_targets import Histories_Targets
 from data_utils.train_test_split import Train_Test_Split
 from ml.conv_lstm import MakeConvLSTM
 from ml.conv import MakeConv
+from ml.lstm import MakeLSTM
 from ml.rbdn import MakeRBDN
 from ml.splitter import MakeSplitter
-#from ml.denoise3D import MakeDenoise
-from ml.denoise3DOrig import MakeDenoise
+from ml.denoise3D import MakeDenoise
+#from ml.denoise3DOrig import MakeDenoise
 from ml.denoise3D_trans import MakeDenoise3DTrans
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
@@ -42,7 +43,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
+    assert (config['MODEL_TYPE'] in ['Linear', 'Dense', 'Conv', 'LSTM', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans', 'ConvTrans', 'ConvLSTMTrans']), "To use this, 'MODEL_TYPE' must be 'Linear', 'Dense', 'Conv', 'ConvLSTM', 'RBDN', 'Split', 'Denoise', 'DenoiseTrans', 'Trans', 'ConvTrans', 'ConvLSTMTrans'. Got: "+str(config['MODEL_TYPE'])
 
     patience = config['PATIENCE']
     model_fig_save_path = config['MODEL_FIG_SAVE_PATH']
@@ -66,12 +67,12 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
 
     if (config['MODEL_TYPE'] == 'Linear'):
         model = MakeLinear(config_path, np.shape(x_train), np.shape(y_train))
-
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Dense'):
         model = MakeDense(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['dense_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Conv'):
         x_train = np.transpose(x_train, (0, 2, 3, 1, 4))
         y_train = np.transpose(y_train, (0, 2, 3, 1, 4))
@@ -89,37 +90,42 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         model = MakeConv(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['conv_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (config['MODEL_TYPE'] == 'LSTM'):
+        model = MakeLSTM(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['batch_size']
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'RBDN'):
         model = MakeRBDN(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['rbdn_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Split'):
         model = MakeSplitter(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['split_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['split_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Denoise'):
         model = MakeDenoise(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'DenoiseTrans'):
         model = MakeDenoise3DTrans(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'ConvLSTM'):
         model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['batch_size']
-    
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Trans'):
         model = MakeDenseTrans(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['trans_hyperparams_dict']['batch_size']
-
+    #----------------------------------------------------------------
     model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
                                                      name="MSE"),
                   optimizer=keras.optimizers.SGD())
@@ -251,13 +257,16 @@ def TestKerasModel(config_path, model_name):
     with open(model_architecture, 'r') as json_file:
         loaded_model_json = json_file.read()
 
-    if ('Trans' in config['MODEL_TYPE']):
-        model = keras.models.model_from_json(loaded_model_json, custom_objects={"TransformerBlock":TransformerBlock})
-    elif (config['MODEL_TYPE'] == 'Split'):
-        model = keras.models.model_from_json(loaded_model_json, custom_objects={"RecombineLayer":RecombineLayer})
-    else:
-        model = keras.models.model_from_json(loaded_model_json)
+    # if ('Trans' in config['MODEL_TYPE']):
+    #     model = keras.models.model_from_json(loaded_model_json, custom_objects={"TransformerBlock":TransformerBlock})
+    # elif (config['MODEL_TYPE'] == 'Split'):
+    #     model = keras.models.model_from_json(loaded_model_json, custom_objects={"RecombineLayer":RecombineLayer})
+    # else:
+    #     model = keras.models.model_from_json(loaded_model_json)
 
+    model = keras.models.model_from_json(loaded_model_json, 
+                                         custom_objects={"TransformerBlock":TransformerBlock, 
+                                                         "RecombineLayer":RecombineLayer})
     print("____________________________________________________________")
 
     model.load_weights(model_weights)
