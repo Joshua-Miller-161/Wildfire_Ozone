@@ -10,7 +10,7 @@ import yaml
 
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, TimeDistributed, Dense, LSTM, LSTMV2, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten, LeakyReLU
+from keras.layers import Input, Concatenate, TimeDistributed, Dense, LSTM, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten, LeakyReLU
 
 sys.path.append(os.getcwd())
 from ml.ml_utils import Funnel
@@ -33,7 +33,7 @@ def MakeLSTM(config_path,
     # Outer lstms
     x = Reshape(target_shape=(x_data_shape[1], np.prod(x_data_shape[2:])))(input_layer)
     
-    x = LSTMV2(units=int(x.shape[-1] / 4),
+    x = LSTM(units=int(x.shape[-1] / 4),
                return_sequences=False)(x)
     x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
