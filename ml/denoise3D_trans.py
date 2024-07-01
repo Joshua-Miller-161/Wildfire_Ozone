@@ -56,7 +56,7 @@ def MakeDenoise3DTrans(config_path,
         x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
                             num_heads=4,
                             ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
-                            attn_axes=(1,2,3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+                            attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
     pre_latent_size = x.shape
 
@@ -101,7 +101,7 @@ def MakeDenoise3DTrans(config_path,
         x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
                             num_heads=4,
                             ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
-                            attn_axes=(1,2,3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+                            attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
     output = Convolution3DTranspose(filters=y_data_shape[4], 
                                     kernel_size=(y_data_shape[1], 3, 3),
