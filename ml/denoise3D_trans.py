@@ -45,7 +45,7 @@ def MakeDenoise3DTrans(config_path,
     
     x = Conv3D(filters=middle_filters, # On website 32
                kernel_size=(x_data_shape[1], 5, 5),
-               strides=(x_data_shape[1], 4, 2),
+               strides=(x_data_shape[1], 4, 4),
                padding="same",
                activation=LeakyReLU(alpha=0.2))(x)
     #x = BatchNormalization(axis=chanDim)(x)
@@ -91,7 +91,7 @@ def MakeDenoise3DTrans(config_path,
     # original depth of the image
     x = Convolution3DTranspose(filters=middle_filters, # On website 32
                                kernel_size=(y_data_shape[1], 5, 5),
-                               strides=(y_data_shape[1], 4, 2),
+                               strides=(y_data_shape[1], 4, 4),
                                padding="same",
                                activation='linear')(x)
     
