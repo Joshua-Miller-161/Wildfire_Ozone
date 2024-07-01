@@ -39,13 +39,11 @@ def MakeDenoise(config_path,
     input_ = Input(shape=x_data_shape[1:])
     x = input_
     
-    x = ConvLSTM2D(filters=outer_filters,
-                   kernel_size=(5, 5), # orig 4, 2
-                   strides=(4, 4),  # orig 4, 2
-                   padding="same",
-                   activation=LeakyReLU(alpha=0.2),
-                   recurrent_activation='tanh',
-                   return_sequences=False)(x)
+    x = Conv3D(filters=outer_filters,
+               kernel_size=(x_data_shape[1], 5, 5), # orig 4, 2
+               strides=(x_data_shape[1], 4, 2),  # orig 4, 2
+               padding="same",
+               activation=LeakyReLU(alpha=0.2))(x)
     #x = BatchNormalization(axis=chanDim)(x)
     x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
@@ -78,7 +76,7 @@ def MakeDenoise(config_path,
     
     x = Convolution3DTranspose(filters=outer_filters, 
                                kernel_size=(y_data_shape[1], 5, 5),
-                               strides=(y_data_shape[1], 4, 4),
+                               strides=(y_data_shape[1], 4, 2),
                                padding="same",
                                activation=LeakyReLU(alpha=0.2))(x)
     #x = BatchNormalization(axis=chanDim)(x)
@@ -92,7 +90,7 @@ def MakeDenoise(config_path,
     #----------------------------------------------------------------
     autoencoder = keras.Model(input_, output, name="autoencoder")
     
-    # print(autoencoder.summary())
+    #print(autoencoder.summary())
     # keras.utils.plot_model(autoencoder, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1Stage.png'))
 
     return autoencoder
