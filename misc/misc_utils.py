@@ -150,6 +150,36 @@ def Longitude180to360(lon):
     lon = np.asarray(lon)
     return lon % 360
 #====================================================================
+def SavePredData(config_path, model_name, y_pred, data, dates):
+    with open(config_path, 'r') as c:
+        config = yaml.load(c, Loader=yaml.FullLoader)
+
+    model_pred_path = config['MODEL_PRED_PATH']
+    model_type      = config['MODEL_TYPE']
+    region          = config['REGION']
+
+    short = {'Whole_Area': 'WA', 'South_Land': 'SL', 'North_Land': 'NL', 'West_Ocean': 'WO', 'East_Ocean': 'EO'}
+    
+    if not os.path.exists(os.path.join(model_pred_path, model_type)):
+        os.makedirs(os.path.join(model_pred_path, model_type))
+
+    if not os.path.exists(os.path.join(model_pred_path, 'Data')):
+        os.makedirs(os.path.join(model_pred_path, 'Data'))
+    
+    sorted_indices = np.argsort(dates)
+    y_pred = y_pred[sorted_indices]
+    data   = data[sorted_indices]
+    dates  = dates[sorted_indices]
+    dates = pd.DataFrame(np.asarray([datetime(1970, 1, 1) + timedelta(days=date) for date in dates]), columns=['Days since 1970/1/1'])
+   
+    np.save(os.path.join(os.path.join(model_pred_path, model_type), model_name+".npy"), y_pred)
+
+    np.save(os.path.join(os.path.join(model_pred_path, 'Data'), model_type+'_'+short[region]+'_raw_ozone.npy'), data)
+
+    #np.savetxt(os.path.join(model_pred_path, 'Data'), model_type+'_dates.csv', dates, delimiter=',')
+    dates.to_csv(os.path.join(os.path.join(model_pred_path, 'Data'), model_type+'_dates.csv'), index=False)
+    
+#====================================================================
 def GetBoxCoords(config_path):
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)

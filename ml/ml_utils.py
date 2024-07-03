@@ -172,7 +172,7 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e=
     #----------------------------------------------------------------
     input_string = input_string.split('.')[0]
 
-    print(' >> input_string:', input_string)
+    #print(' >> input_string:', input_string)
 
     chunks = input_string.split(split_char)
 

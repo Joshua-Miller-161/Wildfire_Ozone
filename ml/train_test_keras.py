@@ -30,6 +30,7 @@ from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
 from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR, FractaLR
 from ml.custom_keras_layers import TransformerBlock, RecombineLayer
+from misc.misc_utils import SavePredData
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels', prefix=''):
     #----------------------------------------------------------------
@@ -182,7 +183,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join(model_fig_save_path, model_name+'.png'))
     return x_test, y_test, history
 #====================================================================
-def TestKerasModel(config_path, model_name):
+def TestKerasModel(config_path, model_name, model_pred_path=None):
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -374,6 +375,14 @@ def TestKerasModel(config_path, model_name):
     #model_name = model_path.split('/')[-1]
 
     fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches=None, pad_inches=0)
+    
+    #----------------------------------------------------------------
+    ''' Save predictions '''
+    SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis)
+
+    print(' >> Saved predictions:', os.path.join(model_pred_path, model_name+".npy"))
+    print("____________________________________________________________")
+    #----------------------------------------------------------------
     plt.show()
 #x_test, y_test, history = TrainConvLSTM('config.yml')
 

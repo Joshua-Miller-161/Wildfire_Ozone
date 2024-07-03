@@ -21,6 +21,7 @@ sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel, ParseModelName
+from misc.misc_utils import SavePredData
 #====================================================================
 def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     #----------------------------------------------------------------
@@ -105,10 +106,11 @@ def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
                 if not os.path.exists(model_save_path):
                     os.makedirs(model_save_path)
                 model_name = NameModel(config_path)
-                print('model_name', model_name)
-                pickle.dump(rfr, open(os.path.join(model_save_path, model_name), 'wb'))
+                print(' >> model_name', model_name)
+                joblib.dump(rfr, open(os.path.join(model_save_path, model_name), 'wb'))
+                print(' >> Saved', os.path.join(model_save_path, model_name)) 
 #====================================================================
-def TestNaiveRF(config_path, data_config_path, model_name):
+def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None):
     #----------------------------------------------------------------
     ''' Get info from model name '''
     info, param_dict = ParseModelName(model_name)
@@ -120,7 +122,7 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    model_folder = config['MODEL_SAVE_PATH']
+    model_folder  = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
 
     if (param_dict['MODEL_TYPE'] == 'XGBRF'):
@@ -149,14 +151,18 @@ def TestNaiveRF(config_path, data_config_path, model_name):
                 #print("root=",root, ", name=", name)
                 if (model_name in name):
                     if name.endswith('.joblib'):
+                        print(" >> ")
+                        print(" >> ", os.path.join(root, name))
                         trained_rfr = joblib.load(os.path.join(root, name))
-                        print("WOOOOOOWEWIJW:EPW\nWEQWEIJQWEPRIJQWE\nWERIJR:OIWEJR:OQWIJR:WEMRFPWEMF")
+                        print(" >> Loaded", os.path.join(root, name))
                     elif name.endswith('.pkl'):
                         trained_rfr = pickle.load(open(os.path.join(root, name), 'rb'))
+                        print(" >> Loaded", os.path.join(root, name))
     #----------------------------------------------------------------
     ''' Get data '''
 
-    x_train_df, x_test_df, y_train_df, y_test_df, x_train_orig_shape, x_test_orig_shape, y_train_orig_shape, y_test_orig_shape = NaiveRFDataLoader(config_path, data_config_path, return_shapes=True)
+    x_train_df, x_test_df, y_train_df, y_test_df, x_train_orig_shape, x_test_orig_shape, y_train_orig_shape, y_test_orig_shape = NaiveRFDataLoader(config_path, data_config_path, 
+                                                                                                                                                   return_shapes=True, shuffle=True)
 
     del(x_train_df)
     del(y_train_df)
@@ -166,8 +172,6 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     lat       = UnScale(x_test_df['lat'], 'data_utils/scale_files/lat_minmax.json').reshape(x_test_orig_shape[:-1])
     time      = UnScale(x_test_df['time'], 'data_utils/scale_files/time_minmax.json').reshape(x_test_orig_shape[:-1])
     
-    print(" >> x_train:", x_train_df.shape)
-    print(" >> y_train:", y_train_df.shape)
     print(" >> x_test :", x_test_df.shape)
     print(" >> y_test :", y_test_df.shape)
     print("____________________________________________________________")
@@ -190,9 +194,11 @@ def TestNaiveRF(config_path, data_config_path, model_name):
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
 
-    print('y_pred:', np.shape(y_pred))
+    print(' >> y_pred:', np.shape(y_pred))
     print("____________________________________________________________")
-
+    
+    #----------------------------------------------------------------
+    ''' Evaluate model '''
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
 
     if not ('XGB' in model_name):
@@ -200,9 +206,9 @@ def TestNaiveRF(config_path, data_config_path, model_name):
                                 index=x_test_df.columns,
                                 name="Importance").sort_values(ascending=True, inplace=False) 
     
-    print("mse:", mse)
+    print(" >> mse:", mse)
     print("____________________________________________________________")
-    print("Model source:", os.path.join(root, model_name))
+    print(" >> model source:", os.path.join(root, model_name))
     print("____________________________________________________________")
     #print("model_ranks:", model_ranks)
 
@@ -285,12 +291,13 @@ def TestNaiveRF(config_path, data_config_path, model_name):
 
     fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches=None, pad_inches=0)
 
+    #----------------------------------------------------------------
+    ''' Save predictions '''
+    
+    SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis)
+    
+    print(' >> Saved predictions:', os.path.join(model_pred_path, model_name+".npy"))
+    print("____________________________________________________________")
+    #----------------------------------------------------------------
     plt.show()
 #====================================================================
-# x_train_df, x_test_df, y_train_df, y_test_df = TrainNaiveRF('config.yml', 
-#                                                             'data_utils/data_utils_config.yml',
-#                                                             'SavedModels/RF')
-
-# TestNaiveRF('config.yml', 
-#             'data_utils/data_utils_config.yml',
-#             'SavedModels/RF/RF_reg=SL_f=1_In=OFTUVXYD_Out=O.joblib')

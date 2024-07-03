@@ -16,7 +16,7 @@ from datetime import datetime, timedelta
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
 from misc.misc_utils import GetDateInStr, FindIntersection
-from misc.plotting_utils import ShowYearMonth, Plot_O3_Fire
+from vis.plotting_utils import ShowYearMonth, Plot_O3_Fire
 #====================================================================
 base_path    = "/Users/joshuamiller/Documents/Lancaster/Data"
 O3_folders   = ['Kriged_L2_O3_TCL', 'East_Ocean/Ozone', 'West_Ocean/Ozone', 'South_Land/Ozone', 'North_Land/Ozone']

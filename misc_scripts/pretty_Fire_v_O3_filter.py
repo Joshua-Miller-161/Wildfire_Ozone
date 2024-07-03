@@ -9,7 +9,7 @@ import netCDF4 as nc
 
 
 sys.path.append(os.getcwd())
-from misc.plotting_utils import ShowYearMonth, Plot_O3_Fire
+from vis.plotting_utils import ShowYearMonth, Plot_O3_Fire
 from misc.misc_utils import ButterLowpassFilter
 from data_utils.extraction_funcs import Extract_netCDF4
 #====================================================================

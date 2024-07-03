@@ -130,13 +130,18 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     lat       = UnScale(x_test_df['lat'], 'data_utils/scale_files/lat_minmax.json').reshape(x_test_orig_shape[:-1])
     time      = UnScale(x_test_df['time'], 'data_utils/scale_files/time_minmax.json').reshape(x_test_orig_shape[:-1])
     
-    print('UNSCALED OZONE', np.shape(raw_ozone))
-    print("+++++++++++++++++++++++++++++++")
-    print('UNSCALED LON', np.shape(lon))
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED LAT", np.shape(lat))
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED TIME", np.shape(time))
+    print(" >> x_test :", x_test_df.shape)
+    print(" >> y_test :", y_test_df.shape)
+    print("____________________________________________________________")
+    print(" >> Testing model type:", config['MODEL_TYPE'])
+    print("____________________________________________________________")
+    # print('UNSCALED OZONE', np.shape(raw_ozone))
+    # print("+++++++++++++++++++++++++++++++")
+    # print('UNSCALED LON', np.shape(lon))
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED LAT", np.shape(lat))
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED TIME", np.shape(time))
     #----------------------------------------------------------------
     ''' Test model '''
 
@@ -144,9 +149,9 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
 
-    print("_________________________________")
-    print(np.shape(y_pred))
-    print("_________________________________")
+    print("____________________________________________________________")
+    print(" >> y_pred:", np.shape(y_pred))
+    print("____________________________________________________________")
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
 
@@ -154,8 +159,8 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #                         index=x_test_df.columns,
     #                         name="Importance").sort_values(ascending=True, inplace=False) 
     
-    print("mse:", mse)
-    print("_________________________________")
+    print(" >> mse:", mse)
+    print("____________________________________________________________")
     #print("model_ranks:", model_ranks)
     #----------------------------------------------------------------
     ''' Plot '''
@@ -243,4 +248,20 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
 
     fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches='tight', pad_inches=0)
 
+    #----------------------------------------------------------------
+    ''' Save predictions '''
+    if not (model_pred_path == None):
+        if not os.path.exists(os.path.join(model_pred_path, config['MODEL_TYPE'])):
+            os.makedirs(os.path.join(model_pred_path, config['MODEL_TYPE']))
+
+        model_pred_path = os.path.join(model_pred_path, config['MODEL_TYPE'])
+
+        sorted_indices = np.argsort(time_axis)
+        y_pred = y_pred[sorted_indices]
+        time_axis = time_axis[sorted_indices]
+
+        np.save(os.path.join(model_pred_path, model_name+".npy"), y_pred)
+
+        print(' >> Saved predictions:', os.path.join(model_pred_path, model_name+".npy"))
+        print("____________________________________________________________")
     plt.show()

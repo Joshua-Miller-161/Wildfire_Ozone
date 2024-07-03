@@ -14,7 +14,7 @@ import sys
 sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import Scale
 from data_utils.extraction_funcs import Extract_netCDF4
-from misc.plotting_utils import PlotBoxes
+from vis.plotting_utils import PlotBoxes
 #====================================================================
 ''' Make subplot '''
 fig, ax = plt.subplots(3, 1, figsize=(8, 6))

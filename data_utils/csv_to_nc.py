@@ -15,7 +15,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 sys.path.append(os.getcwd())
 from misc.misc_utils import GetDateInStr
 from data_utils.extraction_funcs import Extract_netCDF4
-from misc.plotting_utils import PlotBoxes
+from vis.plotting_utils import PlotBoxes
 #====================================================================
 region = 'Whole_Area'
 folder_path = "/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL_v2"
