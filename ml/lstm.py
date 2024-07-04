@@ -33,8 +33,8 @@ def MakeLSTM(config_path,
     # Outer lstms
     x = Reshape(target_shape=(x_data_shape[1], np.prod(x_data_shape[2:])))(input_layer)
     
-    x = LSTM(units=int(x.shape[-1] / 4),
-               return_sequences=False)(x)
+    x = LSTM(units=256,
+             return_sequences=False)(x)
     x = LayerNormalization()(x)
     x = Dropout(rate=0.1)(x)
    
@@ -52,17 +52,17 @@ def MakeLSTM(config_path,
     return model
 
 #====================================================================
-# x = np.random.random((200, 5, 80, 80, 8))
-# y = np.random.random((200, 1, 80, 80, 1))
+x = np.random.random((200, 5, 80, 80, 8))
+y = np.random.random((200, 1, 80, 80, 1))
 
-# model = MakeLSTM('config.yml', x.shape, y.shape)
+model = MakeLSTM('config.yml', x.shape, y.shape)
 
-# model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
-#                                                  name="MSE"),
-#               optimizer=keras.optimizers.Adam(learning_rate=1e-3))
+model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
+                                                 name="MSE"),
+              optimizer=keras.optimizers.Adam(learning_rate=1e-3))
 
-# history = model.fit(x=x,
-#                     y=y,
-#                     batch_size=10,
-#                     epochs=10,
-#                     verbose=1)
+history = model.fit(x=x,
+                    y=y,
+                    batch_size=10,
+                    epochs=10,
+                    verbose=1)

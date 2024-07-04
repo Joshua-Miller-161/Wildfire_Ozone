@@ -110,7 +110,7 @@ def format_date_2(x, pos):
     else:
         return ''
 #====================================================================
-def ShowYearMonth(ax, dates, start_date=datetime(1970, 1, 1), fontsize=12, method=0, rotation=0):
+def ShowYearMonth(ax, dates, start_date=datetime(1970, 1, 1), fontsize=12, method=0, rotation=0, start_line_idx=0):
     if not (type(dates[0])==datetime):
         dates = np.asarray([start_date + timedelta(days=int(d)) for d in dates])
 
@@ -123,7 +123,7 @@ def ShowYearMonth(ax, dates, start_date=datetime(1970, 1, 1), fontsize=12, metho
 
     ax.tick_params(axis='x', rotation=rotation, labelsize=fontsize)
     #ax.grid(axis='x')
-    for year in range(dates[366].year, dates[-1].year + 1):
+    for year in range(dates[start_line_idx].year, dates[-1].year + 1):
         january = mdates.date2num(datetime(year, 1, 1))
         ax.axvline(x=january, color='gray', linestyle=':')
 #====================================================================
