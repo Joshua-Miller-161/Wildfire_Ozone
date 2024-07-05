@@ -78,25 +78,25 @@ def MakeDense(config_path,
     #----------------------------------------------------------------
     model = keras.Model(input_layer, output_layer)
 
-    keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'DiamondDense.png'))
-    print(model.summary())
+    # keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'DiamondDense.png'))
+    # print(model.summary())
     return model
 
 #====================================================================
-x = np.random.random((200, 5, 28, 14, 8))
-y = np.random.random((200, 1, 28, 14, 1)) * 1.2
+# x = np.random.random((200, 5, 28, 14, 8))
+# y = np.random.random((200, 1, 28, 14, 1)) * 1.2
 
-model = MakeDense('config.yml', x.shape, y.shape)
+# model = MakeDense('config.yml', x.shape, y.shape)
 
-model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
-                                                 name="MSE"),
-              optimizer=keras.optimizers.Adam(learning_rate=1e-3))
+# model.compile(loss=keras.losses.MeanSquaredError(reduction="sum_over_batch_size", 
+#                                                  name="MSE"),
+#               optimizer=keras.optimizers.Adam(learning_rate=1e-3))
 
-history = model.fit(x=x,
-                    y=y,
-                    batch_size=10,
-                    epochs=10,
-                    verbose=1)
+# history = model.fit(x=x,
+#                     y=y,
+#                     batch_size=10,
+#                     epochs=10,
+#                     verbose=1)
 
 
 

@@ -90,7 +90,8 @@ def NameModel(config_path, prefix=''):
             epochs = config['HYPERPARAMETERS']['linear_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elif (config['MODEL_TYPE'] == 'Dense'):
-            model_name += 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            num_trans = config['HYPERPARAMETERS']['dense_hyperparams_dict']['num_trans']
+            model_name += 'Dense_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_t='+str(num_trans)+'_In='
             #print("model_name:", model_name)
             epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
