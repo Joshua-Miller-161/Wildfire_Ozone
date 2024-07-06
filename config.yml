@@ -19,12 +19,12 @@ HYPERPARAMETERS:
     num_outer_filters: 64
   convlstm_hyperparams_dict:
     batch_size: 32
-    epochs: 100
+    epochs: 2000
     num_inner_filters: 128
     num_outer_filters: 64
   denoise_hyperparams_dict:
     batch_size: 32
-    epochs: 200
+    epochs: 2000
     inner_filters: 128
     latent_size: 256
     middle_filters: 64
@@ -33,7 +33,7 @@ HYPERPARAMETERS:
     outer_filters: 64
   dense_hyperparams_dict:
     batch_size: 32
-    epochs: 1000
+    epochs: 2000
     num_neurons: 100
     num_trans: 1
   gb_hyperparams_dict:
@@ -43,7 +43,7 @@ HYPERPARAMETERS:
     subsample: 0.5
   lstm_hyperparams_dict:
     batch_size: 32
-    epochs: 1000
+    epochs: 2000
     num_trans: 0
     lstm_units: 128
   rbdn_hyperparams_dict:
