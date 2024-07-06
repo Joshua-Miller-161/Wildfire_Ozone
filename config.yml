@@ -33,9 +33,9 @@ HYPERPARAMETERS:
     outer_filters: 64
   dense_hyperparams_dict:
     batch_size: 32
-    epochs: 2000
+    epochs: 10000
     num_neurons: 100
-    num_trans: 1
+    num_trans: 0
   gb_hyperparams_dict:
     early_stopping_rounds: 10
     max_depth: 20
