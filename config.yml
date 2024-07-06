@@ -33,9 +33,9 @@ HYPERPARAMETERS:
     outer_filters: 64
   dense_hyperparams_dict:
     batch_size: 32
-    epochs: 500
+    epochs: 1000
     num_neurons: 100
-    num_trans: 0
+    num_trans: 1
   gb_hyperparams_dict:
     early_stopping_rounds: 10
     max_depth: 20
@@ -43,7 +43,7 @@ HYPERPARAMETERS:
     subsample: 0.5
   lstm_hyperparams_dict:
     batch_size: 32
-    epochs: 200
+    epochs: 1000
     num_trans: 0
     lstm_units: 128
   rbdn_hyperparams_dict:
@@ -73,7 +73,7 @@ MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: Dense
 PATIENCE: 15
-REGION: North_Land
+REGION: West_Ocean
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone
