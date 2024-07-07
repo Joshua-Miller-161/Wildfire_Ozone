@@ -137,7 +137,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     #custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
     #custom_lr = NoisySinLR(num_epochs)
-    custom_lr = TriangleFractalLR(total_epochs=num_epochs, period=20)
+    custom_lr = TriangleFractalLR(num_epochs, period=20)
 
     print("____________________________________________________________")
     print(" >> Creating model type:", config['MODEL_TYPE'])
