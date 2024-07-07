@@ -10,7 +10,7 @@ import yaml
 
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, Dense, TimeDistributed, Permute, Reshape, Flatten, LayerNormalization, Dropout
+from keras.layers import Input, Concatenate, Dense, TimeDistributed, Permute, Reshape, Flatten, LayerNormalization, BatchNormalization, Dropout
 
 sys.path.append(os.getcwd())
 from ml.ml_utils import Funnel
@@ -45,7 +45,8 @@ def MakeDense(config_path,
                                              ff_dim=spat_flat.shape[-1],
                                              attn_axes=2)(spat_flat)
             if (num_trans == 0):
-                spat_flat = LayerNormalization()(spat_flat)
+                #spat_flat = LayerNormalization()(spat_flat)
+                spat_flat = BatchNormalization()(spat_flat)
                 spat_flat = Dropout(rate=0.1)(spat_flat)
         else:
             spat_flat = LayerNormalization()(spat_flat)
@@ -65,7 +66,8 @@ def MakeDense(config_path,
                                              ff_dim=time_flat.shape[-1],
                                              attn_axes=2)(time_flat)
             if (num_trans == 0):
-                time_flat = LayerNormalization()(time_flat)
+                #time_flat = LayerNormalization()(time_flat)
+                time_flat = BatchNormalization()(time_flat)
                 time_flat = Dropout(rate=0.1)(time_flat)
         else:
             time_flat = LayerNormalization()(time_flat)
