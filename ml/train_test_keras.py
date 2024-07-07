@@ -28,7 +28,7 @@ from ml.denoise3D_trans import MakeDenoise3DTrans
 from ml.linear import MakeLinear
 from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
-from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR, FractaLR
+from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR, TriangleFractalLR
 from ml.custom_keras_layers import TransformerBlock, RecombineLayer
 from misc.misc_utils import SavePredData
 #====================================================================
@@ -134,10 +134,11 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                       patience=patience, 
                                                       restore_best_weights=True)
-    custom_lr = TriangleWaveLR(period=5)
+    #custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
     #custom_lr = NoisySinLR(num_epochs)
-    #custom_lr = FractaLR(num_epochs)
+    custom_lr = TriangleFractalLR(period=20)
+
     print("____________________________________________________________")
     print(" >> Creating model type:", config['MODEL_TYPE'])
     print("____________________________________________________________")
@@ -181,6 +182,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         print(' >> Weights file:', os.path.join(model_save_path, model_name+'.h5'))
 
         keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join(model_fig_save_path, model_name+'.png'))
+    
     return x_test, y_test, history
 #====================================================================
 def TestKerasModel(config_path, model_name, model_pred_path=None):

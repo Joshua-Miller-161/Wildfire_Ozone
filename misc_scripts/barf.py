@@ -14,72 +14,46 @@ from tensorflow import keras
 from keras.layers import Input, Concatenate, Reshape, Permute
 #====================================================================
 ''' Setup '''
-x_data = tf.random.uniform([1, 1, 28, 14, 1], minval=0, maxval=1)
+total_epochs = 1000
+init_lr = 0.01
+floor_lr = 0.00001
+period = 50
+num_waves = 4
 
-lat_kern = 4
-lon_kern = 2
-#----------------------------------------------------------------
-input_layer = Input(shape=x_data.shape[1:])
+def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
+    m = (floor_lr - init_lr) / total_epochs
+    x = (num_waves * period) * int(epoch / (num_waves * period))
+    return m * x + init_lr
 
-split_outputs = []
-lat_offset = int(x_data.shape[2] / lat_kern)
-lon_offset = int(x_data.shape[3] / lon_kern)
+def SubPeakHeight(epoch, top, floor_lr, period, num_waves):
+    m = (floor_lr - top) / (period * num_waves)
+    y_curr = m * epoch + top
+    y_peak = m * (period * int(epoch / period)) + top
+    return max(y_curr, y_peak)
 
-AA = []
-for i in range(0, x_data.shape[2], lat_offset):
-    split_outputs = []
-    for j in range(0, x_data.shape[3], lon_offset):
+def WaveLine(epoch, peak, floor_lr, period):
+    m = (floor_lr - peak) / period
+    b = peak - m * period * (int(epoch / period))
+    return m * epoch + b
 
-        spat_subset = input_layer[:, :, i:i+lat_offset, j:j+lon_offset, :]
+epochs = np.arange(total_epochs)
+lrs    = []
+majors = []
 
-        #reshape = Reshape(target_shape=(x_data.shape[1], lat_offset, lon_offset, x_data.shape[4]))(spat_subset)
+for epoch in range(total_epochs):
+    #start_lr = ((floor_lr - init_lr) / total_epochs) * (num_waves * period) * int(epoch / (num_waves * period)) + init_lr
+    major   = MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves) #(num_waves * period)
+    peak_lr = SubPeakHeight(epoch % (num_waves * period), major, floor_lr, period, num_waves)
+    lr      = WaveLine(epoch, peak_lr, floor_lr, period)
+    
+    lrs.append(lr)
+    majors.append(major)
 
-        split_outputs.append(spat_subset)
-    AA.append(split_outputs)
+    print("epoch=", epoch, ", major=", major, ", peak_lr=", peak_lr, ", lr=", lr)
 
-BB = []
-for i in range(lat_kern):
-    BB.append(Concatenate(axis=-2)(AA[i]))
+#print(lrs)
 
-final = Concatenate(axis=-3)(BB)
-
-# BB = []
-# for i in range(lat_kern):
-#     BB.append(tf.concat(AA[i], axis=-2))
-
-# final = tf.concat(BB, axis=-3)
-
-# print("   -   -")
-# print("AAAAAA", tf.shape(AA))
-# print("   -   -")
-# print("BBBBBB", tf.shape(BB))
-# print("   -   -")
-# print("final", tf.shape(final))
-# print("   -   -")
-# - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# Recombine
-# BB = []
-# for i in range(0, x_data.shape[2], lat_offset):
-#     BB.append(Concatenate(axis=-2)(AA))
-
-
-# recombined = Concatenate(axis=-3)(recombined)  # Then concatenate along longitude
-# recombined = Reshape(target_shape=x_data.shape[1:])(recombined)
-
-model = keras.Model(input_layer, final)
-keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True)
-print(model.summary())
-#====================================================================
-
-x_data = tf.random.uniform([1, 1, 28, 14, 1], minval=0, maxval=1)
-
-y_pred = model.predict(x_data)
-
-print(np.shape(y_pred))
-#print(y_pred)
-
-print("============================================================")
-print("============================================================")
-print("============================================================")
-print("============================================================")
-print(x_data - y_pred)
+plt.plot(epochs, lrs)
+plt.plot(epochs, majors)
+plt.ylim(floor_lr, init_lr)
+plt.show()

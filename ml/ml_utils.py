@@ -266,7 +266,7 @@ class TriangleWaveLR(Callback):
         if (epoch + 1) % self.period == 0:
             self.initial_peak_lr /= (int((epoch + 1) / self.period) + 1)
 #====================================================================
-class FractaLR(Callback):
+class TriangleFractalLR(Callback):
     def __init__(self, total_epochs, init_lr=0.01, floor_lr=0.00001, period=10, num_waves=4):
         super().__init__()
         self.total_epochs = total_epochs
@@ -275,7 +275,12 @@ class FractaLR(Callback):
         self.period = period
         self.num_waves = num_waves
 
-    def PeakHeights(self, epoch, top, floor_lr, period, num_waves):
+    def MajorPeakHeight(self, epoch, init_lr, floor_lr, total_epochs, period, num_waves):
+        m = (self.floor_lr - self.init_lr) / self.total_epochs
+        x = (self.num_waves * self.period) * int(epoch / (self.num_waves * self.period))
+        return m * x + self.init_lr
+
+    def SubPeakHeight(self, epoch, top, floor_lr, period, num_waves):
         m = (self.floor_lr - top) / (self.period * self.num_waves)
         y_curr = m * epoch + top
         y_peak = m * (self.period * int(epoch / self.period)) + top
@@ -287,10 +292,10 @@ class FractaLR(Callback):
         return m * epoch + b
     
     def on_epoch_begin(self, epoch, logs=None):
-        scale    = (1 / (self.num_waves + 1))
-        start_lr = self.init_lr * (1 - scale * int(epoch / (self.num_waves * self.period)))
-        peak_lr  = self.PeakHeights(epoch % (self.num_waves * self.period), start_lr, self.floor_lr, self.period, self.num_waves)
-        lr       = self.WaveLine(epoch, peak_lr, self.floor_lr, self.period)
+        major   = self.MajorPeakHeight(epoch, self.init_lr, self.floor_lr, self.total_epochs, self.period, self.num_waves) #(num_waves * period)
+        peak_lr = self.SubPeakHeight(epoch % (self.num_waves * self.period), major, self.floor_lr, self.period, self.num_waves)
+        lr      = self.WaveLine(epoch, peak_lr, self.floor_lr, self.period)
+
         keras.backend.set_value(self.model.optimizer.lr, lr)
 #====================================================================
 class NoisyDecayLR(Callback):
