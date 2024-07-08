@@ -20,10 +20,20 @@ floor_lr = 0.00001
 period = 25
 num_waves = 2
 
+# def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
+#     m = (floor_lr - init_lr) / total_epochs
+#     x = (num_waves * period) * int(epoch / (num_waves * period))
+#     return m * x + init_lr
+
 def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
-    m = (floor_lr - init_lr) / total_epochs
+    n = int(epoch / (num_waves * period))
+
+    m = - (1 / ((n + 1) * (n + 2))) * (floor_lr + init_lr) / (num_waves * period)
+
+    b = (floor_lr + init_lr) / (n + 1) + (n * (floor_lr + init_lr)) / ((n + 1) * (n + 2))
+
     x = (num_waves * period) * int(epoch / (num_waves * period))
-    return m * x + init_lr
+    return m * x + b
 
 def SubPeakHeight(epoch, top, floor_lr, period, num_waves):
     m = (floor_lr - top) / (period * num_waves)

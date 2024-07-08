@@ -73,7 +73,7 @@ MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: Conv
 PATIENCE: 15
-REGION: East_Ocean
+REGION: Whole_Area
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

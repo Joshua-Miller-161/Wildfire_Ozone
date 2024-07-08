@@ -188,13 +188,13 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 't=', 'In=', 'Out=
     final_dict['MODEL_TYPE'] = chunks[0]
     final_dict['MODEL_TYPE_LONG'] = info[0]
 
-    print(" >> chunks", chunks)
+    #print(" >> chunks", chunks)
 
     for i in range(1, len(chunks)):
         for substr in substrs:
             if (substr in chunks[i]):
                 lol = chunks[i][len(substr):]
-                print(" >> lol =", lol)
+                #print(" >> lol =", lol)
                 try:
                     info.append(dict_[lol])
                 except KeyError:
@@ -290,11 +290,18 @@ class TriangleFractalLR(Callback):
         self.period = period
         self.num_waves = num_waves
 
-    def MajorPeakHeight(self, epoch, init_lr, floor_lr, total_epochs, period, num_waves):
-        m = (self.floor_lr - self.init_lr) / self.total_epochs
-        x = (self.num_waves * self.period) * int(epoch / (self.num_waves * self.period))
-        return m * x + self.init_lr
+    # def MajorPeakHeight(self, epoch, init_lr, floor_lr, total_epochs, period, num_waves):
+    #     m = (self.floor_lr - self.init_lr) / self.total_epochs
+    #     x = (self.num_waves * self.period) * int(epoch / (self.num_waves * self.period))
+    #     return m * x + self.init_lr
 
+    def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
+        n = int(epoch / (num_waves * period))
+        m = - (1 / ((n + 1) * (n + 2))) * (floor_lr + init_lr) / (num_waves * period)
+        b = (floor_lr + init_lr) / (n + 1) + (n * (floor_lr + init_lr)) / ((n + 1) * (n + 2))
+        x = (num_waves * period) * int(epoch / (num_waves * period))
+        return m * x + b
+    
     def SubPeakHeight(self, epoch, top, floor_lr, period, num_waves):
         m = (self.floor_lr - top) / (self.period * self.num_waves)
         y_curr = m * epoch + top
