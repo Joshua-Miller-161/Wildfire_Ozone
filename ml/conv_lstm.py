@@ -5,16 +5,14 @@ os.environ['USE_PYGEOS'] = '0'
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
-import netCDF4 as nc
 import yaml
 
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, TimeDistributed, Dense, Conv2D, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten
+from keras.layers import Input, ConvLSTM2D, LayerNormalization, Dropout, Conv3DTranspose, LeakyReLU, Reshape
 
 sys.path.append(os.getcwd())
-from ml.ml_utils import Funnel
-
+from ml.custom_keras_layers import TransformerBlock
 #====================================================================
 def MakeConvLSTM(config_path, 
                  x_data_shape=(1164, 5, 28, 14, 8), 
@@ -25,95 +23,71 @@ def MakeConvLSTM(config_path,
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    outer_filters = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_outer_filters']
-    inner_filters = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_inner_filters']
+    num_filters       = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_filters']
+    num_trans         = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_trans']
+    
+    region            = config['REGION']
+
+    assert (config['MODEL_TYPE'] == 'ConvLSTM'), "'MODEL_TYPE' must be 'ConvLSTM'. Got: "+str(config['MODEL_TYPE'])
+
+    if (num_trans < 0):
+        num_trans = 0
     #----------------------------------------------------------------
-    input_layer = Input(shape=x_data_shape[1:])
-
-    # Outer convlstms
-    x = ConvLSTM2D(filters=outer_filters,
-                   kernel_size=(6, 6),
-                   padding="same",
-                   return_sequences=True,
-                   activation="tanh")(input_layer)
-    x = LayerNormalization()(x)
-    x = Dropout(rate=0.2)(x)
-
-    x = ConvLSTM2D(filters=outer_filters,
-                   kernel_size=(3, 3),
-                   padding="same",
-                   return_sequences=True,
-                   activation="tanh")(x)
-    x = LayerNormalization()(x)
-    outer_convlstm = Dropout(rate=0.2, name='outer_output')(x)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Middle convlstms
+    x_strides = 69
+    y_strides = 69
+    if not (region == 'Whole_Area'):
+        x_strides = (4, 2)
+        y_strides = (y_data_shape[1], 4, 2)
+    else:
+        x_strides = (4, 4)
+        y_strides = (y_data_shape[1], 4, 4)
+    #----------------------------------------------------------------
+    ''' Encoder '''
+    input_ = Input(shape=x_data_shape[1:])
+    x = input_
     
-    y = AveragePooling3D(pool_size=(1,2,2), strides=(1,2,2))(outer_convlstm)
-
-    y = ConvLSTM2D(filters=inner_filters,
-                   kernel_size=(3, 3),
+    x = ConvLSTM2D(filters=num_filters, # On website 32
+                   kernel_size=(5, 5),
+                   strides=x_strides,
                    padding="same",
-                   return_sequences=True,
-                   activation="tanh")(y)
-    y = LayerNormalization()(y)
-    y = Dropout(rate=0.05)(y)
-
-    y = ConvLSTM2D(filters=inner_filters,
-                   kernel_size=(3, 3),
-                   padding="same",
-                   return_sequences=True,
-                   activation="tanh")(y)
-    y = LayerNormalization()(y)
-    middle_convlstm = Dropout(rate=0.05)(y)
-
-    y = ConvLSTM2D(filters=outer_filters,
-                   kernel_size=(3, 3),
-                   padding="same",
-                   return_sequences=True,
-                   activation="tanh")(y)
-    y = LayerNormalization()(y)
-    middle_convlstm = Dropout(rate=0.05, name='middle_output')(y)
-
-    print("MIDDlE", middle_convlstm.shape)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Upscale and join to outer
-
-    up = UpSampling3D(size=(1, 2, 2), name='upsample_to_outer')(middle_convlstm)
-
-    xx = Concatenate(name='join_middle_to_outer')([outer_convlstm, up])
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Slim down
-
-    final_filters = Funnel(xx.shape[-1], y_data_shape[4]*64)
+                   activation=LeakyReLU(alpha=0.2),
+                   recurrent_activation='tanh',
+                   return_sequences=False)(x)
     
-    for i in range(len(final_filters)):
-        xx = ConvLSTM2D(filters=final_filters[i],
-                        kernel_size=(3, 3),
+    if (num_trans == 0):
+        #x = BatchNormalization(axis=chanDim)(x)
+        x = LayerNormalization()(x)
+        x = Dropout(rate=0.1)(x)
+    else:
+        for _ in range(num_trans):
+            x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
+                                 num_heads=4,
+                                 ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
+                                 attn_axes=(1,2,3))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+
+    pre_decoder_shape = x.shape
+
+    x = Reshape((y_data_shape[1], pre_decoder_shape[1], pre_decoder_shape[2], pre_decoder_shape[3]))(x)
+    #----------------------------------------------------------------
+    ''' Decoder '''
+    
+    # apply a single CONV_TRANSPOSE layer used to recover the
+    # original depth of the image
+    x = Conv3DTranspose(filters=num_filters, # On website 32
+                        kernel_size=(y_data_shape[1], 5, 5),
+                        strides=y_strides,
                         padding="same",
-                        return_sequences=True,
-                        activation="tanh")(xx)
-        xx = LayerNormalization()(xx)
-        xx = Dropout(rate=0.05)(xx)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Final output
+                        activation='linear')(x)
 
-    xx = ConvLSTM2D(filters=outer_filters,
-                    kernel_size=(1, 1),
-                    padding="same",
-                    return_sequences=False,
-                    activation="tanh")(xx)
+    x = LayerNormalization()(x)
     
-    xx = Reshape((y_data_shape[1], y_data_shape[2], y_data_shape[3], xx.shape[-1]))(xx)
-    xx = LayerNormalization()(xx)
-    
-    xx = Flatten()(xx)
-
-    xx = Dense(units=y_data_shape[2] * y_data_shape[3] * y_data_shape[4], activation='linear')(xx)
-
-    output_layer = Reshape(y_data_shape[1:])(xx)
+    output = Conv3DTranspose(filters=y_data_shape[4], 
+                             kernel_size=(y_data_shape[1], 3, 3),
+                             strides=(y_data_shape[1], 1, 1),
+                             padding="same",
+                             activation='linear')(x)
     #----------------------------------------------------------------
-    model = keras.Model(input_layer, output_layer)
+    model = keras.Model(input_, output, name='ConvLSTM')
 
     keras.utils.plot_model(model, show_shapes=True, to_file=os.path.join('SavedModels/Figs', 'ConvLSTM.png'))
     print(model.summary())

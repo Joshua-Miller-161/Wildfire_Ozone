@@ -14,11 +14,11 @@ from tensorflow import keras
 from keras.layers import Input, Concatenate, Reshape, Permute
 #====================================================================
 ''' Setup '''
-total_epochs = 1000
+total_epochs = 10000
 init_lr = 0.01
 floor_lr = 0.00001
-period = 50
-num_waves = 4
+period = 25
+num_waves = 2
 
 def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
     m = (floor_lr - init_lr) / total_epochs

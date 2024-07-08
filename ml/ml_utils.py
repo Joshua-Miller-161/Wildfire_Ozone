@@ -96,7 +96,8 @@ def NameModel(config_path, prefix=''):
             epochs = config['HYPERPARAMETERS']['dense_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elif (config['MODEL_TYPE'] == 'Conv'):
-            model_name = 'Conv_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            num_trans = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_trans']
+            model_name = 'Conv_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_t='+str(num_trans)+'_In='
             #print("model_name:", model_name)
             epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -107,7 +108,8 @@ def NameModel(config_path, prefix=''):
             epochs = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-            model_name += 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_In='
+            num_trans = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_trans']
+            model_name += 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_t='+str(num_trans)+'_In='
             print("model_name:", model_name)
             epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -148,7 +150,7 @@ def NameModel(config_path, prefix=''):
 
     return model_name
 #====================================================================
-def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e='], split_char='_'):
+def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 't=', 'In=', 'Out=', 'e='], split_char='_'):
 
     dict_ = {'WA': 'Whole_Area',
              'EO': 'East_Ocean',
@@ -186,10 +188,13 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e=
     final_dict['MODEL_TYPE'] = chunks[0]
     final_dict['MODEL_TYPE_LONG'] = info[0]
 
+    print(" >> chunks", chunks)
+
     for i in range(1, len(chunks)):
         for substr in substrs:
             if (substr in chunks[i]):
                 lol = chunks[i][len(substr):]
+                print(" >> lol =", lol)
                 try:
                     info.append(dict_[lol])
                 except KeyError:
@@ -204,7 +209,10 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e=
                 elif (substr == 'f='):
                     final_dict['target_len'] = int(lol)
                     final_dict['RF_OFFSET']  = int(lol)
-                
+
+                elif (substr == 't='):
+                    final_dict['num_trans'] = int(lol)
+
                 elif (substr == 'In='):
                     HISTORY_DATA = []
                     for char in lol:
@@ -216,7 +224,14 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 'In=', 'Out=', 'e=
                     for char in lol:
                         TARGET_DATA.append(dict_[char])
                     final_dict['TARGET_DATA'] = TARGET_DATA
+
+                elif (substr == 'e='):
+                    final_dict['epochs'] = int(lol)
+
+                substrs.remove(substr)
     #----------------------------------------------------------------
+
+    print(" >> final_dict:", final_dict)
     return info, final_dict
 #====================================================================
 def Funnel(start_size, end_size, r=np.e):

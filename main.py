@@ -43,21 +43,30 @@ elif (model_type == 'Dense'):
                    model_pred_path=model_pred_path)
 #--------------------------------------------------------------------   
 elif (model_type == 'Conv'):
-    e = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
+    e         = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
+    num_trans = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_trans']
     TrainKerasModel('config.yml',
-                    prefix='Sig',
                     model_save_path=os.path.join(model_save_path, 'Conv'))
     TestKerasModel('config.yml',
-                   model_name='Conv_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_name='Conv_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #--------------------------------------------------------------------
 elif (model_type == 'LSTM'):
     e         = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
     num_trans = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['num_trans']
     TrainKerasModel('config.yml',
-                    model_save_path=os.path.join(model_save_path, 'LSTM'))
+                    model_save_path=os.path.join(model_save_path, 'Conv'))
     TestKerasModel('config.yml',
                    model_name='LSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_pred_path=model_pred_path)
+#-------------------------------------------------------------------- 
+elif (model_type == 'ConvLSTM'):
+    e         = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
+    num_trans = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_trans']
+    TrainKerasModel('config.yml',
+                    model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
+    TestKerasModel('config.yml',
+                   model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #--------------------------------------------------------------------
 elif (model_type == 'RBDN'):
@@ -84,15 +93,6 @@ elif (model_type == 'DenoiseTrans'):
                     model_save_path=os.path.join(model_save_path, 'DenoiseTrans'))
     TestKerasModel('config.yml',
                    model_name='DenoiseTrans_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
-                   model_pred_path=model_pred_path)
-#-------------------------------------------------------------------- 
-elif (model_type == 'ConvLSTM'):
-    e = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
-    TrainKerasModel('config.yml',
-                    model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e),
-                    model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
-    TestKerasModel('config.yml',
-                   model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_In=OFTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #-------------------------------------------------------------------- 
 elif (model_type == 'Split'):

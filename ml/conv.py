@@ -7,119 +7,99 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import numpy as np
 import netCDF4 as nc
 import yaml
-
+import tensorflow as tf
 import keras_tuner as kt
 from tensorflow import keras
-from keras.layers import Input, Concatenate, TimeDistributed, Dense, Conv2D, Conv3D, ConvLSTM2D, LayerNormalization, Dropout, AveragePooling3D, UpSampling3D, Reshape, Flatten, LeakyReLU
+from keras.layers import Input, Conv3D, LayerNormalization, BatchNormalization, Dropout, AveragePooling3D, LeakyReLU, Convolution3DTranspose
 
 sys.path.append(os.getcwd())
-from ml.ml_utils import Funnel
-
+from ml.custom_keras_layers import TransformerBlock
 #====================================================================
-def MakeConv(config_path, 
+def MakeConv(config_path,
              x_data_shape=(1164, 5, 28, 14, 8), 
-             y_data_shape=(1164, 1, 28, 14, 1), 
-             to_file=None):
+             y_data_shape=(1164, 1, 28, 14, 1)):
     #----------------------------------------------------------------
     ''' Setup '''
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
 
-    outer_filters = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_outer_filters']
-    inner_filters = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_inner_filters']
+    num_filters       = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_filters']
+    num_trans         = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_trans']
+    
+    region            = config['REGION']
 
     assert (config['MODEL_TYPE'] == 'Conv'), "'MODEL_TYPE' must be 'Conv'. Got: "+str(config['MODEL_TYPE'])
+
+    if (num_trans < 0):
+        num_trans = 0
     #----------------------------------------------------------------
-    input_layer = Input(shape=x_data_shape[1:])
-
-    # Outer convlstms
-    x = Conv3D(filters=outer_filters,
-               kernel_size=(6, 6, 6),
-               padding="same",
-               activation=LeakyReLU(alpha=0.1))(input_layer)
-    x = LayerNormalization()(x)
-    x = Dropout(rate=0.2)(x)
-
-    x = Conv3D(filters=outer_filters,
-               kernel_size=(3, 3, 3),
-               padding="same",
-               activation=LeakyReLU(alpha=0.1))(x)
-    x = LayerNormalization()(x)
-    outer_convlstm = Dropout(rate=0.2, name='outer_output')(x)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Middle convlstms
-    
-    y = AveragePooling3D(pool_size=(2,2,1), strides=(2,2,1))(outer_convlstm)
-
-    y = Conv3D(filters=inner_filters,
-                   kernel_size=(3, 3, 3),
-                   padding="same",
-                   activation=LeakyReLU(alpha=0.1))(y)
-    y = LayerNormalization()(y)
-    y = Dropout(rate=0.05)(y)
-
-    y = Conv3D(filters=inner_filters,
-                   kernel_size=(3, 3, 3),
-                   padding="same",
-                   activation=LeakyReLU(alpha=0.1))(y)
-    y = LayerNormalization()(y)
-    middle_convlstm = Dropout(rate=0.05)(y)
-
-    y = Conv3D(filters=outer_filters,
-                   kernel_size=(3, 3, 3),
-                   padding="same",
-                   activation=LeakyReLU(alpha=0.1))(y)
-    y = LayerNormalization()(y)
-    middle_convlstm = Dropout(rate=0.05, name='middle_output')(y)
-
-    print("MIDDlE", middle_convlstm.shape)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Upscale and join to outer
-
-    up = UpSampling3D(size=(2, 2, 1), name='upsample_to_outer')(middle_convlstm)
-
-    xx = Concatenate(name='join_middle_to_outer')([outer_convlstm, up])
-
-    xx = Reshape((xx.shape[1], xx.shape[2], -1))(xx)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Slim down
-
-    final_filters = Funnel(xx.shape[-1], y_data_shape[4]*16, r=16) # Orig. *32, r=np.e, kernel: (3, 3)
-    
-    for i in range(len(final_filters)):
-        if (i % 2 == 0):
-            xx = Conv2D(filters=final_filters[i],
-                        kernel_size=(1, 1),
-                        padding="same",
-                        activation=LeakyReLU(alpha=0.1))(xx)
-            xx = LayerNormalization()(xx)
-            xx = Dropout(rate=0.05)(xx)
-        else:
-            xx = Conv2D(filters=final_filters[i],
-                        kernel_size=(1, 1),
-                        padding="same",
-                        activation='sigmoid')(xx)
-            xx = LayerNormalization()(xx)
-            xx = Dropout(rate=0.05)(xx)
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    # Final output
-
-    xx = Conv2D(filters=y_data_shape[4],
-                kernel_size=(1, 1),
-                padding="same",
-                activation='linear')(xx)
-    
-    output_layer = Reshape(y_data_shape[1:])(xx)
+    x_strides = 69
+    y_strides = 69
+    if not (region == 'Whole_Area'):
+        x_strides = (x_data_shape[1], 4, 2)
+        y_strides = (y_data_shape[1], 4, 2)
+    else:
+        x_strides = (x_data_shape[1], 4, 4)
+        y_strides = (y_data_shape[1], 4, 4)
     #----------------------------------------------------------------
-    model = keras.Model(input_layer, output_layer)
+    ''' Encoder '''
+    input_ = Input(shape=x_data_shape[1:])
+    x = input_
+    
+    x = Conv3D(filters=num_filters, # On website 32
+               kernel_size=(x_data_shape[1], 5, 5),
+               strides=x_strides,
+               padding="same",
+               activation=LeakyReLU(alpha=0.2))(x)
+    
+    if (num_trans == 0):
+        #x = BatchNormalization(axis=chanDim)(x)
+        x = LayerNormalization()(x)
+        x = Dropout(rate=0.1)(x)
+    else:
+        for _ in range(num_trans):
+            x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
+                                num_heads=4,
+                                ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
+                                attn_axes=(2,3,4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
 
-    keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Conv.png'))
-    print(model.summary())
+    #----------------------------------------------------------------
+    ''' Decoder '''
+    
+    # apply a single CONV_TRANSPOSE layer used to recover the
+    # original depth of the image
+    x = Convolution3DTranspose(filters=num_filters, # On website 32
+                               kernel_size=(y_data_shape[1], 5, 5),
+                               strides=y_strides,
+                               padding="same",
+                               activation='linear')(x)
+    
+    if (num_trans == 0):
+        #x = BatchNormalization(axis=chanDim)(x)
+        x = LayerNormalization()(x)
+    else:
+        for _ in range(num_trans):
+            x = TransformerBlock(embed_dim=x.shape[-1], # Must always be prev_layer.shape[-1]
+                                num_heads=4,
+                                ff_dim=x.shape[-1], # Must always be next_layer.shape[-1]
+                                attn_axes=(4))(x)   # If input is (Batch, time, d1,...,dn, embed_dim), must be indices of (d1,...,dn)
+
+    output = Convolution3DTranspose(filters=y_data_shape[4], 
+                                    kernel_size=(y_data_shape[1], 3, 3),
+                                    strides=(y_data_shape[1], 1, 1),
+                                    padding="same",
+                                    activation='linear')(x)
+    #----------------------------------------------------------------
+    model = keras.Model(input_, output, name="Conv")
+    
+    #print(model.summary())
+    #keras.utils.plot_model(model, show_shapes=True, show_layer_activations=True, to_file=os.path.join('SavedModels/Figs', 'Denoise3D1StageTrans.png'))
+
     return model
 
 #====================================================================
-# x = np.random.random((200, 28, 14, 5, 8))
-# y = np.random.random((200, 28, 14, 1, 1)) * 1.2
+# x = np.random.random((200, 5, 28, 14, 8))
+# y = np.random.random((200, 1, 28, 14, 1)) * 1.2
 
 # model = MakeConv('config.yml', x.shape, y.shape)
 

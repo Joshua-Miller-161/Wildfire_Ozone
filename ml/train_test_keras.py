@@ -75,19 +75,6 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         batch_size = config['HYPERPARAMETERS']['dense_hyperparams_dict']['batch_size']
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Conv'):
-        x_train = np.transpose(x_train, (0, 2, 3, 1, 4))
-        y_train = np.transpose(y_train, (0, 2, 3, 1, 4))
-        x_test = np.transpose(x_test, (0, 2, 3, 1, 4))
-        y_test = np.transpose(y_test, (0, 2, 3, 1, 4))
-
-        print("____________________________________________________________")
-        print(" >> Conv transpose")
-        print(" >> x_train:", np.shape(x_train))
-        print(" >> y_train:", np.shape(y_train))
-        print(" >> x_test :", np.shape(x_test))
-        print(" >> y_test :", np.shape(y_test))
-        print("____________________________________________________________")
-        
         model = MakeConv(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['conv_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['conv_hyperparams_dict']['batch_size']
@@ -96,6 +83,11 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         model = MakeLSTM(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['batch_size']
+    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    elif (config['MODEL_TYPE'] == 'ConvLSTM'):
+        model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
+        num_epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
+        batch_size = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['batch_size']
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'RBDN'):
         model = MakeRBDN(config_path, np.shape(x_train), np.shape(y_train))
@@ -117,11 +109,6 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
         num_epochs = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['epochs']
         batch_size = config['HYPERPARAMETERS']['denoise_hyperparams_dict']['batch_size']
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-        model = MakeConvLSTM(config_path, np.shape(x_train), np.shape(y_train))
-        num_epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
-        batch_size = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['batch_size']
-    # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     elif (config['MODEL_TYPE'] == 'Trans'):
         model = MakeDenseTrans(config_path, np.shape(x_train), np.shape(y_train))
         num_epochs = config['HYPERPARAMETERS']['trans_hyperparams_dict']['epochs']
@@ -134,10 +121,10 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                       patience=patience, 
                                                       restore_best_weights=True)
-    #custom_lr = TriangleWaveLR(period=5)
+    custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
     #custom_lr = NoisySinLR(num_epochs)
-    custom_lr = TriangleFractalLR(num_epochs, period=20)
+    #custom_lr = TriangleFractalLR(num_epochs, period=5, num_waves=1)
 
     print("____________________________________________________________")
     print(" >> Creating model type:", config['MODEL_TYPE'])
@@ -215,12 +202,6 @@ def TestKerasModel(config_path, model_name, model_pred_path=None):
     del(histories)
     del(targets)
     
-    if ('Conv_' in model_name):
-        x_train = np.transpose(x_train, (0, 2, 3, 1, 4))
-        y_train = np.transpose(y_train, (0, 2, 3, 1, 4))
-        x_test = np.transpose(x_test, (0, 2, 3, 1, 4))
-        y_test = np.transpose(y_test, (0, 2, 3, 1, 4))
-    
     print(" >> x_train:", np.shape(x_train))
     print(" >> y_train:", np.shape(y_train))
     print(" >> x_test :", np.shape(x_test))
@@ -229,6 +210,9 @@ def TestKerasModel(config_path, model_name, model_pred_path=None):
     print(" >> Testing model type:", config['MODEL_TYPE'])
     x_test_orig_shape = np.shape(x_test)
     y_test_orig_shape = np.shape(y_test)
+
+    del(x_train)
+    del(y_train)
 
     raw_ozone = UnScale(y_test, 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
     lon       = UnScale(x_test[..., -3], 'data_utils/scale_files/lon_minmax.json').reshape(x_test_orig_shape[:-1])
@@ -283,22 +267,12 @@ def TestKerasModel(config_path, model_name, model_pred_path=None):
 
     y_pred = UnScale(np.squeeze(y_pred), 'data_utils/scale_files/ozone_standard.json').reshape(y_test_orig_shape[:-1])
     print("____________________________________________________________")
-    print("orig y_pred=", np.shape(y_pred))
-    if ('Conv_' in model_name):
-        y_pred    = np.transpose(y_pred, (0, 3, 1, 2))
-        raw_ozone = np.transpose(raw_ozone, (0, 3, 1, 2))
-        lon       = np.transpose(lon, (0, 3, 1, 2))
-        lat       = np.transpose(lat, (0, 3, 1, 2))
-        time      = np.transpose(time, ((0, 3, 1, 2)))
-    # raw_ozone = raw_ozone[:, 0, :, :].reshape(np.shape(raw_ozone)[0], 1, np.shape(raw_ozone)[2], np.shape(raw_ozone)[3])
-    # y_pred    = y_pred[:, 0, :, :].reshape(np.shape(y_pred)[0], 1, np.shape(y_pred)[2], np.shape(y_pred)[3])
-    print("____________________________________________________________")
-    print("y_pred=", np.shape(y_pred), ", y_data=", np.shape(raw_ozone),
-          ", lon=", np.shape(lon), ", lat=", np.shape(lat))
+    print(" >> y_pred=", np.shape(y_pred), ", y_data=", np.shape(raw_ozone),
+          ", lon=", np.shape(lon), ", lat=", np.shape(lat), ", time=", np.shape(time))
     print("____________________________________________________________")
 
     mse = np.mean(np.square(np.subtract(raw_ozone, y_pred)))
-    print("MSE:", mse)
+    print(" >> MSE:", mse)
     print("____________________________________________________________")
     #----------------------------------------------------------------
     ''' Plot '''
@@ -380,7 +354,7 @@ def TestKerasModel(config_path, model_name, model_pred_path=None):
     
     #----------------------------------------------------------------
     ''' Save predictions '''
-    SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis)
+    SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis, param_dict['num_trans'])
 
     print(' >> Saved predictions:', os.path.join(model_pred_path, model_name+".npy"))
     print("____________________________________________________________")
