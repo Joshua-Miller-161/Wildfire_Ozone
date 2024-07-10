@@ -14,9 +14,9 @@ HIST_TARG:
 HYPERPARAMETERS:
   conv_hyperparams_dict:
     batch_size: 32
-    epochs: 200
+    epochs: 10000
     num_filters: 64
-    num_trans: 0
+    num_trans: 1
   convlstm_hyperparams_dict:
     batch_size: 32
     epochs: 10000
@@ -72,8 +72,8 @@ MODEL_FIG_SAVE_PATH: /Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/S
 MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: Conv
-PATIENCE: 15
-REGION: Whole_Area
+PATIENCE: 100
+REGION: West_Ocean
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

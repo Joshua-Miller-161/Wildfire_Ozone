@@ -295,28 +295,28 @@ class TriangleFractalLR(Callback):
     #     x = (self.num_waves * self.period) * int(epoch / (self.num_waves * self.period))
     #     return m * x + self.init_lr
 
-    def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
-        n = int(epoch / (num_waves * period))
-        m = - (1 / ((n + 1) * (n + 2))) * (floor_lr + init_lr) / (num_waves * period)
-        b = (floor_lr + init_lr) / (n + 1) + (n * (floor_lr + init_lr)) / ((n + 1) * (n + 2))
-        x = (num_waves * period) * int(epoch / (num_waves * period))
+    def MajorPeakHeight(self, epoch):
+        n = int(epoch / (self.num_waves * self.period))
+        m = - (1 / ((n + 1) * (n + 2))) * (self.floor_lr + self.init_lr) / (self.num_waves * self.period)
+        b = (self.floor_lr + self.init_lr) / (n + 1) + (n * (self.floor_lr + self.init_lr)) / ((n + 1) * (n + 2))
+        x = (self.num_waves * self.period) * int(epoch / (self.num_waves * self.period))
         return m * x + b
     
-    def SubPeakHeight(self, epoch, top, floor_lr, period, num_waves):
+    def SubPeakHeight(self, epoch, top):
         m = (self.floor_lr - top) / (self.period * self.num_waves)
         y_curr = m * epoch + top
         y_peak = m * (self.period * int(epoch / self.period)) + top
         return max(y_curr, y_peak)
 
-    def WaveLine(self, epoch, peak, floor_lr, period):
+    def WaveLine(self, epoch, peak):
         m = (self.floor_lr - peak) / self.period
         b = peak - m * self.period * (int(epoch / self.period))
         return m * epoch + b
     
     def on_epoch_begin(self, epoch, logs=None):
-        major   = self.MajorPeakHeight(epoch, self.init_lr, self.floor_lr, self.total_epochs, self.period, self.num_waves) #(num_waves * period)
-        peak_lr = self.SubPeakHeight(epoch % (self.num_waves * self.period), major, self.floor_lr, self.period, self.num_waves)
-        lr      = self.WaveLine(epoch, peak_lr, self.floor_lr, self.period)
+        major   = self.MajorPeakHeight(epoch)
+        peak_lr = self.SubPeakHeight(epoch % (self.num_waves * self.period), major)
+        lr      = self.WaveLine(epoch, peak_lr)
 
         keras.backend.set_value(self.model.optimizer.lr, lr)
 #====================================================================

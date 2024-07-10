@@ -121,10 +121,10 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
                                                       patience=patience, 
                                                       restore_best_weights=True)
-    custom_lr = TriangleWaveLR(period=5)
+    #custom_lr = TriangleWaveLR(period=5)
     #custom_lr = NoisyDecayLR(num_epochs)
     #custom_lr = NoisySinLR(num_epochs)
-    #custom_lr = TriangleFractalLR(num_epochs, period=5, num_waves=1)
+    custom_lr = TriangleFractalLR(num_epochs, period=20, num_waves=20)
 
     print("____________________________________________________________")
     print(" >> Creating model type:", config['MODEL_TYPE'])

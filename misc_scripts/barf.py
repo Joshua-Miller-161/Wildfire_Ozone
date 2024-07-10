@@ -14,18 +14,18 @@ from tensorflow import keras
 from keras.layers import Input, Concatenate, Reshape, Permute
 #====================================================================
 ''' Setup '''
-total_epochs = 10000
+total_epochs = 1000
 init_lr = 0.01
 floor_lr = 0.00001
-period = 25
-num_waves = 2
+period = 20
+num_waves = 20
 
 # def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
 #     m = (floor_lr - init_lr) / total_epochs
 #     x = (num_waves * period) * int(epoch / (num_waves * period))
 #     return m * x + init_lr
 
-def MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves):
+def MajorPeakHeight(epoch, init_lr, floor_lr, period, num_waves):
     n = int(epoch / (num_waves * period))
 
     m = - (1 / ((n + 1) * (n + 2))) * (floor_lr + init_lr) / (num_waves * period)
@@ -52,7 +52,7 @@ majors = []
 
 for epoch in range(total_epochs):
     #start_lr = ((floor_lr - init_lr) / total_epochs) * (num_waves * period) * int(epoch / (num_waves * period)) + init_lr
-    major   = MajorPeakHeight(epoch, init_lr, floor_lr, total_epochs, period, num_waves) #(num_waves * period)
+    major   = MajorPeakHeight(epoch, init_lr, floor_lr, period, num_waves) #(num_waves * period)
     peak_lr = SubPeakHeight(epoch % (num_waves * period), major, floor_lr, period, num_waves)
     lr      = WaveLine(epoch, peak_lr, floor_lr, period)
     

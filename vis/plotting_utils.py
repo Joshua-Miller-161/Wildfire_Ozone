@@ -99,7 +99,7 @@ def Plot_O3_Fire(ax, fire_x, fire, O3_x, O3,
 def format_date(x, pos):
     date = mdates.num2date(x)
     if date.month == 1:
-        return '\\textbf{' + str(date.year) + '}'
+        return r'$\mathbf{' + str(date.year) + r'}$'
     else:
         return date.strftime('%b')
 #====================================================================
