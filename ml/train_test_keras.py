@@ -30,7 +30,7 @@ from ml.dense import MakeDense
 from ml.dense_trans import MakeDenseTrans
 from ml.ml_utils import NameModel, ParseModelName, TriangleWaveLR, NoisyDecayLR, NoisySinLR, TriangleFractalLR
 from ml.custom_keras_layers import TransformerBlock, RecombineLayer
-from misc.misc_utils import SavePredData
+from ml.ml_utils import SavePredData
 #====================================================================
 def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels', prefix=''):
     #----------------------------------------------------------------
@@ -119,6 +119,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                   optimizer=keras.optimizers.SGD())
     
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
+                                                      min_delta=0.00001,
                                                       patience=patience, 
                                                       restore_best_weights=True)
     #custom_lr = TriangleWaveLR(period=5)

@@ -17,7 +17,7 @@ import fiona
 sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
-from ml.ml_utils import NameModel, ParseModelName
+from ml.ml_utils import NameModel, ParseModelName, SavePredData
 #====================================================================
 def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/GBM'):
     #----------------------------------------------------------------
@@ -80,7 +80,7 @@ def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save
 
     dump(model, os.path.join(model_save_path, model_name))
 #====================================================================
-def TestNaiveXGBoost(config_path, data_config_path, model_name):
+def TestNaiveXGBoost(config_path, data_config_path, model_name, model_pred_path=None):
     #----------------------------------------------------------------
     ''' Get info from model name '''
     info, param_dict = ParseModelName(model_name)
@@ -107,6 +107,7 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     ''' Load model '''
 
     model = 69
+    source_path = ''
     folders = os.listdir(model_folder)
     if ('.DS_Store' in folders):
         folders.remove('.DS_Store')
@@ -118,6 +119,8 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
                 if (model_name in name):
                     if name.endswith('.pkl'):
                         model = load(os.path.join(root, name))
+                        source_path = os.path.join(root, name)
+                        break
     #----------------------------------------------------------------
     ''' Get data '''
     x_train_df, x_test_df, y_train_df, y_test_df, x_train_orig_shape, x_test_orig_shape, y_train_orig_shape, y_test_orig_shape = NaiveRFDataLoader(config_path, data_config_path, return_shapes=True)
@@ -159,7 +162,9 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
     #                         index=x_test_df.columns,
     #                         name="Importance").sort_values(ascending=True, inplace=False) 
     
-    print(" >> mse:", mse)
+    print(" >> MSE:", mse)
+    print("____________________________________________________________")
+    print(" >> model source:", source_path)
     print("____________________________________________________________")
     #print("model_ranks:", model_ranks)
     #----------------------------------------------------------------
@@ -243,25 +248,17 @@ def TestNaiveXGBoost(config_path, data_config_path, model_name):
                  fontsize=12, fontweight='bold')
     
 
-    print("model_name=", model_name)
+    #print("model_name=", model_name)
     model_name = model_name.split('.')[0]
 
     fig.savefig(os.path.join(figure_folder, model_name+'.pdf'), bbox_inches='tight', pad_inches=0)
 
     #----------------------------------------------------------------
     ''' Save predictions '''
-    if not (model_pred_path == None):
-        if not os.path.exists(os.path.join(model_pred_path, config['MODEL_TYPE'])):
-            os.makedirs(os.path.join(model_pred_path, config['MODEL_TYPE']))
-
-        model_pred_path = os.path.join(model_pred_path, config['MODEL_TYPE'])
-
-        sorted_indices = np.argsort(time_axis)
-        y_pred = y_pred[sorted_indices]
-        time_axis = time_axis[sorted_indices]
-
-        np.save(os.path.join(model_pred_path, model_name+".npy"), y_pred)
-
-        print(' >> Saved predictions:', os.path.join(model_pred_path, model_name+".npy"))
-        print("____________________________________________________________")
+    
+    full_model_pred_path = SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis)
+    
+    print(' >> Saved predictions:', os.path.join(full_model_pred_path, model_name+".npy"))
+    print("____________________________________________________________")
+    #----------------------------------------------------------------
     plt.show()

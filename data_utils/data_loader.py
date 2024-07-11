@@ -116,9 +116,7 @@ def DataLoader(config_path,
     #----------------------------------------------------------------
     ''' Loop through desired variables and extract data '''
 
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-    print("++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
+    print("\n")
 
     for idx in range(len(variables)):
         var = variables[idx]

@@ -7,6 +7,7 @@ import pandas as pd
 from tensorflow import keras
 from keras.callbacks import Callback
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 #====================================================================
 def NameModel(config_path, prefix=''):
     model_name = ''
@@ -150,7 +151,7 @@ def NameModel(config_path, prefix=''):
 
     return model_name
 #====================================================================
-def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 't=', 'In=', 'Out=', 'e='], split_char='_'):
+def ParseModelName(input_string, substrs=['reg=', 'In=', 'Out=', 'h=', 'f=', 't=', 'e='], split_char='_'):
 
     dict_ = {'WA': 'Whole_Area',
              'EO': 'East_Ocean',
@@ -190,10 +191,16 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 't=', 'In=', 'Out=
 
     #print(" >> chunks", chunks)
 
-    for i in range(1, len(chunks)):
-        for substr in substrs:
-            if (substr in chunks[i]):
-                lol = chunks[i][len(substr):]
+    for substr in substrs:
+        #print(" >> substr =", substr, ", substrs =", substrs)
+        for chunk in chunks[1:]:
+            if (substr in chunk):
+                #print(" >> substr =", substr, ", chunk =", chunk)
+                # substrs.remove(substr)
+                lol = chunk[len(substr):]
+
+                chunks.remove(chunk)
+
                 #print(" >> lol =", lol)
                 try:
                     info.append(dict_[lol])
@@ -202,16 +209,6 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 't=', 'In=', 'Out=
 
                 if (substr == 'reg='):
                     final_dict['REGION'] = info[-1]
-                
-                elif (substr == 'h='):
-                    final_dict['history_len'] = int(lol)
-                
-                elif (substr == 'f='):
-                    final_dict['target_len'] = int(lol)
-                    final_dict['RF_OFFSET']  = int(lol)
-
-                elif (substr == 't='):
-                    final_dict['num_trans'] = int(lol)
 
                 elif (substr == 'In='):
                     HISTORY_DATA = []
@@ -219,20 +216,63 @@ def ParseModelName(input_string, substrs=['reg=', 'h=', 'f=', 't=', 'In=', 'Out=
                         HISTORY_DATA.append(dict_[char])
                     final_dict['HISTORY_DATA'] = HISTORY_DATA
                 
-                elif (substr == 'Out='):
+                elif ((substr == 'Out=') and not (substr == 't=')):
                     TARGET_DATA = []
                     for char in lol:
                         TARGET_DATA.append(dict_[char])
                     final_dict['TARGET_DATA'] = TARGET_DATA
 
+                elif (substr == 'h='):
+                    final_dict['history_len'] = int(lol)
+                
+                elif (substr == 'f='):
+                    final_dict['target_len'] = int(lol)
+                    final_dict['RF_OFFSET']  = int(lol)
+
+                elif ((substr == 't=') and not (substr == 'Out=')):
+                    final_dict['num_trans'] = int(lol)
+
                 elif (substr == 'e='):
                     final_dict['epochs'] = int(lol)
-
-                substrs.remove(substr)
     #----------------------------------------------------------------
 
-    print(" >> final_dict:", final_dict)
+    #print(" >> final_dict:", final_dict)
     return info, final_dict
+#====================================================================
+def SavePredData(config_path, model_name, y_pred, data, dates, num_trans=0):
+    with open(config_path, 'r') as c:
+        config = yaml.load(c, Loader=yaml.FullLoader)
+
+    model_pred_path = config['MODEL_PRED_PATH']
+    model_type      = config['MODEL_TYPE']
+    region          = config['REGION']
+
+    short = {'Whole_Area': 'WA', 'South_Land': 'SL', 'North_Land': 'NL', 'West_Ocean': 'WO', 'East_Ocean': 'EO'}
+
+    full_model_pred_path = os.path.join(model_pred_path, model_type)
+    if ((num_trans > 0) and not ('Trans' in full_model_pred_path)):
+        full_model_pred_path += 'Trans'
+    
+    if not os.path.exists(full_model_pred_path):
+        os.makedirs(full_model_pred_path)
+
+    if not os.path.exists(os.path.join(model_pred_path, 'Data')):
+        os.makedirs(os.path.join(model_pred_path, 'Data'))
+    
+    sorted_indices = np.argsort(dates)
+    y_pred = y_pred[sorted_indices]
+    data   = data[sorted_indices]
+    dates  = dates[sorted_indices]
+    dates = pd.DataFrame(np.asarray([datetime(1970, 1, 1) + timedelta(days=date) for date in dates]), columns=['Days since 1970/1/1'])
+   
+    np.save(os.path.join(full_model_pred_path, model_name+".npy"), y_pred)
+
+    np.save(os.path.join(os.path.join(model_pred_path, 'Data'), model_type+'_'+short[region]+'_raw_ozone.npy'), data)
+
+    #np.savetxt(os.path.join(model_pred_path, 'Data'), model_type+'_dates.csv', dates, delimiter=',')
+    dates.to_csv(os.path.join(os.path.join(model_pred_path, 'Data'), model_type+'_dates.csv'), index=False)
+
+    return full_model_pred_path
 #====================================================================
 def Funnel(start_size, end_size, r=np.e):
     assert not start_size == end_size, "'start_size' and 'end_size' must be different. Got start_size = {}, output_size = {}".format(start_size, end_size)

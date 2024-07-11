@@ -18,7 +18,7 @@ from ml.ml_utils import ParseModelName
 from misc.misc_utils import GetBoxCoords
 from vis.plotting_utils import ShowYearMonth
 #====================================================================
-model_name = 'XGBRF_reg=SL_f=1_In=OFTUVXYD_Out=O'
+model_name = 'Conv_reg=WA_h=5_f=1_t=1_In=OFTUVXYD_Out=O_e=10000'
 
 date_idx = 77
 
@@ -45,7 +45,7 @@ for folder in folders:
             if (model_name in name):
                 if name.endswith('.npy'):
                     print(" >> Found:", os.path.join(root, name))
-                    y_pred = np.load(os.path.join(root, name))
+                    y_pred = np.squeeze(np.load(os.path.join(root, name)))
 
 #====================================================================
 ''' Get info from model name '''
@@ -62,15 +62,17 @@ files = os.listdir(os.path.join(model_pred_path, 'Data'))
 data  = 69
 dates = 69
 for file in files:
-    if ((region in file) and (model_type in file)):
+    if ((region in file) and (model_type+'_' in file)):
         if file.endswith('.npy'):
-            data = np.load(os.path.join(os.path.join(model_pred_path, 'Data'), file))
+            data = np.squeeze(np.load(os.path.join(os.path.join(model_pred_path, 'Data'), file)))
             print(" >> Found:", os.path.join(os.path.join(model_pred_path, 'Data'), file))
-    if ((model_type in file) and ('dates' in file)):
+    if ((model_type+'_' in file) and ('dates' in file)):
         if file.endswith('.csv'):
             dates = pd.read_csv(os.path.join(os.path.join(model_pred_path, 'Data'), file))
             print(" >> Found:", os.path.join(os.path.join(model_pred_path, 'Data'), file))
-
+#====================================================================
+''' MSE '''
+print(" >> MSE:", np.mean(np.square(np.subtract(data, y_pred))))
 #====================================================================
 ''' Get lat/lon and world map '''
 
@@ -124,7 +126,12 @@ fig_time.set_size_inches(10, 1)
 raw_ozone_mean = np.mean(data, axis=(1, 2))
 y_pred_mean    = np.mean(y_pred, axis=(1, 2))
 
-time_axis = [datetime.strptime(date, '%Y-%m-%d') for date in dates['Days since 1970/1/1']]
+time_axis = 69
+
+time_axis = [datetime.strptime(date, '%Y-%m-%d %H:%M:%S') for date in dates['Days since 1970/1/1']]
+
+
+print(np.shape(time_axis), np.shape(raw_ozone_mean))
 
 ax_time.scatter(time_axis, raw_ozone_mean, s=15,color='black', marker='x', label='Data')
 ax_time.scatter(time_axis, y_pred_mean, s=20, facecolors='none', edgecolors='blue', marker='o', label='Prediction')

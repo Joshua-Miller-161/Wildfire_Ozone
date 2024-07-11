@@ -22,6 +22,9 @@ def Train_Test_Split(config_path, x_data, y_data, shuffle=True, perm_path='data_
         with open(perm_path) as json_file:
             permutation_dict = json.load(json_file)
         permutation = permutation_dict[str(np.shape(x_data)[0])]
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print(" >> TrainTestSplit perm:", np.shape(permutation), ', x_data:', np.shape(x_data), ', y_data:', np.shape(y_data))
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         x_data = x_data[permutation]
         y_data = y_data[permutation]
         del(permutation_dict)

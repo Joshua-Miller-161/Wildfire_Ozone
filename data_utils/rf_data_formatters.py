@@ -29,24 +29,13 @@ def NaiveRFDataLoader(config_path, data_config_path, return_shapes=False, shuffl
     offset = int(config['RF_OFFSET'])
     #----------------------------------------------------------------
     ''' Get training and target variables '''
+    print(" >> Training data")
     x_data = DataLoader(config_path, data_config_path, 'HISTORY_DATA')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
-    print('~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~')
+    print("____________________________________________________________")
+    print(" >> Testing data")
     y_data = DataLoader(config_path, data_config_path, 'TARGET_DATA')
 
-    print("x_data", np.shape(x_data), ", y_data", np.shape(y_data))
+    print(" >> x_data", np.shape(x_data), ", y_data", np.shape(y_data))
 
     assert ((0 < offset) and (offset < np.shape(x_data)[0])), "'offset' must be between 1 and "+str(np.shape(x_data)[0])+". Got: "+str(offset)
     #----------------------------------------------------------------
@@ -54,7 +43,7 @@ def NaiveRFDataLoader(config_path, data_config_path, return_shapes=False, shuffl
 
     x_data = x_data[:-offset, ...] # 1st dim is time
     y_data = y_data[offset:, ...]
-    print("x_data", np.shape(x_data), ", y_data", np.shape(y_data))
+    print(" >> x_data", np.shape(x_data), ", y_data", np.shape(y_data))
     #----------------------------------------------------------------
     ''' Train test split '''
 

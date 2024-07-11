@@ -123,10 +123,10 @@ elif (model_type == 'RF'):
                 model_pred_path=model_pred_path)
 #--------------------------------------------------------------------
 elif (model_type == 'GBM'):
-    TrainNaiveXGBoost('config.yml', 
-                      'data_utils/data_utils_config.yml', 
-                      model_save_path=os.path.join(model_save_path, 'GBM'))
-    TestNaiveXGBoost('config.yml', 
+    # TrainNaiveXGBoost('config.yml', 
+    #                   'data_utils/data_utils_config.yml', 
+    #                   model_save_path=os.path.join(model_save_path, 'GBM'))
+    TestNaiveXGBoost('config.yml',
                      'data_utils/data_utils_config.yml',
                      model_name='GBM_reg='+short[region]+'_f=1_In=OFTUVXYD_Out=O.pkl',
                      model_pred_path=model_pred_path)

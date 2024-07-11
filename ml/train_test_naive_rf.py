@@ -20,8 +20,7 @@ import fiona
 sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
-from ml.ml_utils import NameModel, ParseModelName
-from misc.misc_utils import SavePredData
+from ml.ml_utils import NameModel, ParseModelName, SavePredData
 #====================================================================
 def TrainNaiveRF(config_path, data_config_path, model_save_path=None):
     #----------------------------------------------------------------
@@ -115,7 +114,7 @@ def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None)
     ''' Get info from model name '''
     info, param_dict = ParseModelName(model_name)
     print("param_dict:", param_dict)
-
+    print("____________________________________________________________")
     #----------------------------------------------------------------
     ''' Get data from config '''
 
@@ -141,9 +140,11 @@ def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None)
     ''' Load model '''
 
     trained_rfr = 69
+    source_path = ''
     folders = os.listdir(model_folder)
     if ('.DS_Store' in folders):
         folders.remove('.DS_Store')
+
 
     for folder in folders:
         for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
@@ -154,10 +155,16 @@ def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None)
                         print(" >> ")
                         print(" >> ", os.path.join(root, name))
                         trained_rfr = joblib.load(os.path.join(root, name))
+                        source_path = os.path.join(root, name)
                         print(" >> Loaded", os.path.join(root, name))
+                        break
                     elif name.endswith('.pkl'):
                         trained_rfr = pickle.load(open(os.path.join(root, name), 'rb'))
+                        source_path = os.path.join(root, name)
                         print(" >> Loaded", os.path.join(root, name))
+                        break
+
+    print("____________________________________________________________")
     #----------------------------------------------------------------
     ''' Get data '''
 
@@ -179,9 +186,9 @@ def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None)
     print("____________________________________________________________")
     # print('UNSCALED OZONE', np.shape(raw_ozone), raw_ozone)
     # print("+++++++++++++++++++++++++++++++")
-    print('UNSCALED LON', np.shape(lon), lon)
-    print("+++++++++++++++++++++++++++++++")
-    print("UNSCALED LAT", np.shape(lat), lat)
+    # print('UNSCALED LON', np.shape(lon), lon)
+    # print("+++++++++++++++++++++++++++++++")
+    # print("UNSCALED LAT", np.shape(lat), lat)
     # print("+++++++++++++++++++++++++++++++")
     # print("UNSCALED TIME", np.shape(time), time)
     #----------------------------------------------------------------
@@ -208,7 +215,7 @@ def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None)
     
     print(" >> mse:", mse)
     print("____________________________________________________________")
-    print(" >> model source:", os.path.join(root, model_name))
+    print(" >> model source:", source_path)
     print("____________________________________________________________")
     #print("model_ranks:", model_ranks)
 
@@ -294,9 +301,9 @@ def TestNaiveRF(config_path, data_config_path, model_name, model_pred_path=None)
     #----------------------------------------------------------------
     ''' Save predictions '''
     
-    SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis)
+    full_model_pred_path = SavePredData(config_path, model_name, y_pred, raw_ozone, time_axis)
     
-    print(' >> Saved predictions:', os.path.join(model_pred_path, model_name+".npy"))
+    print(' >> Saved predictions:', os.path.join(full_model_pred_path, model_name+".npy"))
     print("____________________________________________________________")
     #----------------------------------------------------------------
     plt.show()
