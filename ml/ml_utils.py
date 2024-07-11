@@ -108,9 +108,9 @@ def NameModel(config_path, prefix=''):
             epochs = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elif (config['MODEL_TYPE'] == 'ConvLSTM'):
-            num_trans = config['HYPERPARAMETERS']['conv_hyperparams_dict']['num_trans']
+            num_trans = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['num_trans']
             model_name += 'ConvLSTM_reg='+shorthand_dict[region]+'_h='+str(int(history_len))+'_f='+str(int(target_len))+'_t='+str(num_trans)+'_In='
-            print("model_name:", model_name)
+            #print("model_name:", model_name)
             epochs = config['HYPERPARAMETERS']['convlstm_hyperparams_dict']['epochs']
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         elif (config['MODEL_TYPE'] == 'RBDN'):

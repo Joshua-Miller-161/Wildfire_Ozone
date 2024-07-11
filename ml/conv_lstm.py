@@ -89,8 +89,8 @@ def MakeConvLSTM(config_path,
     #----------------------------------------------------------------
     model = keras.Model(input_, output, name='ConvLSTM')
 
-    keras.utils.plot_model(model, show_shapes=True, to_file=os.path.join('SavedModels/Figs', 'ConvLSTM.png'))
-    print(model.summary())
+    # keras.utils.plot_model(model, show_shapes=True, to_file=os.path.join('SavedModels/Figs', 'ConvLSTM.png'))
+    # print(model.summary())
     return model
 
 #====================================================================

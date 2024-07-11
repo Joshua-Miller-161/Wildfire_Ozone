@@ -71,7 +71,7 @@ HYPERPARAMETERS:
 MODEL_FIG_SAVE_PATH: /Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/SavedModels/Figs
 MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: Conv
+MODEL_TYPE: ConvLSTM
 PATIENCE: 100
 REGION: West_Ocean
 RF_OFFSET: 1
