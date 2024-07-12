@@ -119,7 +119,7 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
                   optimizer=keras.optimizers.SGD())
     
     early_stopping_cb = keras.callbacks.EarlyStopping(monitor="val_loss",
-                                                      min_delta=0.00001,
+                                                      min_delta=0.00005,
                                                       patience=patience, 
                                                       restore_best_weights=True)
     #custom_lr = TriangleWaveLR(period=5)

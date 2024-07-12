@@ -73,7 +73,7 @@ MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: Dense
 PATIENCE: 100
-REGION: South_Land
+REGION: West_Ocean
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone
