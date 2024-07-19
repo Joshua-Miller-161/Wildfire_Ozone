@@ -77,6 +77,8 @@ def DataLoader(config_path,
                     data_paths_dict[var] = os.path.join(var_path, file)
 
     #print(data_paths_dict)
+    print("____________________________________________________________")
+    print("____________________________________________________________")
     print(" >> variables", variables)
     #----------------------------------------------------------------
     ''' Prepare to extract data '''

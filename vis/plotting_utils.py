@@ -110,6 +110,16 @@ def format_date_2(x, pos):
     else:
         return ''
 #====================================================================
+def truncate_datetime_v3(dt_str):
+    try:
+        dt = datetime.strptime(dt_str, '%Y-%m-%d %H:%M:%S')
+    except ValueError:
+        dt = datetime.strptime(dt_str, '%Y-%m-%d')
+    return dt.date().strftime('%Y-%m-%d')
+#====================================================================
+def DegreeFormatter(x, pos):
+    return f'{x:.0f}°'
+#====================================================================
 def ShowYearMonth(ax, dates, start_date=datetime(1970, 1, 1), fontsize=12, method=0, rotation=0, start_line_idx=0):
     if not (type(dates[0])==datetime):
         dates = np.asarray([start_date + timedelta(days=int(d)) for d in dates])
@@ -127,7 +137,7 @@ def ShowYearMonth(ax, dates, start_date=datetime(1970, 1, 1), fontsize=12, metho
         january = mdates.date2num(datetime(year, 1, 1))
         ax.axvline(x=january, color='gray', linestyle=':')
 #====================================================================
-def PlotBoxes(config_path, ax, plot_text=False):
+def PlotBoxes(config_path, ax, plot_text=False, fontsize=20):
     with open(config_path, 'r') as c:
         config = yaml.load(c, Loader=yaml.FullLoader)
     min_lat_0 = config['WHOLE_AREA_BOX']['min_lat']
@@ -173,8 +183,8 @@ def PlotBoxes(config_path, ax, plot_text=False):
     ax.plot(box4[0, :], box4[1, :], 'k-')
 
     if plot_text:
-        ax.text(box0[0, 0]+1, box0[1, 0]-7, 'Whole\narea', fontsize=20, fontweight='bold')
-        ax.text(box1[0, 0]+1, box1[1, 0]-7, 'East\nocean', fontsize=20, fontweight='bold')
-        ax.text(box2[0, 0]+1, box2[1, 0]-7, 'West\nocean', fontsize=20, fontweight='bold')
-        ax.text(box3[0, 0]+1, box3[1, 0]-7, 'North\nland', fontsize=20, fontweight='bold')
-        ax.text(box4[0, 0]+1, box4[1, 0]-7, 'South\nland', fontsize=20, fontweight='bold')
+        ax.text(box0[0, 0]+1, box0[1, 0]-7, 'Whole\nArea', fontsize=fontsize, fontweight='bold')
+        ax.text(box1[0, 0]+1, box1[1, 0]-7, 'East\nOcean', fontsize=fontsize, fontweight='bold')
+        ax.text(box2[0, 0]+1, box2[1, 0]-7, 'West\nOcean', fontsize=fontsize, fontweight='bold')
+        ax.text(box3[0, 0]+1, box3[1, 0]-7, 'North\nLand', fontsize=fontsize, fontweight='bold')
+        ax.text(box4[0, 0]+1, box4[1, 0]-7, 'South\nLand', fontsize=fontsize, fontweight='bold')

@@ -16,7 +16,7 @@ HYPERPARAMETERS:
     batch_size: 32
     epochs: 10000
     num_filters: 64
-    num_trans: 1
+    num_trans: 0
   convlstm_hyperparams_dict:
     batch_size: 32
     epochs: 10000
@@ -37,14 +37,14 @@ HYPERPARAMETERS:
     num_neurons: 100
     num_trans: 0
   gb_hyperparams_dict:
-    early_stopping_rounds: 10
-    max_depth: 20
-    num_boost_round: 1000
+    early_stopping_rounds: 100
+    max_depth: 24
+    num_boost_round: 10000
     subsample: 0.5
   lstm_hyperparams_dict:
     batch_size: 32
     epochs: 10000
-    lstm_units: 128
+    lstm_units: 512
     num_trans: 0
   rbdn_hyperparams_dict:
     batch_size: 32
@@ -56,7 +56,7 @@ HYPERPARAMETERS:
     max_depth: 24
     num_trees: 200
     subsample: 0.5
-    use_xgboost: true
+    use_xgboost: True
   split_hyperparams_dict:
     batch_size: 32
     epochs: 200
@@ -71,9 +71,9 @@ HYPERPARAMETERS:
 MODEL_FIG_SAVE_PATH: /Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/SavedModels/Figs
 MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: Dense
+MODEL_TYPE: Conv
 PATIENCE: 100
-REGION: West_Ocean
+REGION: South_Land
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

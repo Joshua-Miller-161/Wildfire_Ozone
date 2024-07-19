@@ -5,6 +5,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 import geopandas as gpd
 from matplotlib.colors import Normalize, LogNorm, FuncNorm
 from matplotlib.colors import LinearSegmentedColormap
+from matplotlib.ticker import FuncFormatter
 import pandas as pd
 import sys
 import numpy as np
@@ -14,7 +15,7 @@ import netCDF4 as nc
     
 sys.path.append(os.getcwd())
 from data_utils.extraction_funcs import Extract_netCDF4
-from vis.plotting_utils import PlotBoxes
+from vis.plotting_utils import PlotBoxes, DegreeFormatter
 #====================================================================
 ''' World map '''
 world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
@@ -250,16 +251,17 @@ plt.show()
 # cbar.ax.tick_params(labelsize=20)
 # cbar.ax.set_xticklabels(cbar.ax.get_xticklabels(), rotation=90)
 #==========================================================================================
-# world.plot(ax=ax[0], facecolor='none', edgecolor='black', linewidth=.5, alpha=1, legend=True) # GOOD lots the map
-# world.plot(ax=ax[1], facecolor='none', edgecolor='black', linewidth=.5, alpha=1, legend=True) # GOOD lots the map
+fig2, ax2 = plt.subplots(1,1,figsize=(8, 4))
 
-# fig2, ax2 = plt.subplots(1,1,figsize=(8, 4))
+world.plot(ax=ax2, facecolor='none', edgecolor='black', linewidth=.5, alpha=1, legend=True) # GOOD lots the map
+PlotBoxes("data_utils/data_utils_config.yml", ax2, plot_text=True, fontsize=16)
 
-# world.plot(ax=ax2, facecolor='none', edgecolor='black', linewidth=.5, alpha=1, legend=True) # GOOD lots the map
-# PlotBoxes("data_utils/data_utils_config.yml", ax2, plot_text=True)
-# ax2.set_xlim(-30, 70)
-# ax2.set_ylim(-30, 30)
+ax2.set_xlim(-22, 62)
+ax2.set_ylim(-22, 22)
 
-# plt.show()
+ax2.xaxis.set_major_formatter(FuncFormatter(DegreeFormatter))
+ax2.yaxis.set_major_formatter(FuncFormatter(DegreeFormatter))
 
-# fig2.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', bbox_inches='tight', pad_inches=0)
+plt.show()
+
+fig2.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', bbox_inches='tight', pad_inches=0)

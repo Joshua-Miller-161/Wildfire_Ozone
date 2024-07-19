@@ -24,14 +24,15 @@ fire_str  = 'MODIS_C61'
 cutoff = 0.016
 order = 4
 
-corr_fontsize = 11
+corr_fontsize = 14
 year_fontsize = 7
 yaxis_fontsize = 14
 linewidth=1.5
+y_lim = 0.024
 
 O3_fire_dict = {}
 
-fig, ax = plt.subplots(len(regions), 1, figsize=(10, 5), sharex=True)
+fig, ax = plt.subplots(len(regions), 1, figsize=(10, 7), sharex=True)
 fig.subplots_adjust(hspace=0)
 #====================================================================
 for i in range(len(regions)):
@@ -94,8 +95,8 @@ for i in range(len(regions)):
 
     elif (regions[i] == 'North_Land'):
         Plot_O3_Fire(ax[i], fire_dates, fire_mean, ozone_dates, ozone_mean,
-                     fire_ylabel='FRP'+'\ '+'(MW)',
-                     O3_ylabel=r'O_3'+'\ '+r'\left(\frac{mol}{m^2}\right)',
+                     fire_ylabel='Avg.'+'\ '+'FRP'+'\ '+'(MW)',
+                     O3_ylabel='Avg.'+'\ '+r'O_3'+'\ '+r'\left(\frac{mol}{m^2}\right)',
                      bold=True, fontsize=yaxis_fontsize, O3_rotation=270, O3_pad=25, fire_pad=2,
                      O3_linewidth=linewidth, fire_linewidth=linewidth,
                      fire_xmin=17300, fire_xmax=max(fire_dates)+100)
@@ -122,8 +123,8 @@ for i in range(len(regions)):
     ShowYearMonth(ax[i], fire_dates, fontsize=year_fontsize, start_line_idx=300, method=1, rotation=60)
     #----------------------------------------------------------------
 
-fig.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Smooth_Fire_O3.png',
-            bbox_inches='tight', pad_inches=0)
+# fig.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Smooth_Fire_O3.pdf',
+#             bbox_inches='tight', pad_inches=0)
 #====================================================================
 fig_corr, ax_corr = plt.subplots(1, 1, figsize=(5, 5))
 
@@ -157,7 +158,7 @@ for i in range(np.shape(corrs)[0]):
         ax_corr.text(j, i, f"{corrs[i, j]:.3f}", ha="center", va="center", color="black")
 
 
-fig_corr.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Smooth_Corr_Fire_O3.pdf',
-                 bbox_inches='tight', pad_inches=0)
+# fig_corr.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Smooth_Corr_Fire_O3.pdf',
+#                  bbox_inches='tight', pad_inches=0)
 #====================================================================
 plt.show()

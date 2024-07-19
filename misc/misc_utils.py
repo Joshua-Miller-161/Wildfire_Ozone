@@ -51,6 +51,36 @@ def GetDateInStr(string):
     date = re.sub(r"\D", "", date)
     return date
 #====================================================================
+def MADN(image):
+    '''
+    Made by ChatGPT
+    '''
+    image = np.squeeze(np.array(image))
+
+    assert len(image.shape) == 2, "image must be 2-dimensional. Received "+str(image.shape) 
+    #----------------------------------------------------------------
+
+    rows, cols = image.shape
+    
+    avg_diff = np.ones((rows, cols)) * -999
+    
+    neighbor_offsets = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+
+    for i in range(rows):
+        for j in range(cols):
+            # Collect the values of the neighboring pixels
+            neighbors = []
+            for offset in neighbor_offsets:
+                ni, nj = i + offset[0], j + offset[1]
+                if 0 <= ni < rows and 0 <= nj < cols:
+                    neighbors.append(image[ni, nj])
+            
+            # Calculate the average difference
+            if neighbors:
+                avg_diff[i, j] = np.mean([abs(image[i, j] - neighbor) for neighbor in neighbors])
+                #print("i=", i, ", j=", j, ", im =", image[i, j], ", n =", neighbors)
+    return avg_diff
+#====================================================================
 def NumericalDerivative(x, y, method='central', x_to_datetime=True):
     assert np.shape(x) == np.shape(y), "x and y must be same shape. Got x: "+str(np.shape(x))+", y: "+str(np.shape(y))
 
@@ -149,7 +179,7 @@ def Longitude360to180(lon):
 #====================================================================
 def Longitude180to360(lon):
     lon = np.asarray(lon)
-    return lon % 360   
+    return lon % 360
 #====================================================================
 def GetBoxCoords(config_path):
     with open(config_path, 'r') as c:
@@ -260,9 +290,7 @@ def RecoverScaledTime(config_path, time, start_date=datetime(1970, 1, 1), lower=
     for num in time:
         datetimes.append()
     return datetimes
-
 #====================================================================
-
 '''
 def ProgressWheel():
     for c in itertools.cycle(['|', '/', '-', '\\']):

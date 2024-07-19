@@ -182,6 +182,7 @@ def TestKerasModel(config_path, model_name, model_pred_path=None):
 
     model_folder  = config['MODEL_SAVE_PATH']
     figure_folder = config['FIG_SAVE_PATH']
+    model_type    = config['MODEL_TYPE']
 
     info, param_dict = ParseModelName(model_name)
 
@@ -234,7 +235,7 @@ def TestKerasModel(config_path, model_name, model_pred_path=None):
         for root, dirs, files in os.walk(os.path.join(model_folder, folder)):
             for name in files:
                 #print("root=",root, ", name=", name)
-                if (model_name in name):
+                if ((model_name in name) and (model_type+'_' in name)):
                     if name.endswith('.json'):
                         model_architecture = os.path.join(root, name)
                         print(" >> model: ", os.path.join(root, name))

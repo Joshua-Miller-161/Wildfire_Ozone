@@ -55,7 +55,7 @@ elif (model_type == 'LSTM'):
     e         = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['epochs']
     num_trans = config['HYPERPARAMETERS']['lstm_hyperparams_dict']['num_trans']
     TrainKerasModel('config.yml',
-                    model_save_path=os.path.join(model_save_path, 'Conv'))
+                    model_save_path=os.path.join(model_save_path, 'LSTM'))
     TestKerasModel('config.yml',
                    model_name='LSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
