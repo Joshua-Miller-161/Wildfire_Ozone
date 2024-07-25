@@ -257,6 +257,7 @@ lol = ax_bar.scatter(x=1, y=0.015, c=0.015, norm=norm, cmap=cmap)
 divider = make_axes_locatable(ax_bar)
 cax = divider.append_axes("right", size="5%", pad=0.05)
 cbar = plt.colorbar(lol, cax=cax)
+cbar.set_label(r'$\mathbf{MADN}$', fontsize=20, rotation=270, labelpad=30)
 
 #====================================================================
 plt.show()

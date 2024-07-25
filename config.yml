@@ -1,7 +1,6 @@
 FIG_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/Figs
 HISTORY_DATA:
 - ozone
-- fire
 - temp
 - u-wind
 - v-wind
@@ -16,7 +15,7 @@ HYPERPARAMETERS:
     batch_size: 32
     epochs: 10000
     num_filters: 64
-    num_trans: 0
+    num_trans: 1
   convlstm_hyperparams_dict:
     batch_size: 32
     epochs: 10000
@@ -73,7 +72,7 @@ MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
 MODEL_TYPE: Conv
 PATIENCE: 100
-REGION: South_Land
+REGION: Whole_Area
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

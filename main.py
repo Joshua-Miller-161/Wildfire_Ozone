@@ -48,7 +48,7 @@ elif (model_type == 'Conv'):
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'Conv'))
     TestKerasModel('config.yml',
-                   model_name='Conv_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_name='Conv_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #--------------------------------------------------------------------
 elif (model_type == 'LSTM'):
