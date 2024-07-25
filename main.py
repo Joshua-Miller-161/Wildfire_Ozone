@@ -39,7 +39,7 @@ elif (model_type == 'Dense'):
                     prefix='Diamond',
                     model_save_path=os.path.join(model_save_path, 'Dense'))
     TestKerasModel('config.yml',
-                   model_name='Diamond-Dense_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_name='Diamond-Dense_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #--------------------------------------------------------------------   
 elif (model_type == 'Conv'):
