@@ -127,5 +127,5 @@ PlotBoxes('data_utils/data_utils_config.yml', ax3, True)
 ax3.set_xlim(-21, 61)
 ax3.set_ylim(-21, 21)
 
-fig3.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', pad_inches=0, bbox_inches='tight')
+#fig3.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', pad_inches=0, bbox_inches='tight')
 plt.show()

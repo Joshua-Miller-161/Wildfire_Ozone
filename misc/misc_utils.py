@@ -291,6 +291,17 @@ def RecoverScaledTime(config_path, time, start_date=datetime(1970, 1, 1), lower=
         datetimes.append()
     return datetimes
 #====================================================================
+def PercentChange(old, new):
+    old = np.asarray(old)
+    new = np.asarray(new)
+
+    perc = np.divide(new-old, old)
+
+    if (perc.shape == (1,)):
+        return perc[0]
+    else:
+        return perc
+#====================================================================
 '''
 def ProgressWheel():
     for c in itertools.cycle(['|', '/', '-', '\\']):

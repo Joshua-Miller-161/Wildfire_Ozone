@@ -264,4 +264,4 @@ ax2.yaxis.set_major_formatter(FuncFormatter(DegreeFormatter))
 
 plt.show()
 
-fig2.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', bbox_inches='tight', pad_inches=0)
+#fig2.savefig('/Users/joshuamiller/Documents/Lancaster/Figs/Boxes.pdf', bbox_inches='tight', pad_inches=0)

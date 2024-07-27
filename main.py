@@ -57,7 +57,7 @@ elif (model_type == 'LSTM'):
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'LSTM'))
     TestKerasModel('config.yml',
-                   model_name='LSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_name='LSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #-------------------------------------------------------------------- 
 elif (model_type == 'ConvLSTM'):
@@ -66,7 +66,7 @@ elif (model_type == 'ConvLSTM'):
     TrainKerasModel('config.yml',
                     model_save_path=os.path.join(model_save_path, 'ConvLSTM'))
     TestKerasModel('config.yml',
-                   model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OFTUVXYD_Out=O_e='+str(e),
+                   model_name='ConvLSTM_reg='+short[region]+'_h=5_f=1_t='+str(num_trans)+'_In=OTUVXYD_Out=O_e='+str(e),
                    model_pred_path=model_pred_path)
 #--------------------------------------------------------------------
 elif (model_type == 'RBDN'):
