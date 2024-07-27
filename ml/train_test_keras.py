@@ -36,8 +36,8 @@ def TrainKerasModel(config_path, model_name=None, model_save_path='/Users/joshua
     #----------------------------------------------------------------
     ''' Check for GPU access '''
     
-    print(f"TensorFlow has access to the following devices:\n{tf.config.list_physical_devices()}")
-    print(f"TensorFlow version: {tf.__version__}")
+    print(f" >> TensorFlow has access to the following devices:\n{tf.config.list_physical_devices()}")
+    print(f" >> TensorFlow version: {tf.__version__}")
     #----------------------------------------------------------------
     ''' Get data from config '''
 

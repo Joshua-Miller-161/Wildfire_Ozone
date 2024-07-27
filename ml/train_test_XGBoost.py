@@ -19,7 +19,7 @@ from data_utils.preprocessing_funcs import UnScale
 from data_utils.rf_data_formatters import NaiveRFDataLoader
 from ml.ml_utils import NameModel, ParseModelName, SavePredData
 
-print(xgb.__version__)
+print(" >> XGBoost version:", xgb.__version__)
 #====================================================================
 def TrainNaiveXGBoost(config_path, data_config_path, model_name=None, model_save_path='/Users/joshuamiller/Documents/Lancaster/SavedModels/GBM'):
     #----------------------------------------------------------------
