@@ -5,6 +5,8 @@ from osgeo import gdal
 import rasterio
 import os
 os.environ['HDF5_USE_FILE_LOCKING'] = 'FALSE'
+
+print(">> netCDF4 version =", nc.__version__)
 #====================================================================
 
 def Extract_netCDF4(path, var_names, groups=None, print_sum=False, attrs_to_find=None):
