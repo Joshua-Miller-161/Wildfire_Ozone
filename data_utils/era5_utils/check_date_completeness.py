@@ -8,7 +8,8 @@ import shutil
 import netCDF4 as nc
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import ExtractGRIBIris, Extract_netCDF4
+from data_utils.extract_GRIB import ExtractGRIBIris
+from data_utils.extract_netCDF4 import Extract_netCDF4
 from misc.misc_utils import GetDateInStr
 #====================================================================
 def find_elements_not_in_list(reference, list1):

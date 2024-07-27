@@ -11,8 +11,9 @@ import numpy as np
 import yaml
     
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import Extract_netCDF4
-from misc.misc_utils import GetBoxCoords, PlotBoxes
+from data_utils.extract_netCDF4 import Extract_netCDF4
+from misc.misc_utils import GetBoxCoords
+from vis.plotting_utils import PlotBoxes
 #====================================================================
 save_folder = '/Users/joshuamiller/Documents/Lancaster/Data/'
 data_folder = '/Users/joshuamiller/Documents/Lancaster/Data/Kriged_L2_O3_TCL'

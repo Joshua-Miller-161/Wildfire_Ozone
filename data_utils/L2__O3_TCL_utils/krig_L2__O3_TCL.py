@@ -8,7 +8,7 @@ import math
 
 sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import Scale, DoKrig
-from data_utils.extraction_funcs import Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
 #====================================================================
 ''' Number of neighbors '''
 num_neighbors = 100

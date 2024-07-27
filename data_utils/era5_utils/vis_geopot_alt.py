@@ -14,7 +14,7 @@ import sys
 from cartopy import crs
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import ExtractGRIBIris
+from data_utils.extract_GRIB import ExtractGRIBIris
 #====================================================================
 levels = [1, 25, 50, 100, 137]
 #====================================================================

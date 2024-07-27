@@ -15,7 +15,8 @@ from datetime import datetime, timedelta
 import re
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import SplitDataFrame, Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
+from misc.misc_utils import SplitDataFrame
 #====================================================================
 ''' Get data '''
 # path1 = "/Users/joshuamiller/Documents/Lancaster/Data/MODIS_C61/fire_archive_M-C61_401077.csv"

@@ -7,7 +7,7 @@ iris.FUTURE.save_split_attrs = True
 
 sys.path.append(os.getcwd())
 from misc.misc_utils import GetDateInStr
-from data_utils.extraction_funcs import Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
 #====================================================================
 ''' Merge files into one .nc file '''
 # files = ['/Users/joshuamiller/Documents/Lancaster/Data/Vwind-ERA5/TEST_Vwind_l=135_2018-04-28_2018-12-31_14:00:00.grib',

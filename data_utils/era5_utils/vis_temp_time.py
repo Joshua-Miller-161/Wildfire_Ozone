@@ -15,7 +15,7 @@ from cartopy import crs
 import sys
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import ExtractGRIBIris
+from data_utils.extract_GRIB import ExtractGRIBIris
 from misc.misc_utils import FindDate
 #====================================================================
 def extract_pattern(s):

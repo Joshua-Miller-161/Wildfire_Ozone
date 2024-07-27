@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import datetime
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
 #====================================================================
 ''' Folders '''
 search_folder = '/Users/joshuamiller/Documents/Lancaster/Data/Fire-MODIS_C61'

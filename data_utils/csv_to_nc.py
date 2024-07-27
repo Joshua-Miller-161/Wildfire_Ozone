@@ -2,9 +2,9 @@ import sys
 sys.dont_write_bytecode
 import os
 os.environ['USE_PYGEOS'] = '0'
+import netCDF4 as nc
 import pandas as pd
 import geopandas as gpd
-import netCDF4 as nc
 from datetime import datetime, timedelta
 import numpy as np
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 sys.path.append(os.getcwd())
 from misc.misc_utils import GetDateInStr
-from data_utils.extraction_funcs import Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
 from vis.plotting_utils import PlotBoxes
 #====================================================================
 region = 'Whole_Area'

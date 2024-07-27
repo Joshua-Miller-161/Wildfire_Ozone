@@ -20,7 +20,8 @@ import cartopy
 from cartopy import crs
 
 sys.path.append(os.getcwd())
-from data_utils.extraction_funcs import ExtractGRIBIris, PrintSumGRIBIris, Extract_netCDF4
+from data_utils.extract_GRIB import ExtractGRIBIris, PrintSumGRIBIris
+from data_utils.extract_netCDF4 import Extract_netCDF4
 from misc.misc_utils import FindDate, Scale
 #====================================================================
 ''' Get data '''

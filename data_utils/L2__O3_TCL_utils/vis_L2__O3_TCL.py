@@ -14,7 +14,7 @@ import sys
 
 sys.path.append(os.getcwd())
 from data_utils.preprocessing_funcs import Scale
-from data_utils.extraction_funcs import Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
 from vis.plotting_utils import PlotBoxes, ShowYearMonth, DegreeFormatter
 #====================================================================
 font = {'weight' : 'bold',

@@ -302,6 +302,37 @@ def PercentChange(old, new):
     else:
         return perc
 #====================================================================
+def SplitDataFrame(df, column, save_new_files=False, new_files_folder=None):
+    '''
+    Creates subsets of df where all of the entries in 'column' are the same
+
+    Returns a dictionary of subsets of the original dataframe
+
+    - df (Pandas dataframe): The dataframe to split
+    - column (str): The column in which the unique values will be searched
+    - save_new_file (Bool, optional): Whether to save the new dataframes as csv files
+    - new_files_folder (str, optional): Path to folder to save the subsets
+    '''
+    #----------------------------------------------------------------
+    cols_str = ''
+    for col in df.columns:
+        cols_str += col +', '
+    assert column in df.columns, column+" is not a valid column name. Valid columns:\n"+cols_str
+    #----------------------------------------------------------------
+    sub_dfs_dict = {}
+
+    for val in df[column].unique():
+        print(">> Searching for", val)
+        sub_dfs_dict[val] = df[df[column] == val]
+        print(">> Finished with", val, "\n  - - - -")
+    #----------------------------------------------------------------
+    if save_new_files:
+        for key in sub_dfs_dict.keys():
+            sub_dfs_dict[key].to_csv(os.path.join(new_files_folder, key+'.csv'), index=False)
+            print(">> Saved", key+'.csv')
+    #----------------------------------------------------------------
+    return sub_dfs_dict
+#====================================================================
 '''
 def ProgressWheel():
     for c in itertools.cycle(['|', '/', '-', '\\']):
