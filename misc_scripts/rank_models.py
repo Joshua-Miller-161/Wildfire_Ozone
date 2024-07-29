@@ -26,15 +26,15 @@ def Sort(strings, numbers):
 #====================================================================
 regions = ['Whole Area', 'East Ocean', 'West Ocean', 'South Land', 'North Land']
 
-path = "/Users/joshuamiller/Documents/Lancaster/Dissertation"
+path = "/Users/joshuamiller/Documents/Lancaster/Dissertation/Data"
 
 mse  = "Final_MSE"
 madn = "FinalMSE_MADN"
 perc = "Final99Percent"
 
-df_mse  = pd.read_excel(os.path.join(path, mse+".xlsx"), index_col=0)
-df_madn = pd.read_excel(os.path.join(path, madn+".xlsx"), index_col=0)
-df_perc = pd.read_excel(os.path.join(path, perc+".xlsx"), index_col=0)
+df_mse  = pd.read_excel(os.path.join(path, mse+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
+df_madn = pd.read_excel(os.path.join(path, madn+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
+df_perc = pd.read_excel(os.path.join(path, perc+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
 #====================================================================
 ranked_mse = df_mse.apply(rank_columns, axis=1, args=(False,))
 

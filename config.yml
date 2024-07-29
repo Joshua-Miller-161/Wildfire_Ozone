@@ -55,7 +55,7 @@ HYPERPARAMETERS:
     max_depth: 24
     num_trees: 200
     subsample: 0.5
-    use_xgboost: True
+    use_xgboost: true
   split_hyperparams_dict:
     batch_size: 32
     epochs: 200
@@ -70,9 +70,9 @@ HYPERPARAMETERS:
 MODEL_FIG_SAVE_PATH: /Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/SavedModels/Figs
 MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: ConvLSTM
+MODEL_TYPE: GBM
 PATIENCE: 100
-REGION: East_Ocean
+REGION: Whole_Area
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

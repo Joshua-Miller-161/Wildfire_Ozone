@@ -10,7 +10,7 @@ import pandas as pd
 #====================================================================
 fig, ax = plt.subplots(1, 1, figsize = (12, 5))
 
-ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
+#ax.ticklabel_format(axis='y', style='sci', scilimits=(0,0), useMathText=True)
 #====================================================================
 colors = ['darkred', 'lightcoral', 
           'purple', 'violet',
@@ -18,10 +18,10 @@ colors = ['darkred', 'lightcoral',
           'navy', 'deepskyblue',
           'forestgreen', 'lawngreen']
 
-path = "/Users/joshuamiller/Documents/Lancaster/Dissertation"
+path = "/Users/joshuamiller/Documents/Lancaster/Dissertation/Data"
 name = "Final99Percent"
 
-df = pd.read_excel(os.path.join(path, name+".xlsx"), index_col=0)
+df = pd.read_excel(os.path.join(path, name+".xlsx"), sheet_name="OFTUVXYD", index_col=0)
 
 regions = ['Whole Area', 'South Land', 'North Land', 'East Ocean', 'West Ocean']
 print(df)
@@ -57,10 +57,12 @@ for i in range(len(regions)):
 
 regions2 = ['Whole\nArea', 'South\nLand', 'North\nLand', 'East\nOcean', 'West\nOcean']
 
-ax.set_ylabel('Avg. Correct Hotspots', fontweight='bold', fontsize=22)
+ax.set_ylabel('Correct Hotspots (%)', fontweight='bold', fontsize=22)
+
 ax.set_xticks(x-(1 / (8*np.shape(x)[0])), regions2, fontweight='bold', fontsize=17)  # Set x-axis labels
-ax.set_ylim(10**-5, 1.3 * 10**-2)
-ax.set_yscale('log')
+ax.set_yticks([0, 20, 40, 60, 80, 100])
+ax.set_ylim(0, 120)
+#ax.set_yscale('log')
 ax.grid(axis='y', which='major', linestyle='-')
 ax.grid(axis='y', which='minor', linestyle=':')
 ax.tick_params(axis='y', which='major', labelsize=15)
@@ -73,5 +75,6 @@ ax.legend(loc='upper center', prop=font, ncol=5)
 plt.tight_layout()  # Ensure labels are visible
 plt.show()
 #====================================================================
-fig.savefig(os.path.join(path, name+'.pdf'), bbox_inches='tight', pad_inches=0)
+fig.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Dissertation/Figs", name+'.pdf'), 
+            bbox_inches='tight', pad_inches=0)
 #====================================================================

@@ -202,20 +202,20 @@ fig_data.tight_layout()
 
 # ShowYearMonth(ax_time, time_axis, start_line_idx=150, fontsize=22)
 #====================================================================
-fig_bar, ax_bar = plt.subplots(1,1,dpi=100)
-fig_bar.set_size_inches(10, 10)
+# fig_bar, ax_bar = plt.subplots(1,1,dpi=100)
+# fig_bar.set_size_inches(10, 10)
 
-font = {'weight' : 'bold',
-        'size'   : 11}
+# font = {'weight' : 'bold',
+#         'size'   : 11}
 
-plt.rc('font', **font)
+# plt.rc('font', **font)
 
-lol = ax_bar.scatter(x=1, y=0.015, c=0.015, norm=norm, cmap='bwr')
+# lol = ax_bar.scatter(x=1, y=0.015, c=0.015, norm=norm, cmap='bwr')
 
-divider = make_axes_locatable(ax_bar)
-cax = divider.append_axes("right", size="5%", pad=0.05)
-cbar = plt.colorbar(lol, cax=cax)
-cbar.set_label(r'$O_3$'+' '+r'$\left( \frac{mol}{m^2} \right)$', fontsize=20, rotation=270, labelpad=30)
+# divider = make_axes_locatable(ax_bar)
+# cax = divider.append_axes("right", size="5%", pad=0.05)
+# cbar = plt.colorbar(lol, cax=cax)
+# cbar.set_label(r'$O_3$'+' '+r'$\left( \frac{mol}{m^2} \right)$', fontsize=20, rotation=270, labelpad=30)
 
 #====================================================================
 plt.show()
@@ -235,6 +235,6 @@ if ("Trans." in model_type):
 #                               'Time_'+model_name+'_'+date_str+'.pdf'),
 #                 bbox_inches='tight', pad_inches=0)
 
-fig_bar.savefig(os.path.join('/Users/joshuamiller/Documents/Lancaster/Figs/SmallMaps', 
-                              'Colorbar.pdf'),
-                bbox_inches='tight', pad_inches=0)
+# fig_bar.savefig(os.path.join('/Users/joshuamiller/Documents/Lancaster/Figs/SmallMaps', 
+#                               'Colorbar.pdf'),
+#                 bbox_inches='tight', pad_inches=0)

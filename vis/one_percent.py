@@ -17,8 +17,8 @@ sys.path.append(os.getcwd())
 from ml.ml_utils import ParseModelName
 from misc.misc_utils import GetBoxCoords, MADN
 #====================================================================
-model_name = 'ConvLSTM_reg=NL_h=5_f=1_t=1_In=OFTUVXYD_Out=O_e=10000.npy'
-#model_name = 'XGBRF_reg=NL_f=1_In=OFTUVXYD_Out=O'
+model_name = 'ConvLSTM_reg=EO_h=5_f=1_t=0_In=OFTUVXYD_Out=O_e=10000.npy'
+#model_name = 'GBM_reg=NL_f=1_In=OFTUVXYD_Out=O'
 
 date_idx = 222 # 222 for neural networks, 223 for RF
 if (('GBM' in model_name) or ('RF' in model_name)):
@@ -105,11 +105,6 @@ print("____________________________________________________________")
 print(" >> Threshold =", round(threshold, 5), ", max(data) = ", round(max(data.ravel()), 5), ", sum(data) =", np.sum(data_mask), ", sum(y_pred) =", np.sum(y_pred_mask))
 print("____________________________________________________________")
 #====================================================================
-
-date_str = truncate_datetime_v3(dates.iloc[date_idx]['Days since 1970/1/1'])
-print("____________________________________________________________")
-print(" >> Date:", date_str)
-#====================================================================
 if ("_t=" in model_name):
     if (param_dict['num_trans']>0):
         model_type += '+Trans'
@@ -120,95 +115,8 @@ print(" >> MSE =", np.mean(np.square(np.subtract(data, y_pred))))
 print("____________________________________________________________")
 print(" >> Num. correct =", np.sum(final_mask), ", /day =", np.sum(final_mask) / np.shape(final_mask)[0])
 print(" >> /area =", np.sum(final_mask) / (np.prod(np.shape(final_mask)[1:])), ", /(area * num. hotspots) =", np.sum(final_mask) / (np.prod(np.shape(final_mask)[1:]) * np.sum(data_mask)))
+print(" >> % =", 100 * np.sum(final_mask) / np.sum(data_mask), ", sum(data) =", np.sum(data_mask))
 print("____________________________________________________________")
 print(" >>", model_name)
 print("____________________________________________________________")
 #====================================================================
-# ''' Get lat/lon and world map '''
-
-# world = 69
-# try:
-#     world = gpd.read_file("/Users/joshuamiller/Documents/Lancaster/Data/ne_110m_land/ne_110m_land.shp")
-# except fiona.errors.DriverError:
-#     world = gpd.read_file("/content/drive/MyDrive/Colab_Notebooks/Data/ne_110m_land/ne_110m_land.shp")
-    
-# boxes_dict = GetBoxCoords('data_utils/data_utils_config.yml')
-
-# min_lat = boxes_dict[param_dict['REGION']][3] + 0.25
-# max_lat = boxes_dict[param_dict['REGION']][1] - 0.25
-# min_lon = boxes_dict[param_dict['REGION']][0] + 0.5
-# max_lon = boxes_dict[param_dict['REGION']][2] - 0.5
-
-# lat = 69
-# lon = 69
-
-# lat = np.tile(np.arange(max_lat, min_lat-0.5, -0.5).reshape(-1, 1), (1, int(max_lon - min_lon+1)))
-# lon = np.tile(np.arange(min_lon, max_lon+1, 1).reshape(1, -1), (int((max_lat - min_lat)*2)+1, 1))
-
-# max_ = max([max(y_pred_madn.ravel()), max(data_madn.ravel())])
-# norm = Normalize(vmin=0, vmax=1 * max_)
-
-# max_diff = max(abs(data_madn.ravel() - y_pred_madn.ravel()))
-# norm_diff = Normalize(vmin=-max_diff, vmax=max_diff)
-# #====================================================================
-# ''' Plot predictions '''
-
-# fig_map, ax_map = plt.subplots(1,1, dpi=100)
-# fig_map.set_size_inches(6, 6)
-
-# map = ax_map.scatter(x=lon, y=lat, c=y_pred_madn[date_idx], s=150, cmap='Reds', norm=norm)
-
-# world.plot(ax=ax_map, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
-
-# divider = make_axes_locatable(ax_map)
-# cax = divider.append_axes("right", size="5%", pad=0.15)
-# cbar = plt.colorbar(map, cax=cax)
-# #cbar.set_label('MADN')
-
-# ax_map.set_xlim(min_lon-1, max_lon+1)
-# ax_map.set_ylim(min_lat-1, max_lat+1)
-
-# if (model_type in ['RF', 'XGBRF', 'GBM', 'Dense']):
-#     ax_map.set_title(model_type, fontsize=big_font, fontweight='bold')
-#     ax_map.set_xticklabels('')
-# elif (model_type in ['Conv', 'Conv+Trans', 'LSTM', 'LSTM+Trans', 'ConvLSTM']):
-#     ax_map.set_title(model_type, fontsize=big_font-6, fontweight='bold')
-#     ax_map.set_xticklabels('')
-#     ax_map.set_yticklabels('')
-# elif (model_type in ['Dense+Trans', 'ConvLSTM+Trans']):
-#     ax_map.set_title(model_type, fontsize=small_font, fontweight='bold')
-
-# ax_map.text(.95 * min_lon, .85 * max_lat, "Avg. MADN = "+str(round(np.mean(y_pred_madn[date_idx]) , 7)), 
-#              fontsize=text_fontsize-2)
-
-# fig_map.tight_layout()
-# #====================================================================
-# ''' Plot data '''
-
-# fig_data, ax_data = plt.subplots(1,1, dpi=100)
-# fig_data.set_size_inches(6, 6)
-
-# map = ax_data.scatter(x=lon, y=lat, c=data_madn[date_idx], s=150, cmap='Reds', norm=norm)
-
-# world.plot(ax=ax_data, facecolor='none', edgecolor='black', linewidth=.5, alpha=1)
-
-
-# ax_data.set_xlim(min_lon-1, max_lon+1)
-# ax_data.set_ylim(min_lat-1, max_lat+1)
-# ax_data.set_title("Data", fontsize=big_font, fontweight='bold')
-# ax_data.set_xticklabels('')
-# ax_data.text(.95 * min_lon, .85 * max_lat, "Avg. MADN = "+str(round(np.mean(data_madn[date_idx]) , 7)), 
-#              fontsize=text_fontsize)
-
-# fig_data.tight_layout()
-
-#====================================================================
-plt.show()
-#====================================================================
-# fig_map.savefig(os.path.join('/Users/joshuamiller/Documents/Lancaster/Figs/MADNMaps', 
-#                               'MADN_Pred_'+model_name+'_'+date_str+'.pdf'),
-#                 bbox_inches='tight', pad_inches=0)
-
-# fig_data.savefig(os.path.join('/Users/joshuamiller/Documents/Lancaster/Figs/MADNMaps', 
-#                               'MADN_Data_'+model_type+'_'+date_str+'.pdf'),
-#                 bbox_inches='tight', pad_inches=0)
