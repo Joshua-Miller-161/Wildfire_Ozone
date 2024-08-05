@@ -70,9 +70,9 @@ HYPERPARAMETERS:
 MODEL_FIG_SAVE_PATH: /Users/joshuamiller/Documents/Python Files/Wildfire_Ozone/SavedModels/Figs
 MODEL_PRED_PATH: /Users/joshuamiller/Documents/Lancaster/SimulationResults
 MODEL_SAVE_PATH: /Users/joshuamiller/Documents/Lancaster/SavedModels
-MODEL_TYPE: GBM
+MODEL_TYPE: Dense
 PATIENCE: 100
-REGION: Whole_Area
+REGION: South_Land
 RF_OFFSET: 1
 TARGET_DATA:
 - ozone

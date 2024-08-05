@@ -11,7 +11,7 @@ import netCDF4 as nc
 sys.path.append(os.getcwd())
 from vis.plotting_utils import ShowYearMonth, Plot_O3_Fire
 from misc.misc_utils import ButterLowpassFilter
-from data_utils.extraction_funcs import Extract_netCDF4
+from data_utils.extract_netCDF4 import Extract_netCDF4
 #====================================================================
 base_path = '/Users/joshuamiller/Documents/Lancaster/Data'
 
@@ -70,8 +70,12 @@ for i in range(len(regions)):
     ozone_mean = np.mean(ozone, axis=(1, 2))
     fire_mean  = np.mean(fire, axis=(1, 2))
 
-    ozone_mean = ButterLowpassFilter(ozone_mean, cutoff, 1, order)
-    fire_mean  = ButterLowpassFilter(fire_mean, cutoff, 1, order)
+    #ozone_mean_diff = np.asarray([abs(j - i) for i, j in zip(ozone_mean[:-1], ozone_mean[1:])])
+
+    #print(" >>", regions[i], ", min:", min(ozone_mean), ", max:", max(ozone_mean), ", max_diff:", max(ozone_mean_diff), ", x:", max(ozone_mean_diff) / (max(ozone_mean) - min(ozone_mean)), ", mean:", round(np.mean(ozone_mean),5), ", std:", round(np.std(ozone_mean), 5))
+
+    #ozone_mean = ButterLowpassFilter(ozone_mean, cutoff, 1, order)
+    #fire_mean  = ButterLowpassFilter(fire_mean, cutoff, 1, order)
 
     O3_fire_dict[regions[i]+'_O3']   = ozone_mean
     O3_fire_dict[regions[i]+'_fire'] = fire_mean
@@ -123,8 +127,8 @@ for i in range(len(regions)):
     ShowYearMonth(ax[i], fire_dates, fontsize=year_fontsize, start_line_idx=300, method=1, rotation=60)
     #----------------------------------------------------------------
 
-# fig.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Smooth_Fire_O3.pdf',
-#             bbox_inches='tight', pad_inches=0)
+fig.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Figs/Raw_Fire_O3.pdf',
+            bbox_inches='tight', pad_inches=0)
 #====================================================================
 fig_corr, ax_corr = plt.subplots(1, 1, figsize=(5, 5))
 
@@ -158,7 +162,11 @@ for i in range(np.shape(corrs)[0]):
         ax_corr.text(j, i, f"{corrs[i, j]:.3f}", ha="center", va="center", color="black")
 
 
-# fig_corr.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Smooth_Corr_Fire_O3.pdf',
-#                  bbox_inches='tight', pad_inches=0)
+fig_corr.savefig('/Users/joshuamiller/Documents/Lancaster/Dissertation/Figs/Raw_Corr_Fire_O3.pdf',
+                 bbox_inches='tight', pad_inches=0)
 #====================================================================
 plt.show()
+
+#====================================================================
+
+

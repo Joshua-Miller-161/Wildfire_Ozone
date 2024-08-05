@@ -25,6 +25,11 @@ df = pd.read_excel(os.path.join(path, name+".xlsx"), sheet_name="OFTUVXYD", inde
 
 regions = ['Whole Area', 'South Land', 'North Land', 'East Ocean', 'West Ocean']
 print(df)
+
+land = df.loc['South Land'].sum() + df.loc['North Land'].sum()
+ocean = df.loc['East Ocean'].sum() + df.loc['West Ocean'].sum()
+print("---------")
+print((ocean-land) / land)
 #====================================================================
 models  = df.columns
 
@@ -75,6 +80,6 @@ ax.legend(loc='upper center', prop=font, ncol=5)
 plt.tight_layout()  # Ensure labels are visible
 plt.show()
 #====================================================================
-fig.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Dissertation/Figs", name+'.pdf'), 
-            bbox_inches='tight', pad_inches=0)
+# fig.savefig(os.path.join("/Users/joshuamiller/Documents/Lancaster/Dissertation/Figs", name+'.pdf'), 
+#             bbox_inches='tight', pad_inches=0)
 #====================================================================

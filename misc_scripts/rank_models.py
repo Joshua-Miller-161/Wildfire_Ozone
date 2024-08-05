@@ -32,54 +32,116 @@ mse  = "Final_MSE"
 madn = "FinalMSE_MADN"
 perc = "Final99Percent"
 
-df_mse  = pd.read_excel(os.path.join(path, mse+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
-df_madn = pd.read_excel(os.path.join(path, madn+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
-df_perc = pd.read_excel(os.path.join(path, perc+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
-#====================================================================
-ranked_mse = df_mse.apply(rank_columns, axis=1, args=(False,))
+df_mse_old  = pd.read_excel(os.path.join(path, mse+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
+df_madn_old = pd.read_excel(os.path.join(path, madn+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
+df_hot_old  = pd.read_excel(os.path.join(path, perc+".xlsx"), sheet_name='OFTUVXYD', index_col=0)
 
-ranked_madn = df_madn.apply(rank_columns, axis=1, args=(False,))
-
-ranked_perc = df_perc.apply(rank_columns, axis=1, args=(True,))
+df_mse_new  = pd.read_excel(os.path.join(path, mse+".xlsx"), sheet_name='OTUVXYD', index_col=0)
+df_madn_new = pd.read_excel(os.path.join(path, madn+".xlsx"), sheet_name='OTUVXYD', index_col=0)
+df_hot_new  = pd.read_excel(os.path.join(path, perc+".xlsx"), sheet_name='OTUVXYD', index_col=0)
 #====================================================================
-# print(df_mse)
-# print("=========================")
-# print(ranked_mse)
+ranked_mse_old = df_mse_old.apply(rank_columns, axis=1, args=(False,))
+
+ranked_madn_old = df_madn_old.apply(rank_columns, axis=1, args=(False,))
+
+ranked_hot_old = df_hot_old.apply(rank_columns, axis=1, args=(True,))
+
+ranked_mse_new = df_mse_new.apply(rank_columns, axis=1, args=(False,))
+
+ranked_madn_new = df_madn_new.apply(rank_columns, axis=1, args=(False,))
+
+ranked_hot_new = df_hot_new.apply(rank_columns, axis=1, args=(True,))
+
+total_abs_df = abs(ranked_mse_old - ranked_mse_new) + abs(ranked_madn_old - ranked_madn_new) + abs(ranked_hot_old - ranked_hot_new)
+
+total_df = (ranked_mse_old - ranked_mse_new) + (ranked_madn_old - ranked_madn_new) + (ranked_hot_old - ranked_hot_new)
+#====================================================================
+print(df_mse_old)
+print("=========================")
+print(ranked_mse_old)
+print("=========================")
+print(ranked_mse_new)
+print("===========================================================================")
+print("===========================================================================")
+print("===========================================================================")
+print(abs(ranked_mse_old - ranked_mse_new))
+print("=========================")
+print(abs(ranked_madn_old - ranked_madn_new))
+print("=========================")
+print(abs(ranked_hot_old - ranked_hot_new))
+print("===========================================================================")
+print("===========================================================================")
+print("===========================================================================")
+print(total_abs_df)
+print("===========================================================================")
+print("===========================================================================")
+print("===========================================================================")
+print(total_abs_df.sum(axis=0))
 
 
-#====================================================================
-total_rankings = ranked_mse.sum(axis=0) + ranked_madn.sum(axis=0) + ranked_perc.sum(axis=0)
-print("____________________________________________________________")
-print(" - > All regions all metrics")
-print(list(df_mse.columns))
-print(list(total_rankings))
-Sort(list(df_mse.columns), list(total_rankings))
-print("____________________________________________________________")
-print(" - > All regions MSE")
-print(list(df_mse.columns))
-print(list(ranked_mse.sum(axis=0)))
-Sort(list(df_mse.columns), list(ranked_mse.sum(axis=0)))
-print("____________________________________________________________")
-print(" - > All regions MADN")
-print(list(df_madn.columns))
-print(list(ranked_madn.sum(axis=0)))
-Sort(list(df_madn.columns), list(ranked_madn.sum(axis=0)))
-print("____________________________________________________________")
-print(" - > All regions hotspot")
-print(list(df_perc.columns))
-print(list(ranked_perc.sum(axis=0)))
-Sort(list(df_perc.columns), list(ranked_perc.sum(axis=0)))
-print("____________________________________________________________")
-print(" ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^")
-print("^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^")
-print(" ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^")
-print("____________________________________________________________")
-#====================================================================
-dict_ = {'MSE': ranked_mse, 'MADN': ranked_madn, 'Hotspot': ranked_perc}
-for region in regions:
-    sum_rankings = ranked_mse.loc[region] + ranked_madn.loc[region] + ranked_perc.loc[region]
-    print(" - >", region, " all metrics")
-    print(list(ranked_mse.columns))
-    print(list(sum_rankings))
-    Sort(list(ranked_mse.columns), list(sum_rankings))
-    print("____________________________________________________________")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# #====================================================================
+# total_rankings = ranked_mse_old.sum(axis=0) + ranked_madn_old.sum(axis=0) + ranked_perc_old.sum(axis=0)
+# print("____________________________________________________________")
+# print(" - > All regions all metrics")
+# print(list(df_mse_old.columns))
+# print(list(total_rankings))
+# Sort(list(df_mse_old.columns), list(total_rankings))
+# print("____________________________________________________________")
+# print(" - > All regions MSE")
+# print(list(df_mse_old.columns))
+# print(list(ranked_mse_old.sum(axis=0)))
+# Sort(list(df_mse_old.columns), list(ranked_mse_old.sum(axis=0)))
+# print("____________________________________________________________")
+# print(" - > All regions MADN")
+# print(list(df_madn_old.columns))
+# print(list(ranked_madn_old.sum(axis=0)))
+# Sort(list(df_madn_old.columns), list(ranked_madn_old.sum(axis=0)))
+# print("____________________________________________________________")
+# print(" - > All regions hotspot")
+# print(list(df_perc_old.columns))
+# print(list(ranked_perc_old.sum(axis=0)))
+# Sort(list(df_perc_old.columns), list(ranked_perc_old.sum(axis=0)))
+# print("____________________________________________________________")
+# print(" ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^")
+# print("^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^")
+# print(" ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^ ^_^")
+# print("____________________________________________________________")
+# #====================================================================
+# dict_ = {'MSE': ranked_mse_old, 'MADN': ranked_madn_old, 'Hotspot': ranked_perc_old}
+# for region in regions:
+#     sum_rankings = ranked_mse_old.loc[region] + ranked_madn_old.loc[region] + ranked_perc_old.loc[region]
+#     print(" - >", region, " all metrics")
+#     print(list(ranked_mse_old.columns))
+#     print(list(sum_rankings))
+#     Sort(list(ranked_mse_old.columns), list(sum_rankings))
+#     print("____________________________________________________________")

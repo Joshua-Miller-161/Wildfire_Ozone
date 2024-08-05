@@ -17,8 +17,8 @@ sys.path.append(os.getcwd())
 from ml.ml_utils import ParseModelName
 from misc.misc_utils import GetBoxCoords, MADN
 #====================================================================
-model_name = 'ConvLSTM_reg=EO_h=5_f=1_t=0_In=OFTUVXYD_Out=O_e=10000.npy'
-#model_name = 'GBM_reg=NL_f=1_In=OFTUVXYD_Out=O'
+model_name = 'ConvLSTM_reg=EO_h=5_f=1_t=0_In=OTUVXYD_Out=O_e=10000.npy'
+#model_name = 'RF_reg=NL_f=1_In=OTUVXYD_Out=O'
 
 date_idx = 222 # 222 for neural networks, 223 for RF
 if (('GBM' in model_name) or ('RF' in model_name)):

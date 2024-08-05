@@ -19,8 +19,8 @@ from ml.ml_utils import ParseModelName
 from misc.misc_utils import GetBoxCoords, MADN
 from vis.plotting_utils import truncate_datetime_v3, DegreeFormatter
 #====================================================================
-#model_name = 'Dense_reg=WA_h=5_f=1_t=0_In=OFTUVXYD_Out=O_e=10000.npy'
-model_name = 'GBM_reg=WA_f=1_In=OFTUVXYD_Out=O'
+model_name = 'ConvLSTM_reg=WA_h=5_f=1_t=1_In=OTUVXYD_Out=O_e=10000.npy'
+#model_name = 'GBM_reg=WO_f=1_In=OTUVXYD_Out=O'
 
 date_idx = 222 # 222 for neural networks, 223 for RF
 if (('GBM' in model_name) or ('RF' in model_name)):
@@ -260,7 +260,7 @@ cbar = plt.colorbar(lol, cax=cax)
 cbar.set_label(r'$\mathbf{MADN}$', fontsize=20, rotation=270, labelpad=30)
 
 #====================================================================
-plt.show()
+#plt.show()
 #====================================================================
 if ("Trans." in model_type):
     model_type = model_type[:-1]
